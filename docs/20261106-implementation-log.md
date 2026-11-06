@@ -1,0 +1,30 @@
+# Pokington implementation log index
+
+Date: 2026-11-06.
+
+Plan: [Implementation plan](20261106-implementation-plan.md). Current contract: [Brief](brief.md). Decision history: [Design](20261106-design.md).
+
+Keep task scope and status in the plan. Keep actual work, goals, evidence and permission history in stage logs. D19 records stage-sequence/refinement approval and requested per-task goals and two review passes; D20 records `jamtat-work` compatibility; D21 fixes local `main` and related suggested batches B01–B04. No implementation run has begun and no specific implementation, review launch, commit or publication permission is recorded here.
+
+## Stage logs
+
+No stages have started. Create a stage log only when that stage's preparation or implementation begins, using `logs/YYYYMMDD-sxx-implementation-log.md` with its actual first date. Add its link and canonical run record here then; do not create empty logs for later stages.
+
+Use the batch Pokémon names in scope recommendations and run records: Furfrou (B01), Vivillon (B02), Greedent (B03), and Dustox (B04). Retain batch/stage/task IDs for stable evidence links.
+
+Use `jamtat-work`'s installed stage-log template and continuation procedure. Extend each task entry with its exact goal objective, returned identity if supplied, status/history and closure evidence. Keep correctness and separate simplification/Rust review fields distinct, with model, effort, count, scope, reviewer identity, findings/disposition and resulting validation. Add the concrete commit proposal/approval and final commit result. Do not create a separate stage-wide goal for T00.
+
+## Recording rules
+
+- Each run has a canonical dated record in its first selected stage log: originating request, selected batch ID and exact remaining task IDs, prerequisites/evidence gaps, local `main`, exact questions and replies, scoped grants/revocations and actual observed UTC times. Link any related records to it. A run's permission record does not replace required specific approval for each review or commit.
+- Record implementation scope separately from branch changes, reviews, commits, pushes, PRs and manual CI actions. Approval for the plan does not grant those actions. Before each review, record model, effort, reviewer count and scope; before each commit, show the subject and changes-by-file table and record explicit approval.
+- Preserve exact valid review grants already given for this run, including individually enumerated reviews in an accepted concrete quick option. Do not repeat an approval question for those same actions or treat a different earlier review as approval for a new one.
+- Start with `jamtat-work`'s concrete quick option after read-only preparation, recommending the first dependency-ready incomplete suggested batch and listing only its remaining tasks, models/checks, review scopes/counts and stage boundary. Local `main` is already authorised; verify it rather than asking another branch question. Do not create feature branches/worktrees. Exclude publication by default; main-only work does not authorise a push or PR. Preserve the user's narrower review-launch, commit-approval and stage-pause requirements; do not imply the generic skill's automatic-action policy overrides them.
+- Record one goal per implementation task, using the task's actual evidence and assigned review models. Inspect existing goals before creation, never overwrite an unfinished unrelated goal, and do not invent a token budget. Goals confer no review, commit or publication authority. Follow the plan and live goal-tool rules for completion, pending input, explicit pauses and blocking.
+- Use actual ISO 8601 UTC Start and Finish values from clock reads. Preserve original starts and record pauses/resumptions; leave Finish blank until required checks and reviews pass. Do not invent unavailable times.
+- Keep runs open while paused or blocked; close with actual UTC time and reason when their approved scope ends. Closing incomplete work does not complete its task or grant publication permission. Completed runs' grants do not apply to a later run.
+- Record task changes, relevant commands/results, fixture versus live-source evidence, terminal/platform/protocol details, manual validation, review findings and fixes, simplification findings and disposition, deviations and blockers. Include exact artifact/commit/PR links where applicable.
+- Record fresh-source versus resumed bootstrap results, and preserve the original feasibility observations if later evidence changes them. Add dated corrections rather than rewriting historical decisions or permission answers.
+- For every task, record correctness review first, then the separate fresh Sol `xhigh` simplification/Rust review. Resolve correctness blockers before simplification; record all simplification dispositions, apply in-scope changes and rerun affected checks. Obtain specific approval for any additional review or follow-up outside an existing exact grant.
+- Create the task's final coherent commit only after its required evidence, checks and both reviews pass and its concrete subject/file table receive explicit approval. Use `<component>: Sxx.Tnn <brief change>`, normal commit hooks, and relevant contract/tracking/log updates. Do not delay completed task commits until the end of a multi-task stage. An unapproved or failed commit blocks the next task and goal completion.
+- At every stage boundary, summarize changes, checks and both reviews for each task. Include stage integration in the final task's specifically approved correctness scope, and stage exit records in its final commit. Wait for approval before the next stage. Link concise tracking comments to the evidence. Never claim an unperformed review or missing platform result as passed acceptance.
