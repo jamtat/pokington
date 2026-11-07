@@ -1,0 +1,31 @@
+{
+  "recorded_utc": "2026-11-07T01:29:44.216102+00:00",
+  "replay_completed_by_utc": "2026-11-07T01:29:12Z",
+  "status": "Four review regressions fixed; complete metadata gate correctly fails on exactly five unsupported type joins. No new exclusions applied. Five OG/named candidate identities remain unresolved.",
+  "source_species": 1025,
+  "raw_owned_references": 1458,
+  "fully_reconciled_species": 1023,
+  "partial_output_forms": 1413,
+  "unresolved_species": [
+    "25: 25 Pikachu: captain: 0 type assignments {}; mr windychu: 0 type assignments {}; ms waveychu: 0 type assignments {}",
+    "718: 718 Zygarde: cell: 0 type assignments {}; core: 0 type assignments {}"
+  ],
+  "unsupported_join_count": 5,
+  "existing_approved_exclusions": 6,
+  "partial_output_missing_validated_png_urls": [],
+  "source_png_successes_reused": 1431,
+  "new_source_png_successes": 6,
+  "additional_game_pages_fetched": 6,
+  "previously_cached_game_page_newly_consumed": "https://www.serebii.net/pokemongo/pokemon/150.shtml",
+  "game_evidence_captures": 138,
+  "checks": {
+    "cargo fmt --check": "passed",
+    "cargo test --locked": "passed: 30 integration tests (21 Serebii + 9 archived)",
+    "cargo clippy --locked --all-targets -- -D warnings": "passed",
+    "git diff --check": "passed",
+    "full_offline_metadata_and_image_gate": "failed as required: five unsupported joins across Pikachu and Zygarde; no complete image gate success claim"
+  },
+  "source_sha256": "e4536b78d6557c6a8a0e6300418a24f01deb9fd842ada15e3623008229fc5766",
+  "partial_catalogue": "docs/logs/20261107-serebii-correctness-partial-catalogue.json",
+  "identity_diff": "docs/logs/20261107-serebii-correctness-identity-diff.json"
+}

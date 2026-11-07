@@ -1,0 +1,25 @@
+{
+  "completed_utc": "2026-11-07T00:15:56.802407+00:00",
+  "candidate_count": 1070,
+  "original_species_count": 1025,
+  "new_mega_count": 45,
+  "validated_png_count": 1070,
+  "http_or_decode_failures": [],
+  "opaque_images": [],
+  "fully_transparent_images": [],
+  "uniform_blank_images": [],
+  "duplicate_image_hashes": [],
+  "all_rgba_with_visible_and_transparent_pixels": true,
+  "dimensions": {
+    "475x475": 1006,
+    "570x570": 44,
+    "450x450": 17,
+    "500x500": 3
+  },
+  "minimum_visible_pixels": 24452,
+  "minimum_transparent_pixels": 80878,
+  "total_bytes": 140023048,
+  "cache_directory": "/private/tmp/pokington-illustration-validation/images/pokemon/art",
+  "scope": "All source-mapped originals and exactly the 45 newer Mega forms previously absent from the HOME tier; does not claim every alternate form",
+  "offline_blank_checks": "Fully transparent and uniform-solid synthetic PNGs both rejected without network requests"
+}

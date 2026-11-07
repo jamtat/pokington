@@ -1,0 +1,975 @@
+[
+  {
+    "id": 19,
+    "path": "/pokedex-swsh/rattata/",
+    "url": "https://www.serebii.net/pokedex-swsh/rattata/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/19.html",
+    "sha256": "12037190c6076477bbe31e7a6574a4c4271599a8ba885898d8dd562cd979addb"
+  },
+  {
+    "id": 20,
+    "path": "/pokedex-swsh/raticate/",
+    "url": "https://www.serebii.net/pokedex-swsh/raticate/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/20.html",
+    "sha256": "51470d37be3219b0e9a2388b1102f1450fb68bcd6f322567df1018c1d553abcd"
+  },
+  {
+    "id": 25,
+    "path": "/pokedex-sv/pikachu/",
+    "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/25.html",
+    "sha256": "5e6c3fbbd646a8b5c92cec07d3c73d3b34425cb95258fd46c151f3b838135ccd"
+  },
+  {
+    "id": 26,
+    "path": "/pokedex-sv/raichu/",
+    "url": "https://www.serebii.net/pokedex-sv/raichu/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/26.html",
+    "sha256": "a05ba7e38401450152d9b812a325b39c8f2545a073853b4096a4e6ecfd47c3d8"
+  },
+  {
+    "id": 27,
+    "path": "/pokedex-sv/sandshrew/",
+    "url": "https://www.serebii.net/pokedex-sv/sandshrew/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/27.html",
+    "sha256": "b682ec8102f82d0deb7daf110c847753a93aa49ad60aa4a4101099920c464825"
+  },
+  {
+    "id": 28,
+    "path": "/pokedex-sv/sandslash/",
+    "url": "https://www.serebii.net/pokedex-sv/sandslash/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/28.html",
+    "sha256": "e11e1ee0557f21c044594afef5e36f2f7c6bc5f05f2bf89c11e7e6c8cd77363a"
+  },
+  {
+    "id": 37,
+    "path": "/pokedex-sv/vulpix/",
+    "url": "https://www.serebii.net/pokedex-sv/vulpix/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/37.html",
+    "sha256": "e89d5971380f747dcd7a71b6e6ba8a7ed607dbe365934da16163a785092cca8d"
+  },
+  {
+    "id": 38,
+    "path": "/pokedex-sv/ninetales/",
+    "url": "https://www.serebii.net/pokedex-sv/ninetales/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/38.html",
+    "sha256": "4d150f695130370a0ef13c5443b1eb043d6da324dacdd109ea2d129357165c40"
+  },
+  {
+    "id": 50,
+    "path": "/pokedex-sv/diglett/",
+    "url": "https://www.serebii.net/pokedex-sv/diglett/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/50.html",
+    "sha256": "2a7fc276a8e60fa6e55aae048f5a5a9ce586196e26d6da9c8cd5b5a22f09880e"
+  },
+  {
+    "id": 51,
+    "path": "/pokedex-sv/dugtrio/",
+    "url": "https://www.serebii.net/pokedex-sv/dugtrio/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/51.html",
+    "sha256": "8064c565a8090fc5b2fa8c778c079449487178cbc24aac77214e3c454314c2e6"
+  },
+  {
+    "id": 52,
+    "path": "/pokedex-sv/meowth/",
+    "url": "https://www.serebii.net/pokedex-sv/meowth/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/52.html",
+    "sha256": "921d0fffc93b6115815af25d7c7c91e24fbc60335ef3177a42197c6798fdf42b"
+  },
+  {
+    "id": 53,
+    "path": "/pokedex-sv/persian/",
+    "url": "https://www.serebii.net/pokedex-sv/persian/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/53.html",
+    "sha256": "350f76cd8846af611c611ee1607c7a30e87ad0a3570c72b663398b3f186508ff"
+  },
+  {
+    "id": 58,
+    "path": "/pokedex-sv/growlithe/",
+    "url": "https://www.serebii.net/pokedex-sv/growlithe/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/58.html",
+    "sha256": "79b03aed2cf9a580c2a58e5d71225c29598bc8b946e668f75e5298598caa9088"
+  },
+  {
+    "id": 59,
+    "path": "/pokedex-sv/arcanine/",
+    "url": "https://www.serebii.net/pokedex-sv/arcanine/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/59.html",
+    "sha256": "850019e4a6ba68cf0ff762cb54aa0dd5721b4d0b61c9c54bbf6c88bf09c8c029"
+  },
+  {
+    "id": 74,
+    "path": "/pokedex-sv/geodude/",
+    "url": "https://www.serebii.net/pokedex-sv/geodude/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/74.html",
+    "sha256": "2fa02f64e672f3e0f7b30ddb0fb6767a492287d446d0c87870f18bcfa4c46eea"
+  },
+  {
+    "id": 75,
+    "path": "/pokedex-sv/graveler/",
+    "url": "https://www.serebii.net/pokedex-sv/graveler/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/75.html",
+    "sha256": "0dae62f333764f26d0f29f1149e7be522f22a3a8db4c418889430ea0ef01f7a7"
+  },
+  {
+    "id": 76,
+    "path": "/pokedex-sv/golem/",
+    "url": "https://www.serebii.net/pokedex-sv/golem/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/76.html",
+    "sha256": "89ac8ee92b3b6a13cb6a679923595bc2452096529fc09ec13f6ef86ff9bc26cb"
+  },
+  {
+    "id": 77,
+    "path": "/pokedex-swsh/ponyta/",
+    "url": "https://www.serebii.net/pokedex-swsh/ponyta/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/77.html",
+    "sha256": "d226bee6792faad87145b546b6143a210930a50ab636a25d55abea18dcae3477"
+  },
+  {
+    "id": 78,
+    "path": "/pokedex-swsh/rapidash/",
+    "url": "https://www.serebii.net/pokedex-swsh/rapidash/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/78.html",
+    "sha256": "0a63c5ecfe0246f37069b0360790d24e4de1eb64d0f59ab6d52d826b41b048d6"
+  },
+  {
+    "id": 83,
+    "path": "/pokedex-sv/farfetch'd/",
+    "url": "https://www.serebii.net/pokedex-sv/farfetch'd/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/83.html",
+    "sha256": "4256dcacfe5f49818571a3f871333b25879069b6b2946d5496a806c5fe314893"
+  },
+  {
+    "id": 88,
+    "path": "/pokedex-sv/grimer/",
+    "url": "https://www.serebii.net/pokedex-sv/grimer/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/88.html",
+    "sha256": "cfbd064b68145975b1e9e9bf17a1222bca16ae2798b534cf5d6a000047da9110"
+  },
+  {
+    "id": 89,
+    "path": "/pokedex-sv/muk/",
+    "url": "https://www.serebii.net/pokedex-sv/muk/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/89.html",
+    "sha256": "8fc22690310dcb7318e30957c64ed28a0cf6912635d26ba76720319c030c3b42"
+  },
+  {
+    "id": 100,
+    "path": "/pokedex-sv/voltorb/",
+    "url": "https://www.serebii.net/pokedex-sv/voltorb/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/100.html",
+    "sha256": "0b6a202c02675aa8eebf34a42df0b652186952eea84c7a705182930691bad46e"
+  },
+  {
+    "id": 101,
+    "path": "/pokedex-sv/electrode/",
+    "url": "https://www.serebii.net/pokedex-sv/electrode/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/101.html",
+    "sha256": "a87f6d7f7a7a1e0a67ff1381c2ea75b03dbaddd0454db9f257829c4f88738429"
+  },
+  {
+    "id": 103,
+    "path": "/pokedex-sv/exeggutor/",
+    "url": "https://www.serebii.net/pokedex-sv/exeggutor/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/103.html",
+    "sha256": "643132d41154197358acf20fd2dae9f77889eab297762658b1b216167d47e366"
+  },
+  {
+    "id": 105,
+    "path": "/pokedex-sv/marowak/",
+    "url": "https://www.serebii.net/pokedex-sv/marowak/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/105.html",
+    "sha256": "d9d384444eae1c12e1796e0f33be77708edf357752decd8a3f4ffa2712a155f0"
+  },
+  {
+    "id": 110,
+    "path": "/pokedex-sv/weezing/",
+    "url": "https://www.serebii.net/pokedex-sv/weezing/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/110.html",
+    "sha256": "1bb15a165f8e7cad875b34ec796e6287b9715ca9949ec283fe877cc21e5e48ba"
+  },
+  {
+    "id": 122,
+    "path": "/pokedex-sv/mr.mime/",
+    "url": "https://www.serebii.net/pokedex-sv/mr.mime/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/122.html",
+    "sha256": "ffdc962c04334dcbb55f50d91651248aa17aefb56c77539933a32bf9f289acd1"
+  },
+  {
+    "id": 128,
+    "path": "/pokedex-sv/tauros/",
+    "url": "https://www.serebii.net/pokedex-sv/tauros/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/128.html",
+    "sha256": "11f35080d1ab29f817b853c427457cc5e95dec0932c5f881bd4a80322100584b"
+  },
+  {
+    "id": 144,
+    "path": "/pokedex-sv/articuno/",
+    "url": "https://www.serebii.net/pokedex-sv/articuno/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/144.html",
+    "sha256": "510a42cd911c487cf837047c77723bfea76340f2416b4a8cfbf81aadc0f5d916"
+  },
+  {
+    "id": 145,
+    "path": "/pokedex-sv/zapdos/",
+    "url": "https://www.serebii.net/pokedex-sv/zapdos/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/145.html",
+    "sha256": "0621b1f004c31223fa759a47511460646605d82a55f747c816ea4cb3529fbc39"
+  },
+  {
+    "id": 146,
+    "path": "/pokedex-sv/moltres/",
+    "url": "https://www.serebii.net/pokedex-sv/moltres/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/146.html",
+    "sha256": "5359f423368a82a4f4c2fba6347a85c77cb20c5f6e9d130f81ef730d1c154da8"
+  },
+  {
+    "id": 150,
+    "path": "/pokedex-sv/mewtwo/",
+    "url": "https://www.serebii.net/pokedex-sv/mewtwo/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/150.html",
+    "sha256": "e534de5848d43d1639ec2ede462c73725244822221f7f773f07ae7da32dbf488"
+  },
+  {
+    "id": 157,
+    "path": "/pokedex-sv/typhlosion/",
+    "url": "https://www.serebii.net/pokedex-sv/typhlosion/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/157.html",
+    "sha256": "645f2f52eaf0db018be9ef5c26624c3fec65c95010c97baaa24d8e3575abd70f"
+  },
+  {
+    "id": 172,
+    "path": "/pokedex-sv/pichu/",
+    "url": "https://www.serebii.net/pokedex-sv/pichu/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/172.html",
+    "sha256": "c576c4445c3555aaded1e287e1f2ae530842d1bf3aaec8c86057a0ead631b51c"
+  },
+  {
+    "id": 194,
+    "path": "/pokedex-sv/wooper/",
+    "url": "https://www.serebii.net/pokedex-sv/wooper/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/194.html",
+    "sha256": "936280b4029f1bfc84b4d55ac5170807850c6b23722cbbf3784a83ed8dbb138b"
+  },
+  {
+    "id": 199,
+    "path": "/pokedex-sv/slowking/",
+    "url": "https://www.serebii.net/pokedex-sv/slowking/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/199.html",
+    "sha256": "0497866387af7b3b836f3a8229d3644fef3d2ea6c5e364900566972331312650"
+  },
+  {
+    "id": 211,
+    "path": "/pokedex-sv/qwilfish/",
+    "url": "https://www.serebii.net/pokedex-sv/qwilfish/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/211.html",
+    "sha256": "6f3ce948e101d2766db392eb97eaa06cf68192eecfcd069e9d270c162142ee66"
+  },
+  {
+    "id": 215,
+    "path": "/pokedex-sv/sneasel/",
+    "url": "https://www.serebii.net/pokedex-sv/sneasel/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/215.html",
+    "sha256": "dc6d9d66a1e50b99a2238c658d3e6684d84b661383caf9e9a1766e33ee29f0c5"
+  },
+  {
+    "id": 222,
+    "path": "/pokedex-swsh/corsola/",
+    "url": "https://www.serebii.net/pokedex-swsh/corsola/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/222.html",
+    "sha256": "9d3f1081fe13fb4e1a9db2a3fd617fac0d08ce43f3f53b0173312dd93ddc7bba"
+  },
+  {
+    "id": 263,
+    "path": "/pokedex-swsh/zigzagoon/",
+    "url": "https://www.serebii.net/pokedex-swsh/zigzagoon/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/263.html",
+    "sha256": "ecb376d7e98522395cd5221c364a72ac78b5c145f41f560fed8e646b93712be6"
+  },
+  {
+    "id": 264,
+    "path": "/pokedex-swsh/linoone/",
+    "url": "https://www.serebii.net/pokedex-swsh/linoone/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/264.html",
+    "sha256": "bda99a162498e588eeae01292c8eac18fd4e2df482868eb9d2cba3b1f9cf1d83"
+  },
+  {
+    "id": 351,
+    "path": "/pokedex-champions/castform/",
+    "url": "https://www.serebii.net/pokedex-champions/castform/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/351.html",
+    "sha256": "ff20874f0e0b2673f43567b718e1324a15b53d69c366dc34c63c93703392f819"
+  },
+  {
+    "id": 386,
+    "path": "/pokedex-sv/deoxys/",
+    "url": "https://www.serebii.net/pokedex-sv/deoxys/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/386.html",
+    "sha256": "a6420fc81ea85a54af8d836ce8d9b1939939fbaeaea510acb654aa85aadd2f92"
+  },
+  {
+    "id": 412,
+    "path": "/pokedex-swsh/burmy/",
+    "url": "https://www.serebii.net/pokedex-swsh/burmy/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/412.html",
+    "sha256": "e3f8e8b485e0bc82510ff7bd23671678101cda2977f38dcd525454c8bd40a911"
+  },
+  {
+    "id": 413,
+    "path": "/pokedex-swsh/wormadam/",
+    "url": "https://www.serebii.net/pokedex-swsh/wormadam/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/413.html",
+    "sha256": "d24c810ed045e796d204109eedb3d8fd4250bd54dfae58131dfd273f1194f248"
+  },
+  {
+    "id": 421,
+    "path": "/pokedex-swsh/cherrim/",
+    "url": "https://www.serebii.net/pokedex-swsh/cherrim/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/421.html",
+    "sha256": "bc05bb0b02c2f71e7516a88c72bd67852fcf0f5ea116b3457e51a672d0413028"
+  },
+  {
+    "id": 422,
+    "path": "/pokedex-sv/shellos/",
+    "url": "https://www.serebii.net/pokedex-sv/shellos/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/422.html",
+    "sha256": "2258e1eb9f3e0cbc477552c9fc17999aa31e7c1c36870419685091e0a29f175e"
+  },
+  {
+    "id": 423,
+    "path": "/pokedex-sv/gastrodon/",
+    "url": "https://www.serebii.net/pokedex-sv/gastrodon/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/423.html",
+    "sha256": "f3d902a04b46091c08cbcb1b6975729e4a268f1ec002b5f0051d1e15c6ef8265"
+  },
+  {
+    "id": 479,
+    "path": "/pokedex-sv/rotom/",
+    "url": "https://www.serebii.net/pokedex-sv/rotom/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/479.html",
+    "sha256": "71a31df4d99166699cdf92679abc31584be579ac35eb8349651fb2f937c87cdc"
+  },
+  {
+    "id": 483,
+    "path": "/pokedex-sv/dialga/",
+    "url": "https://www.serebii.net/pokedex-sv/dialga/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/483.html",
+    "sha256": "05ace14841480769e1909fcd83cc5958c75b45e7017de48d214e8da8a8e8a676"
+  },
+  {
+    "id": 484,
+    "path": "/pokedex-sv/palkia/",
+    "url": "https://www.serebii.net/pokedex-sv/palkia/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/484.html",
+    "sha256": "21728ca7766c3036ddcc31b4960622da23390cfb77e361b77e342b45fad30019"
+  },
+  {
+    "id": 487,
+    "path": "/pokedex-sv/giratina/",
+    "url": "https://www.serebii.net/pokedex-sv/giratina/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/487.html",
+    "sha256": "e7429ba355ce75986ec055b53e56b271ea2dfcee9b0bfa6143130821e06b3541"
+  },
+  {
+    "id": 492,
+    "path": "/pokedex-sv/shaymin/",
+    "url": "https://www.serebii.net/pokedex-sv/shaymin/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/492.html",
+    "sha256": "c2ea355d8553af27cf826db066e30c9fb38c2c4ba98e42c54870eac3e6f8f426"
+  },
+  {
+    "id": 493,
+    "path": "/pokedex-sv/arceus/",
+    "url": "https://www.serebii.net/pokedex-sv/arceus/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/493.html",
+    "sha256": "618621f6b4320024cebfcf883ac406c211e736dd8f994164e7545ab2bc85c4fb"
+  },
+  {
+    "id": 503,
+    "path": "/pokedex-sv/samurott/",
+    "url": "https://www.serebii.net/pokedex-sv/samurott/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/503.html",
+    "sha256": "3b2776b80e8f68e641c3d3a85792bf52e3417472647742a5be0a2525a6698bc7"
+  },
+  {
+    "id": 521,
+    "path": "/pokedex-swsh/unfezant/",
+    "url": "https://www.serebii.net/pokedex-swsh/unfezant/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/521.html",
+    "sha256": "401436562780292c4d941f0aca5e6c439c1ea59db6a45ed7212970328a62f743"
+  },
+  {
+    "id": 549,
+    "path": "/pokedex-sv/lilligant/",
+    "url": "https://www.serebii.net/pokedex-sv/lilligant/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/549.html",
+    "sha256": "213b6007ba3b3eae1250ea513bee79020b1c2f12344c7fa31b18ae92e7ab0b0c"
+  },
+  {
+    "id": 550,
+    "path": "/pokedex-sv/basculin/",
+    "url": "https://www.serebii.net/pokedex-sv/basculin/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/550.html",
+    "sha256": "01887ee722060f8dad80bc11b6c51b952d2e072e85a9a3ff591c391bd0e7639c"
+  },
+  {
+    "id": 554,
+    "path": "/pokedex-swsh/darumaka/",
+    "url": "https://www.serebii.net/pokedex-swsh/darumaka/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/554.html",
+    "sha256": "8eec7d45f94f267c3614f774164045debcc97a9ede5d093bf6fb020875a7ea0a"
+  },
+  {
+    "id": 555,
+    "path": "/pokedex-swsh/darmanitan/",
+    "url": "https://www.serebii.net/pokedex-swsh/darmanitan/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/555.html",
+    "sha256": "4e4299308187e8ff928eebab4f73461b5a1300c22fd302db824416caa30b489d"
+  },
+  {
+    "id": 562,
+    "path": "/pokedex-sv/yamask/",
+    "url": "https://www.serebii.net/pokedex-sv/yamask/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/562.html",
+    "sha256": "ee2ca0c90463e824e65644f99a201d53b22a78bcf014ca85c02d0f764899c855"
+  },
+  {
+    "id": 570,
+    "path": "/pokedex-sv/zorua/",
+    "url": "https://www.serebii.net/pokedex-sv/zorua/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/570.html",
+    "sha256": "14d24ccee70106d35fb354e732117848cca28ab6ceb0d7e5b6ef0fdc1d094925"
+  },
+  {
+    "id": 571,
+    "path": "/pokedex-sv/zoroark/",
+    "url": "https://www.serebii.net/pokedex-sv/zoroark/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/571.html",
+    "sha256": "12b7725cfc6538321aebcd20901b983d58b70845f5e083027beef13caa7b8479"
+  },
+  {
+    "id": 585,
+    "path": "/pokedex-sv/deerling/",
+    "url": "https://www.serebii.net/pokedex-sv/deerling/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/585.html",
+    "sha256": "ec706df805e134081721a3b2197ef1fb8f0ba28e24cabbc83bb381a6bd511e76"
+  },
+  {
+    "id": 586,
+    "path": "/pokedex-sv/sawsbuck/",
+    "url": "https://www.serebii.net/pokedex-sv/sawsbuck/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/586.html",
+    "sha256": "b3f4fea2a720325a064bf986a3e238b7e362465afd1d0af28453a1cf17162e21"
+  },
+  {
+    "id": 592,
+    "path": "/pokedex-swsh/frillish/",
+    "url": "https://www.serebii.net/pokedex-swsh/frillish/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/592.html",
+    "sha256": "31b28a041d8f9262c22de441cd304378a13cf3a2edecc3fa32e15b04a9431ba0"
+  },
+  {
+    "id": 593,
+    "path": "/pokedex-swsh/jellicent/",
+    "url": "https://www.serebii.net/pokedex-swsh/jellicent/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/593.html",
+    "sha256": "5f75191582e88f7b287a5675a5de088fa7cb166fe4f6ae063120d921a6dddc2c"
+  },
+  {
+    "id": 618,
+    "path": "/pokedex-sv/stunfisk/",
+    "url": "https://www.serebii.net/pokedex-sv/stunfisk/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/618.html",
+    "sha256": "01b680bb58588fdaac472914a9f39ba98fa2bfee4c6717c32caf3ffd94099ca6"
+  },
+  {
+    "id": 628,
+    "path": "/pokedex-sv/braviary/",
+    "url": "https://www.serebii.net/pokedex-sv/braviary/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/628.html",
+    "sha256": "ca52e71abf461209f755dd1d6625fefbf9b4c30d1c1ba01f8377f6f90b18b1a8"
+  },
+  {
+    "id": 641,
+    "path": "/pokedex-sv/tornadus/",
+    "url": "https://www.serebii.net/pokedex-sv/tornadus/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/641.html",
+    "sha256": "c6ba3380f124fd2ceabf50017107c35828ae6795ded98d2f859ba7cd0613c57a"
+  },
+  {
+    "id": 642,
+    "path": "/pokedex-sv/thundurus/",
+    "url": "https://www.serebii.net/pokedex-sv/thundurus/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/642.html",
+    "sha256": "2c0f65ccc7f9ac6b5ca525b27db4a03cc01965b9d16ad3dc22ecea7c8b4a9671"
+  },
+  {
+    "id": 645,
+    "path": "/pokedex-sv/landorus/",
+    "url": "https://www.serebii.net/pokedex-sv/landorus/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/645.html",
+    "sha256": "fc7aaf0aa0a027ba1ecefb4a043bf7ed41a76b71d094de65c530579019dca05d"
+  },
+  {
+    "id": 646,
+    "path": "/pokedex-sv/kyurem/",
+    "url": "https://www.serebii.net/pokedex-sv/kyurem/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/646.html",
+    "sha256": "bd03d28c372cbe1d138842b11667157cf7396059519cd6c11c527bd9b7e8ed7e"
+  },
+  {
+    "id": 647,
+    "path": "/pokedex-sv/keldeo/",
+    "url": "https://www.serebii.net/pokedex-sv/keldeo/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/647.html",
+    "sha256": "779358234c069b228af9943ee0bd3b749777cb0b91fe79d600d79d7565711152"
+  },
+  {
+    "id": 648,
+    "path": "/pokedex-sv/meloetta/",
+    "url": "https://www.serebii.net/pokedex-sv/meloetta/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/648.html",
+    "sha256": "dfc7d9288fa5beb68409132ef48b922082f8767f341d25d8b4a87eb52210e862"
+  },
+  {
+    "id": 649,
+    "path": "/pokedex-sv/genesect/",
+    "url": "https://www.serebii.net/pokedex-sv/genesect/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/649.html",
+    "sha256": "7ff4cab20659d536e69e0460d3145171c89b76e4be1b30abca3489bd8ccc7496"
+  },
+  {
+    "id": 658,
+    "path": "/pokedex-sv/greninja/",
+    "url": "https://www.serebii.net/pokedex-sv/greninja/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/658.html",
+    "sha256": "495542543d8484164fcb940a2cf45d5e3b38452bc81155740b823dfb90a2f32a"
+  },
+  {
+    "id": 666,
+    "path": "/pokedex-sv/vivillon/",
+    "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/666.html",
+    "sha256": "4e7ec7b9f289cdcb5d730fd35fdc7abb365956d43537f4a408ece6507c95db8e"
+  },
+  {
+    "id": 668,
+    "path": "/pokedex-sv/pyroar/",
+    "url": "https://www.serebii.net/pokedex-sv/pyroar/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/668.html",
+    "sha256": "87111826deda264ea4cd41046e74a9accc3854d972b80d422fe4c58a933232fc"
+  },
+  {
+    "id": 669,
+    "path": "/pokedex-sv/flabebe/",
+    "url": "https://www.serebii.net/pokedex-sv/flabebe/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/669.html",
+    "sha256": "dab678b0754e5c0c0bb4d3aea0937c6a6e4927cb4135221b8a4ffa6fef01e326"
+  },
+  {
+    "id": 670,
+    "path": "/pokedex-sv/floette/",
+    "url": "https://www.serebii.net/pokedex-sv/floette/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/670.html",
+    "sha256": "81fd89acdc70b77799905b2b1f02e5c2dfa8c4ec5bb984a7a475e3f82c11dd5c"
+  },
+  {
+    "id": 671,
+    "path": "/pokedex-sv/florges/",
+    "url": "https://www.serebii.net/pokedex-sv/florges/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/671.html",
+    "sha256": "22c5ea4bb1b6b40740fa0cc1c258eb6a57ccc8059ede30cd41d9a8bfaf61c229"
+  },
+  {
+    "id": 676,
+    "path": "/pokedex-sv/furfrou/",
+    "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/676.html",
+    "sha256": "70310f8c1b2ac9229f91962ec118fe6c8ef818e21b4d28f86135bdc290590314"
+  },
+  {
+    "id": 678,
+    "path": "/pokedex-sv/meowstic/",
+    "url": "https://www.serebii.net/pokedex-sv/meowstic/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/678.html",
+    "sha256": "650e6936ca99b2e1679feb0d39e523c3c1bfce520aee198e2d2776c3a161f91a"
+  },
+  {
+    "id": 681,
+    "path": "/pokedex-sv/aegislash/",
+    "url": "https://www.serebii.net/pokedex-sv/aegislash/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/681.html",
+    "sha256": "bea9ecdf7fdfb3f350997610ddbfbbae001dd2ba1a53c7a2434263450de6e77c"
+  },
+  {
+    "id": 705,
+    "path": "/pokedex-sv/sliggoo/",
+    "url": "https://www.serebii.net/pokedex-sv/sliggoo/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/705.html",
+    "sha256": "85152934f3f59232aab2359c28dd0d1264569bc2f7cfd87af47bc39547507ae2"
+  },
+  {
+    "id": 706,
+    "path": "/pokedex-sv/goodra/",
+    "url": "https://www.serebii.net/pokedex-sv/goodra/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/706.html",
+    "sha256": "6756ddfa35f2645a016091405605dde6a0a053b51ea9f1d23803748da1ceb615"
+  },
+  {
+    "id": 710,
+    "path": "/pokedex-sv/pumpkaboo/",
+    "url": "https://www.serebii.net/pokedex-sv/pumpkaboo/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/710.html",
+    "sha256": "75f670a0aac1eff317437ca687f4a04da62b94ab7b3a6d3e1e3980b2883b485f"
+  },
+  {
+    "id": 711,
+    "path": "/pokedex-sv/gourgeist/",
+    "url": "https://www.serebii.net/pokedex-sv/gourgeist/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/711.html",
+    "sha256": "37d12014c70bdfde9711f2dd6b7463b72dc3f5b49873095f98ef6191bde75d72"
+  },
+  {
+    "id": 713,
+    "path": "/pokedex-sv/avalugg/",
+    "url": "https://www.serebii.net/pokedex-sv/avalugg/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/713.html",
+    "sha256": "ef7d450ab88d2c35718a27971fa6be228b585959b989341665113fbdbe0db8ad"
+  },
+  {
+    "id": 718,
+    "path": "/pokedex-sv/zygarde/",
+    "url": "https://www.serebii.net/pokedex-sv/zygarde/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/718.html",
+    "sha256": "4bb36e9d6f2f1e5abd58eba2d91e618d1cded747e4cd223c9053d6afc7afbf1d"
+  },
+  {
+    "id": 720,
+    "path": "/pokedex-sv/hoopa/",
+    "url": "https://www.serebii.net/pokedex-sv/hoopa/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/720.html",
+    "sha256": "f48602d73aaf73b54e535a2f006c90e75c7f3349d9b6aca27778849a9f5e8647"
+  },
+  {
+    "id": 724,
+    "path": "/pokedex-sv/decidueye/",
+    "url": "https://www.serebii.net/pokedex-sv/decidueye/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/724.html",
+    "sha256": "c0bf3116a792b7e8ee89f229ba2c1103b98cd9eb68c52c7cf562558335d9c669"
+  },
+  {
+    "id": 741,
+    "path": "/pokedex-sv/oricorio/",
+    "url": "https://www.serebii.net/pokedex-sv/oricorio/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/741.html",
+    "sha256": "e58548d481fccf9fdc250ef5235ecf6310170764891a209d23eb619d606170fb"
+  },
+  {
+    "id": 745,
+    "path": "/pokedex-sv/lycanroc/",
+    "url": "https://www.serebii.net/pokedex-sv/lycanroc/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/745.html",
+    "sha256": "7d4c33bbb4153f15adf2e608c89db33d37d2a285d77bc66c0d8a4849745e50c8"
+  },
+  {
+    "id": 746,
+    "path": "/pokedex-swsh/wishiwashi/",
+    "url": "https://www.serebii.net/pokedex-swsh/wishiwashi/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/746.html",
+    "sha256": "3a5d2c25b898d226f12a4ad69d10eee78e8dde7efd0f18662e1005b8c918b096"
+  },
+  {
+    "id": 773,
+    "path": "/pokedex-swsh/silvally/",
+    "url": "https://www.serebii.net/pokedex-swsh/silvally/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/773.html",
+    "sha256": "bbcb1974c7caee82706cba4d4cdbc66586928ef717b3ee49545661b437854df2"
+  },
+  {
+    "id": 774,
+    "path": "/pokedex-sv/minior/",
+    "url": "https://www.serebii.net/pokedex-sv/minior/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/774.html",
+    "sha256": "69ad6db24691d81d0499d613b4da87c3bcbb1014576fcc00a4c2e82d0e8d848e"
+  },
+  {
+    "id": 778,
+    "path": "/pokedex-sv/mimikyu/",
+    "url": "https://www.serebii.net/pokedex-sv/mimikyu/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/778.html",
+    "sha256": "a84607a18f1f4ac9a20181627cd33eb2fa4a5c24a6cf459ee76e9e0bf5863b8d"
+  },
+  {
+    "id": 800,
+    "path": "/pokedex-sv/necrozma/",
+    "url": "https://www.serebii.net/pokedex-sv/necrozma/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/800.html",
+    "sha256": "cee27839c47c42103cc67500d4d361187609f29ec72e70fe2220d0aa7001ea16"
+  },
+  {
+    "id": 801,
+    "path": "/pokedex-sv/magearna/",
+    "url": "https://www.serebii.net/pokedex-sv/magearna/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/801.html",
+    "sha256": "e5e6807d032d9aa051636a76d58c99ad2804088ec9265e3f38952d97a8a3d141"
+  },
+  {
+    "id": 845,
+    "path": "/pokedex-sv/cramorant/",
+    "url": "https://www.serebii.net/pokedex-sv/cramorant/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/845.html",
+    "sha256": "b3e52154c6368ae7ed7c14aee89644d00a19ca49edef60d5f49d55800fdcf1c6"
+  },
+  {
+    "id": 849,
+    "path": "/pokedex-sv/toxtricity/",
+    "url": "https://www.serebii.net/pokedex-sv/toxtricity/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/849.html",
+    "sha256": "40611e866c11dfa0eb4c9081b7d5906fef71755c867bf32ef810f29b8bf908e7"
+  },
+  {
+    "id": 854,
+    "path": "/pokedex-sv/sinistea/",
+    "url": "https://www.serebii.net/pokedex-sv/sinistea/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/854.html",
+    "sha256": "8ff92c72e487ccb9f124f5bfed75e392aff107d25720e549ece6c28348022ede"
+  },
+  {
+    "id": 855,
+    "path": "/pokedex-sv/polteageist/",
+    "url": "https://www.serebii.net/pokedex-sv/polteageist/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/855.html",
+    "sha256": "ae62fe3cb1d08ac2317c4f327e02c48949edeb00ecc6066991974d07e578de95"
+  },
+  {
+    "id": 875,
+    "path": "/pokedex-sv/eiscue/",
+    "url": "https://www.serebii.net/pokedex-sv/eiscue/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/875.html",
+    "sha256": "cfeca0dc67a7e8432e4163dc7ead3adbf89debad43ad45d00c9b1f476b73384e"
+  },
+  {
+    "id": 876,
+    "path": "/pokedex-sv/indeedee/",
+    "url": "https://www.serebii.net/pokedex-sv/indeedee/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/876.html",
+    "sha256": "c0fe03cb8bab98d24827386c9fd7e8cbb6d3ff6d9021c66a988af7b554097e7a"
+  },
+  {
+    "id": 877,
+    "path": "/pokedex-sv/morpeko/",
+    "url": "https://www.serebii.net/pokedex-sv/morpeko/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/877.html",
+    "sha256": "b05d8bd91eb79603df6c519e54ecb1a002777d269f1fead0df800260eb2055fa"
+  },
+  {
+    "id": 888,
+    "path": "/pokedex-sv/zacian/",
+    "url": "https://www.serebii.net/pokedex-sv/zacian/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/888.html",
+    "sha256": "7e4b7aa6cd7cc0433b9de8bf53d7d924ba73beb73fbe70596a6bff78edafa057"
+  },
+  {
+    "id": 889,
+    "path": "/pokedex-sv/zamazenta/",
+    "url": "https://www.serebii.net/pokedex-sv/zamazenta/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/889.html",
+    "sha256": "0e811ab49f4c1d580bece43e0beab86f685f96195e9f6c132e033f30c3b79282"
+  },
+  {
+    "id": 890,
+    "path": "/pokedex-sv/eternatus/",
+    "url": "https://www.serebii.net/pokedex-sv/eternatus/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/890.html",
+    "sha256": "39de15dbfb1930448212f7c6071c18a1468fe287069d0dd26809a7d58a868e94"
+  },
+  {
+    "id": 892,
+    "path": "/pokedex-sv/urshifu/",
+    "url": "https://www.serebii.net/pokedex-sv/urshifu/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/892.html",
+    "sha256": "0e415273f7db2272bdd1aa0e572a42308531f13392f60d7fe9d58f17421a482a"
+  },
+  {
+    "id": 893,
+    "path": "/pokedex-sv/zarude/",
+    "url": "https://www.serebii.net/pokedex-sv/zarude/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/893.html",
+    "sha256": "7a19fff5a8cdaa6163d3b5d8c278573eb4ca12546b7eae45b922e032e047cb6c"
+  },
+  {
+    "id": 898,
+    "path": "/pokedex-sv/calyrex/",
+    "url": "https://www.serebii.net/pokedex-sv/calyrex/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/898.html",
+    "sha256": "753bc5fe8dc9a5e74dd87eed59fade124b978d1c97726acedc6d6cc7ef552eaa"
+  },
+  {
+    "id": 901,
+    "path": "/pokedex-sv/ursaluna/",
+    "url": "https://www.serebii.net/pokedex-sv/ursaluna/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/901.html",
+    "sha256": "5a85635c91265c160e89db6b30b987d0ff9e6f8a7e06632e96cad5b7d96ebd65"
+  },
+  {
+    "id": 902,
+    "path": "/pokedex-sv/basculegion/",
+    "url": "https://www.serebii.net/pokedex-sv/basculegion/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/902.html",
+    "sha256": "83dcc028a026cff4f16196909b6b77ea22fc8f1be60b88f190caca6ccb992ce5"
+  },
+  {
+    "id": 905,
+    "path": "/pokedex-sv/enamorus/",
+    "url": "https://www.serebii.net/pokedex-sv/enamorus/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/905.html",
+    "sha256": "f2fa15a17c525d277e240b527ecff9f52ff9269f877434ec3354e48f55f0f7ed"
+  },
+  {
+    "id": 916,
+    "path": "/pokedex-sv/oinkologne/",
+    "url": "https://www.serebii.net/pokedex-sv/oinkologne/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/916.html",
+    "sha256": "46e536ee9aeb4ba011c72668406c971151f1a2938e8be515ab30750a8b925881"
+  },
+  {
+    "id": 925,
+    "path": "/pokedex-sv/maushold/",
+    "url": "https://www.serebii.net/pokedex-sv/maushold/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/925.html",
+    "sha256": "58d78eb9d7ff4208d6aa16b88d5b8ca0d519f57787890e6a57829426ea5ebd3b"
+  },
+  {
+    "id": 931,
+    "path": "/pokedex-sv/squawkabilly/",
+    "url": "https://www.serebii.net/pokedex-sv/squawkabilly/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/931.html",
+    "sha256": "c126e90b61f13038eb9d165af119262749488bfd8da220984e422715b13c7ba8"
+  },
+  {
+    "id": 964,
+    "path": "/pokedex-sv/palafin/",
+    "url": "https://www.serebii.net/pokedex-sv/palafin/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/964.html",
+    "sha256": "535e36c50265348628044a412e35c0babe90cd8046f81096be760a2aaec09dd4"
+  },
+  {
+    "id": 978,
+    "path": "/pokedex-sv/tatsugiri/",
+    "url": "https://www.serebii.net/pokedex-sv/tatsugiri/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/978.html",
+    "sha256": "071b3f08e09b1dffe9898394acd40f0091e0bf50ea2de2fd77d54b5fefac89c9"
+  },
+  {
+    "id": 982,
+    "path": "/pokedex-sv/dudunsparce/",
+    "url": "https://www.serebii.net/pokedex-sv/dudunsparce/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/982.html",
+    "sha256": "da436782b1ecd8eee1abdb217387e21f928b8f59351143b3f3de1ae8f9758a24"
+  },
+  {
+    "id": 999,
+    "path": "/pokedex-sv/gimmighoul/",
+    "url": "https://www.serebii.net/pokedex-sv/gimmighoul/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/999.html",
+    "sha256": "a8fdc9cf4b7909c3b7b419012c2aba0677fc647d1083394a242c3d3c258b5c7b"
+  },
+  {
+    "id": 1007,
+    "path": "/pokedex-sv/koraidon/",
+    "url": "https://www.serebii.net/pokedex-sv/koraidon/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/1007.html",
+    "sha256": "79998c59d1516259a4d4b305da42b686e4ce307a34478aa464810cf8c3077efb"
+  },
+  {
+    "id": 1008,
+    "path": "/pokedex-sv/miraidon/",
+    "url": "https://www.serebii.net/pokedex-sv/miraidon/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/1008.html",
+    "sha256": "273e05f92c02bc3e5657ce0545ebebf1a6c1b639050bac075621f06ec96ca851"
+  },
+  {
+    "id": 1012,
+    "path": "/pokedex-sv/poltchageist/",
+    "url": "https://www.serebii.net/pokedex-sv/poltchageist/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/1012.html",
+    "sha256": "d0b1af8e413914dc0302fae72424d9c4422757886c8bd7121497b6faac0279d9"
+  },
+  {
+    "id": 1013,
+    "path": "/pokedex-sv/sinistcha/",
+    "url": "https://www.serebii.net/pokedex-sv/sinistcha/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/1013.html",
+    "sha256": "71e72c5f4a9c46d7e2f697e54e022b37fa2fa78c9273c10c37355c39f8176267"
+  },
+  {
+    "id": 1017,
+    "path": "/pokedex-sv/ogerpon/",
+    "url": "https://www.serebii.net/pokedex-sv/ogerpon/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/1017.html",
+    "sha256": "c3c00ef50dc4bbd738b8a75058620e02fc9b6fbb657c7206c36a158a73562b01"
+  },
+  {
+    "id": 1024,
+    "path": "/pokedex-sv/terapagos/",
+    "url": "https://www.serebii.net/pokedex-sv/terapagos/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/1024.html",
+    "sha256": "d068b847cb74a628cbd688e170f7847bfe7994ab1e1d0762b44a2fba07135485"
+  },
+  {
+    "id": 25,
+    "path": "/pokedex-xy/025.shtml",
+    "file": "25-correctness.html",
+    "url": "https://www.serebii.net/pokedex-xy/025.shtml",
+    "cache_path": "/tmp/pokington-serebii/enrichment/25-correctness.html",
+    "sha256": "ed76c5b5c85a4ea5a155cb08b69e28e93fe5bbb56cce255c01eea26228616d7f"
+  },
+  {
+    "id": 172,
+    "path": "/pokedex-dp/172.shtml",
+    "file": "172-correctness.html",
+    "url": "https://www.serebii.net/pokedex-dp/172.shtml",
+    "cache_path": "/tmp/pokington-serebii/enrichment/172-correctness.html",
+    "sha256": "03234378fab6a36209bc5f93d984e3876f67734e6288918bad1dac05c4b56aae"
+  },
+  {
+    "id": 658,
+    "path": "/pokedex-sm/658.shtml",
+    "file": "658-correctness.html",
+    "url": "https://www.serebii.net/pokedex-sm/658.shtml",
+    "cache_path": "/tmp/pokington-serebii/enrichment/658-correctness.html",
+    "sha256": "51437b4b4674e83ecd7b52c4bb9fb04748532dbaa1ad8c0ea851d946af0b90e9"
+  },
+  {
+    "id": 150,
+    "path": "/pokemongo/pokemon/150.shtml",
+    "file": "150-go.html",
+    "url": "https://www.serebii.net/pokemongo/pokemon/150.shtml",
+    "cache_path": "/tmp/pokington-serebii/enrichment/150-go.html",
+    "sha256": "914daf63f8abd60cc34f373137ed3f247c9221c6a9f4689401175236b3a382a6"
+  },
+  {
+    "id": 710,
+    "path": "/pokedex-swsh/pumpkaboo/",
+    "file": "710-correctness.html",
+    "url": "https://www.serebii.net/pokedex-swsh/pumpkaboo/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/710-correctness.html",
+    "sha256": "01a78ead3505542e125b2ed0eb15d393c194910cd38add0037aec75a5a6f6be2"
+  },
+  {
+    "id": 711,
+    "path": "/pokedex-swsh/gourgeist/",
+    "file": "711-correctness.html",
+    "url": "https://www.serebii.net/pokedex-swsh/gourgeist/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/711-correctness.html",
+    "sha256": "d020d607000ec7e058b91196c7654da83ddd19ff84182fc11d7f5ac34cf4823a"
+  },
+  {
+    "id": 890,
+    "path": "/pokedex-swsh/eternatus/",
+    "file": "890-correctness.html",
+    "url": "https://www.serebii.net/pokedex-swsh/eternatus/",
+    "cache_path": "/tmp/pokington-serebii/enrichment/890-correctness.html",
+    "sha256": "875e09cf82651677d0284cb3bad5fecb74592abf1f50cdd2831f6c77b4b3c111"
+  }
+]

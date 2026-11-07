@@ -1,0 +1,52 @@
+[
+  {
+    "path": "/tmp/pokemondb-investigation/charizard-illustration.jpg",
+    "bytes": 123619,
+    "sha256": "b40c9d0effc746ea5b569a132c68293145ec0f74b8099cda18f2f08fa48027f7"
+  },
+  {
+    "path": "/tmp/pokemondb-investigation/pecharunt-illustration.jpg",
+    "bytes": 75550,
+    "sha256": "ba4fa7c8c76ab7f183c859a33c96a51953d4ab18b645aae451adc93103de8e8c"
+  },
+  {
+    "path": "/tmp/pokemondb-investigation/pecharunt-illustration.avif",
+    "bytes": 10650,
+    "sha256": "e5017a50b17d71a61fb33ee72b09f284fc0293a5c4f99ece0893b68950d2764d"
+  },
+  {
+    "path": "/tmp/pokemondb-investigation/raichu-mega-x-illustration.jpg",
+    "bytes": 37068,
+    "sha256": "0ea6584573645f03de29416ae0d1d608b331d72bc8d65e33a24e14e02774c35b"
+  },
+  {
+    "path": "/tmp/pokemondb-investigation/raichu-mega-x-illustration.avif",
+    "bytes": 9571,
+    "sha256": "a57c9519d80b0cb863395b8d5573becdd705c3c18c9dea6fd24d2d31e90f3491"
+  },
+  {
+    "path": "/tmp/pokemondb-investigation/pecharunt-codec-test.png",
+    "bytes": 285121,
+    "sha256": "07f38c689ff82a10d1b406e6158b8ee11b424ea09dc1e03195e097894e9c435d"
+  },
+  {
+    "path": "/tmp/pokington-serebii/1025.png",
+    "bytes": 117652,
+    "sha256": "8ec2abecad578a8649689c9f9419f459cefabc5ae8be2f069c9d5e37ecf080f7"
+  },
+  {
+    "path": "/tmp/pokington-serebii/149.png",
+    "bytes": 132064,
+    "sha256": "4bd7549caa15eac43a8197ba53e843a95f2b56c71b1121829ea76764fbf26f9c"
+  },
+  {
+    "path": "/tmp/pokington-serebii/149-m.png",
+    "bytes": 252237,
+    "sha256": "513c95520625e150d14976fee402d57b3102177ab7389107b6cc7bb559d4a5a2"
+  },
+  {
+    "path": "/tmp/pokington-serebii/006-mx.png",
+    "bytes": 170074,
+    "sha256": "d7650ad47e44981447de3f558e5b4a102d1b378559b33608352287a824c1d68d"
+  }
+]

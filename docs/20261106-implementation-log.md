@@ -4,11 +4,11 @@ Date: 2026-11-06.
 
 Plan: [Implementation plan](20261106-implementation-plan.md). Current contract: [Brief](brief.md). Decision history: [Design](20261106-design.md).
 
-Keep task scope and status in the plan. Keep actual work, goals, evidence and permission history in stage logs. D19 records stage-sequence/refinement approval and requested per-task goals and two review passes; D20 records `jamtat-work` compatibility; D21 fixes local `main` and related suggested batches B01–B04. No implementation run has begun and no specific implementation, review launch, commit or publication permission is recorded here.
+Keep task scope and status in the plan. Keep actual work, goals, evidence and permission history in stage logs. D19 records stage-sequence/refinement approval and requested per-task goals and two review passes; D20 records `jamtat-work` compatibility; D21 fixes local `main` and related suggested batches B01–B04. Current scoped permissions are in the canonical Run 01 record linked below.
 
 ## Stage logs
 
-No stages have started. Create a stage log only when that stage's preparation or implementation begins, using `logs/YYYYMMDD-sxx-implementation-log.md` with its actual first date. Add its link and canonical run record here then; do not create empty logs for later stages.
+[S01 canonical Run 01](logs/20261106-s01-implementation-log.md): Furfrou (B01), approved S01.T01 then S01.T02 on local `main`. S01.T01 integrates selected Serebii illustrations under D28–D32; earlier provider investigations remain evidence. Q01 authorises four exact reviews across the two tasks; Q16 adds one targeted S01.T01 correctness follow-up. Correctness findings and simplification suggestions are resolved; full 1,025-species/1,427-form replay and 33 tests pass. Q17 approves its final local commit with completion tracking. S01.T02 is next after successful commit and task-goal closure. Summon and computer/browser control are revoked. No later stage log exists.
 
 Use the batch Pokémon names in scope recommendations and run records: Furfrou (B01), Vivillon (B02), Greedent (B03), and Dustox (B04). Retain batch/stage/task IDs for stable evidence links.
 

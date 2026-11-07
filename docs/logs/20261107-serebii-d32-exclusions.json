@@ -1,0 +1,42 @@
+[
+  {
+    "id": 25,
+    "species": "Pikachu",
+    "label": "Captain Pikachu",
+    "artwork_url": "https://www.serebii.net/pokemon/art/025-captain.png",
+    "reason": "approved_unsupported_type_evidence",
+    "source_context": "No supported named per-form type join in the inspected source-linked evidence; exact exclusion approved in D32 on 2026-11-07. Source labels and evidence: docs/logs/20261107-serebii-correctness-unresolved.json"
+  },
+  {
+    "id": 25,
+    "species": "Pikachu",
+    "label": "Mr. Windychu",
+    "artwork_url": "https://www.serebii.net/pokemon/art/025-mrwindychu.png",
+    "reason": "approved_unsupported_type_evidence",
+    "source_context": "No supported named per-form type join in the inspected source-linked evidence; exact exclusion approved in D32 on 2026-11-07. Source labels and evidence: docs/logs/20261107-serebii-correctness-unresolved.json"
+  },
+  {
+    "id": 25,
+    "species": "Pikachu",
+    "label": "Ms. Waveychu",
+    "artwork_url": "https://www.serebii.net/pokemon/art/025-mswaveychu.png",
+    "reason": "approved_unsupported_type_evidence",
+    "source_context": "No supported named per-form type join in the inspected source-linked evidence; exact exclusion approved in D32 on 2026-11-07. Source labels and evidence: docs/logs/20261107-serebii-correctness-unresolved.json"
+  },
+  {
+    "id": 718,
+    "species": "Zygarde",
+    "label": "Cell",
+    "artwork_url": "https://www.serebii.net/pokemon/art/718-cell.png",
+    "reason": "approved_unsupported_type_evidence",
+    "source_context": "No supported named per-form type join in the inspected source-linked evidence; exact exclusion approved in D32 on 2026-11-07. Source labels and evidence: docs/logs/20261107-serebii-correctness-unresolved.json"
+  },
+  {
+    "id": 718,
+    "species": "Zygarde",
+    "label": "Core",
+    "artwork_url": "https://www.serebii.net/pokemon/art/718-core.png",
+    "reason": "approved_unsupported_type_evidence",
+    "source_context": "No supported named per-form type join in the inspected source-linked evidence; exact exclusion approved in D32 on 2026-11-07. Source labels and evidence: docs/logs/20261107-serebii-correctness-unresolved.json"
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "bytes": 44334,
+    "color": "Rgba",
+    "complete_decode": true,
+    "height": 300,
+    "http": {
+      "content_type": "image/png",
+      "final_url": "https://www.serebii.net/pokemon/art/669-r.png",
+      "status": 200,
+      "url": "https://www.serebii.net/pokemon/art/669-r.png"
+    },
+    "path": "/tmp/pokington-illustration-validation/images/pokemon/art/669-r.png",
+    "transparent_pixels": 46146,
+    "uniform_blank": false,
+    "visible_pixels": 43854,
+    "width": 300,
+    "sha256": "b79bf0ab29424dbf64c509f3188836c519b7e636c4c63ddff2cd39338c4f43b4"
+  },
+  {
+    "bytes": 105809,
+    "color": "Rgba",
+    "complete_decode": true,
+    "height": 475,
+    "http": {
+      "content_type": "image/png",
+      "final_url": "https://www.serebii.net/pokemon/art/412-p.png",
+      "status": 200,
+      "url": "https://www.serebii.net/pokemon/art/412-p.png"
+    },
+    "path": "/tmp/pokington-illustration-validation/images/pokemon/art/412-p.png",
+    "transparent_pixels": 167914,
+    "uniform_blank": false,
+    "visible_pixels": 57711,
+    "width": 475,
+    "sha256": "2eec6ff0f5abdbfb34010507d9746aa21dd490deb9cd4a40be6893c00670632a"
+  },
+  {
+    "bytes": 182700,
+    "color": "Rgba",
+    "complete_decode": true,
+    "height": 570,
+    "http": {
+      "content_type": "image/png",
+      "final_url": "https://www.serebii.net/pokemon/art/666-m.png",
+      "status": 200,
+      "url": "https://www.serebii.net/pokemon/art/666-m.png"
+    },
+    "path": "/tmp/pokington-illustration-validation/images/pokemon/art/666-m.png",
+    "transparent_pixels": 194813,
+    "uniform_blank": false,
+    "visible_pixels": 130087,
+    "width": 570,
+    "sha256": "2be41322b9433150a2d3b430f52422dba62897e2733d8163435eb1f1ea3726d4"
+  },
+  {
+    "bytes": 34821,
+    "color": "Rgba",
+    "complete_decode": true,
+    "height": 300,
+    "http": {
+      "content_type": "image/png",
+      "final_url": "https://www.serebii.net/pokemon/art/670-r.png",
+      "status": 200,
+      "url": "https://www.serebii.net/pokemon/art/670-r.png"
+    },
+    "path": "/tmp/pokington-illustration-validation/images/pokemon/art/670-r.png",
+    "transparent_pixels": 58975,
+    "uniform_blank": false,
+    "visible_pixels": 31025,
+    "width": 300,
+    "sha256": "6013fdb29739deeaffed16f300a2b288fb348c0cbbe1f83c7b79d52a07f1c819"
+  },
+  {
+    "bytes": 36466,
+    "color": "Rgba",
+    "complete_decode": true,
+    "height": 300,
+    "http": {
+      "content_type": "image/png",
+      "final_url": "https://www.serebii.net/pokemon/art/778-d.png",
+      "status": 200,
+      "url": "https://www.serebii.net/pokemon/art/778-d.png"
+    },
+    "path": "/tmp/pokington-illustration-validation/images/pokemon/art/778-d.png",
+    "transparent_pixels": 55513,
+    "uniform_blank": false,
+    "visible_pixels": 34487,
+    "width": 300,
+    "sha256": "832f0b0fcb2e4b4cf07f72cfa154712023b11ba7ec38fd67df24aa1e97f670e5"
+  },
+  {
+    "bytes": 51307,
+    "color": "Rgba",
+    "complete_decode": true,
+    "height": 300,
+    "http": {
+      "content_type": "image/png",
+      "final_url": "https://www.serebii.net/pokemon/art/671-r.png",
+      "status": 200,
+      "url": "https://www.serebii.net/pokemon/art/671-r.png"
+    },
+    "path": "/tmp/pokington-illustration-validation/images/pokemon/art/671-r.png",
+    "transparent_pixels": 53102,
+    "uniform_blank": false,
+    "visible_pixels": 36898,
+    "width": 300,
+    "sha256": "7bd0bcfd6d19195e94e2b697ee04f41b3e3712d2c067710c8a5537f04f86ecef"
+  }
+]

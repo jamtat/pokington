@@ -1,0 +1,118 @@
+{
+  "recorded_utc": "2026-11-07T01:51:19.298012+00:00",
+  "baseline_entries": 1432,
+  "current_forms": 1427,
+  "added_forms": [],
+  "merged_named_forms": [
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "meadow pattern",
+      "named_url": "https://www.serebii.net/pokemon/art/666-m.png",
+      "original_url": "https://www.serebii.net/pokemon/art/666.png",
+      "source_caption": "Meadow Pattern",
+      "disposition": "Verified same biological form; retained as original artwork reference and source label"
+    },
+    {
+      "id": 669,
+      "species": "Flabébé",
+      "key": "red flower",
+      "named_url": "https://www.serebii.net/pokemon/art/669-r.png",
+      "original_url": "https://www.serebii.net/pokemon/art/669.png",
+      "source_caption": "Red Flower",
+      "disposition": "Verified same biological form; retained as original artwork reference and source label"
+    },
+    {
+      "id": 670,
+      "species": "Floette",
+      "key": "red flower",
+      "named_url": "https://www.serebii.net/pokemon/art/670-r.png",
+      "original_url": "https://www.serebii.net/pokemon/art/670.png",
+      "source_caption": "Red Flower",
+      "disposition": "Verified same biological form; retained as original artwork reference and source label"
+    },
+    {
+      "id": 671,
+      "species": "Florges",
+      "key": "red flower",
+      "named_url": "https://www.serebii.net/pokemon/art/671-r.png",
+      "original_url": "https://www.serebii.net/pokemon/art/671.png",
+      "source_caption": "Red Flower",
+      "disposition": "Verified same biological form; retained as original artwork reference and source label"
+    },
+    {
+      "id": 778,
+      "species": "Mimikyu",
+      "key": "disguised",
+      "named_url": "https://www.serebii.net/pokemon/art/778-d.png",
+      "original_url": "https://www.serebii.net/pokemon/art/778.png",
+      "source_caption": "Disguised Form",
+      "disposition": "Verified same biological form; retained as original artwork reference and source label"
+    }
+  ],
+  "original_portrait_changes": [],
+  "type_value_changes": [],
+  "alias_changes": [
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "original",
+      "before": [
+        "https://www.serebii.net/pokemon/art/666.png"
+      ],
+      "after": [
+        "https://www.serebii.net/pokemon/art/666.png",
+        "https://www.serebii.net/pokemon/art/666-m.png"
+      ]
+    },
+    {
+      "id": 669,
+      "species": "Flabébé",
+      "key": "original",
+      "before": [
+        "https://www.serebii.net/pokemon/art/669.png"
+      ],
+      "after": [
+        "https://www.serebii.net/pokemon/art/669.png",
+        "https://www.serebii.net/pokemon/art/669-r.png"
+      ]
+    },
+    {
+      "id": 670,
+      "species": "Floette",
+      "key": "original",
+      "before": [
+        "https://www.serebii.net/pokemon/art/670.png"
+      ],
+      "after": [
+        "https://www.serebii.net/pokemon/art/670.png",
+        "https://www.serebii.net/pokemon/art/670-r.png"
+      ]
+    },
+    {
+      "id": 671,
+      "species": "Florges",
+      "key": "original",
+      "before": [
+        "https://www.serebii.net/pokemon/art/671.png"
+      ],
+      "after": [
+        "https://www.serebii.net/pokemon/art/671.png",
+        "https://www.serebii.net/pokemon/art/671-r.png"
+      ]
+    },
+    {
+      "id": 778,
+      "species": "Mimikyu",
+      "key": "original",
+      "before": [
+        "https://www.serebii.net/pokemon/art/778.png"
+      ],
+      "after": [
+        "https://www.serebii.net/pokemon/art/778.png",
+        "https://www.serebii.net/pokemon/art/778-d.png"
+      ]
+    }
+  ],
+  "exclusion_changes": []
+}

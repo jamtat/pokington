@@ -1,0 +1,29 @@
+{
+  "recorded_utc": "2026-11-07T01:57:36.841663+00:00",
+  "scope": [
+    "S1: reuse each validated Html document for type extraction; public parse_type_evidence still validates input",
+    "S2: flatten text nodes directly through split_whitespace"
+  ],
+  "replay_catalogue_written_utc": "2026-11-07T01:55:53.482263+00:00",
+  "before_cache_sha256": "f289a88004887a49af20ac3069c25cee3e16694e9eb68abb5c41d5211e0ba7d2",
+  "after_cache_sha256": "f289a88004887a49af20ac3069c25cee3e16694e9eb68abb5c41d5211e0ba7d2",
+  "byte_identical": true,
+  "repository_catalogue_structurally_identical": true,
+  "source_sha256": "9f0aef8bba36ad8027764476570fe976fcdb451a77fd396e9b8cb402add5c0ad",
+  "species": 1025,
+  "forms": 1427,
+  "exclusions": 11,
+  "unresolved_errors": [],
+  "selected_png_references_verified": 1427,
+  "missing_png_references": [],
+  "png_gate": "Existing full PNG decode report reused; successful complete decode, visible nonblank pixels, HTTP 200 image/png required for every selected URL. Gate independently reconfirmed after replay. No image downloads or new decoding.",
+  "checks": {
+    "cargo fmt --check": "passed, exit 0",
+    "cargo test --locked": "passed, exit 0; 33 integration tests",
+    "cargo clippy --locked --all-targets -- -D warnings": "passed, exit 0",
+    "git diff --check": "passed, exit 0"
+  },
+  "check_note": "Test execution emits existing btls linker search-directory warnings; tests and clippy complete successfully.",
+  "before_snapshot": "docs/logs/20261107-serebii-catalogue-before-simplification.json",
+  "current_catalogue": "docs/logs/20261107-serebii-catalogue-catalogue.json"
+}

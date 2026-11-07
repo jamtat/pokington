@@ -1,0 +1,70 @@
+{
+  "variant": "top",
+  "initialPokemons": [
+    {
+      "zukan_id": "0006",
+      "zukan_sub_id": 0,
+      "pokemon_name": "Charizard",
+      "pokemon_sub_name": "",
+      "weight": 90.5,
+      "height": 1.7,
+      "file_name": "/images/pokedex/2050f1fd1283f473d7d048f8631712e7e003f802.png",
+      "pokemon_type_id": "fire,flying",
+      "pokemon_type_name": "Fire,Flying"
+    },
+    {
+      "zukan_id": "0006",
+      "zukan_sub_id": 1,
+      "pokemon_name": "Mega Charizard X",
+      "pokemon_sub_name": "",
+      "weight": 110.5,
+      "height": 1.7,
+      "file_name": "/images/pokedex/ca3db4aad5c85a525d9be86852b26db1db7a22c0.png",
+      "pokemon_type_id": "fire,dragon",
+      "pokemon_type_name": "Fire,Dragon"
+    },
+    {
+      "zukan_id": "0006",
+      "zukan_sub_id": 2,
+      "pokemon_name": "Mega Charizard Y",
+      "pokemon_sub_name": "",
+      "weight": 100.5,
+      "height": 1.7,
+      "file_name": "/images/pokedex/0aa78a0061bda9d88cbb0bbf739cd9cc56522fe9.png",
+      "pokemon_type_id": "fire,flying",
+      "pokemon_type_name": "Fire,Flying"
+    },
+    {
+      "zukan_id": "0006",
+      "zukan_sub_id": 3,
+      "pokemon_name": "Charizard",
+      "pokemon_sub_name": "Gigantamax",
+      "weight": 999.99,
+      "height": 28,
+      "file_name": "/images/pokedex/2fd12098f15628cce80d411e090189aeb7d758ff.png",
+      "pokemon_type_id": "fire,flying",
+      "pokemon_type_name": "Fire,Flying"
+    }
+  ],
+  "searchItems": {
+    "pokemonMinId": 6,
+    "pokemonMaxId": 6,
+    "type": [
+      {
+        "pokemon_type_id": "fire",
+        "pokemon_type_name": "Fire"
+      },
+      {
+        "pokemon_type_id": "flying",
+        "pokemon_type_name": "Flying"
+      },
+      {
+        "pokemon_type_id": "dragon",
+        "pokemon_type_name": "Dragon"
+      }
+    ],
+    "search": "",
+    "searchType": ""
+  },
+  "imageBaseUrl": ""
+}

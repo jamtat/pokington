@@ -1,0 +1,140 @@
+{
+  "recorded_utc": "2026-11-07T00:59:58.219862+00:00",
+  "metadata_replay_completed_by_utc": "2026-11-07T00:59:23Z",
+  "source_species": 1025,
+  "raw_owned_artwork_references": 1458,
+  "metadata_unresolved_species": 0,
+  "approved_device_exclusions": [
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotom Phone",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-p.png",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    },
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotom Drone",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-drone.png",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    },
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotomi",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-rotomi.png",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    },
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotom Phone Paldea Ver.",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-p2.png",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    }
+  ],
+  "extra_same_form_references": 21,
+  "alias_groups": 20,
+  "selected_png_valid": 1431,
+  "selected_png_unavailable": [],
+  "all_originals_png_valid": 1025,
+  "reused_validated_images": 1070,
+  "new_selected_urls_requested": 363,
+  "all_successes_nonblank_rgba_with_transparency": true,
+  "dimensions": {
+    "475x475": 1248,
+    "570x570": 64,
+    "500x500": 11,
+    "450x450": 25,
+    "300x300": 41,
+    "192x190": 1,
+    "180x180": 35,
+    "512x512": 3,
+    "140x140": 3
+  },
+  "type_evidence_hubs": 1270,
+  "type_evidence_linked_pages": 161,
+  "linked_game_captures": 131,
+  "checks": {
+    "cargo fmt --check": "passed",
+    "cargo test --locked": "passed: 25 integration tests (16 selected Serebii, 9 archived providers)",
+    "cargo clippy --locked --all-targets -- -D warnings": "passed",
+    "complete_metadata_replay_and_selected_reference_gate": "passed; 1025 species,1431 eligible forms,0 unresolved; every selected URL has successful PNG byte validation"
+  },
+  "status": "D29/D30/D31 eligibility applied; complete selected metadata and image-reference checks pass; ready for authorized independent correctness review. No commit or production bootstrap.",
+  "cache_directory": "/private/tmp/pokington-illustration-validation/images/pokemon/art",
+  "canonical_candidate_forms_before_d31": 1433,
+  "eligible_forms": 1431,
+  "approved_exclusions": [
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotom Phone",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-p.png",
+      "reason": "non_battle_device_without_types",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    },
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotom Drone",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-drone.png",
+      "reason": "non_battle_device_without_types",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    },
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotomi",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-rotomi.png",
+      "reason": "non_battle_device_without_types",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    },
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotom Phone Paldea Ver.",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-p2.png",
+      "reason": "non_battle_device_without_types",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    },
+    {
+      "id": 1012,
+      "species": "Poltchageist",
+      "label": "Artisan Form",
+      "artwork_url": "https://www.serebii.net/pokemon/art/1012-m.png",
+      "reason": "approved_unavailable_illustration",
+      "source_context": "Source-linked illustration returned HTTP 404 on 2026-11-07T00:53:46–47Z; exact exclusion approved in D31. Response evidence: docs/logs/20261107-serebii-catalogue-source-verification.json"
+    },
+    {
+      "id": 1013,
+      "species": "Sinistcha",
+      "label": "Masterpiece Form",
+      "artwork_url": "https://www.serebii.net/pokemon/art/1013-m.png",
+      "reason": "approved_unavailable_illustration",
+      "source_context": "Source-linked illustration returned HTTP 404 on 2026-11-07T00:53:46–47Z; exact exclusion approved in D31. Response evidence: docs/logs/20261107-serebii-catalogue-source-verification.json"
+    }
+  ],
+  "approved_unavailable_source_references": [
+    {
+      "id": 1012,
+      "species": "Poltchageist",
+      "key": "artisan",
+      "source": "https://www.serebii.net/pokemon/poltchageist",
+      "reused_from_1070_check": false,
+      "error": "HTTP status client error (404 Not Found) for uri (https://www.serebii.net/pokemon/art/1012-m.png)",
+      "url": "https://www.serebii.net/pokemon/art/1012-m.png"
+    },
+    {
+      "id": 1013,
+      "species": "Sinistcha",
+      "key": "masterpiece",
+      "source": "https://www.serebii.net/pokemon/sinistcha",
+      "reused_from_1070_check": false,
+      "error": "HTTP status client error (404 Not Found) for uri (https://www.serebii.net/pokemon/art/1013-m.png)",
+      "url": "https://www.serebii.net/pokemon/art/1013-m.png"
+    }
+  ],
+  "duplicate_selected_sha256": false
+}

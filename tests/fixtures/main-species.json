@@ -1,0 +1,28 @@
+[
+  {
+    "abilities": [
+      "Inner Focus"
+    ],
+    "detailPageURL": "/us/pokedex/dragonite",
+    "weight": 463.0,
+    "weakness": [
+      "Rock",
+      "Ice",
+      "Dragon",
+      "Fairy"
+    ],
+    "number": "0149",
+    "height": 87.0,
+    "collectibles_slug": "dragonite",
+    "featured": "true",
+    "slug": "dragonite",
+    "name": "Dragonite",
+    "ThumbnailAltText": "Dragonite",
+    "ThumbnailImage": "https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/149.png",
+    "id": 149,
+    "type": [
+      "dragon",
+      "flying"
+    ]
+  }
+]

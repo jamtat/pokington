@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://www.serebii.net/pokemon/art/1012-m.png",
+    "started_at": "2026-11-07T00:53:46.639979+00:00",
+    "finished_at": "2026-11-07T00:53:46.972420+00:00",
+    "exit": 1,
+    "output": "404 Not Found https://www.serebii.net/pokemon/art/1012-m.png\ntext/html; charset=ISO-8859-1; 36656 bytes\nError: \"HTTP 404 Not Found; response body preserved\"\n",
+    "body_path": "/tmp/pokington-serebii/verification/1012-m.body",
+    "sha256": "85cea50bd759055122ebad389969039532185c158e64d61b7c17147a06b9bf75"
+  },
+  {
+    "url": "https://www.serebii.net/pokemon/poltchageist",
+    "started_at": "2026-11-07T00:53:45.667763+00:00",
+    "finished_at": "2026-11-07T00:53:46.639644+00:00",
+    "exit": 0,
+    "output": "200 OK https://www.serebii.net/pokemon/poltchageist/\ntext/html; charset=ISO-8859-1; 160324 bytes\n",
+    "body_path": "/tmp/pokington-serebii/verification/1012.body",
+    "sha256": "9e6c8ffac5fe921f07c0e95f53ee1fba47f4f88fe247f6039d0e31e99faaf65f"
+  },
+  {
+    "url": "https://www.serebii.net/pokemon/art/1013-m.png",
+    "started_at": "2026-11-07T00:53:46.972885+00:00",
+    "finished_at": "2026-11-07T00:53:47.568446+00:00",
+    "exit": 1,
+    "output": "404 Not Found https://www.serebii.net/pokemon/art/1013-m.png\ntext/html; charset=ISO-8859-1; 36656 bytes\nError: \"HTTP 404 Not Found; response body preserved\"\n",
+    "body_path": "/tmp/pokington-serebii/verification/1013-m.body",
+    "sha256": "85cea50bd759055122ebad389969039532185c158e64d61b7c17147a06b9bf75"
+  },
+  {
+    "url": "https://www.serebii.net/pokemon/sinistcha",
+    "started_at": "2026-11-07T00:53:46.564881+00:00",
+    "finished_at": "2026-11-07T00:53:47.163735+00:00",
+    "exit": 0,
+    "output": "200 OK https://www.serebii.net/pokemon/sinistcha/\ntext/html; charset=ISO-8859-1; 160628 bytes\n",
+    "body_path": "/tmp/pokington-serebii/verification/1013.body",
+    "sha256": "fec024481b6d9c053c883f77ce6389d5a0849df7b89a8b4d65e9e1463182645e"
+  },
+  {
+    "url": "https://www.serebii.net/pokemon/nationalpokedex.shtml",
+    "started_at": "2026-11-07T00:53:45.666845+00:00",
+    "finished_at": "2026-11-07T00:53:46.564239+00:00",
+    "exit": 0,
+    "output": "200 OK https://www.serebii.net/pokemon/nationalpokedex.shtml\ntext/html; charset=ISO-8859-1; 1024799 bytes\n",
+    "body_path": "/tmp/pokington-serebii/verification/index.body",
+    "sha256": "f1a0be41447c99570563ad5e390bf182491503a7a9d49df67d02d70bbf25df53"
+  }
+]

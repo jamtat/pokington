@@ -1,0 +1,276 @@
+[
+  {
+    "id": 6,
+    "species": "Charizard",
+    "key": "gigantamax",
+    "selected": "https://www.serebii.net/pokemon/art/006-gi.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/006-gi.png",
+      "https://www.serebii.net/pokemon/art/006-g.png"
+    ],
+    "labels": [
+      "Gigantamax Charizard"
+    ]
+  },
+  {
+    "id": 25,
+    "species": "Pikachu",
+    "key": "gigantamax",
+    "selected": "https://www.serebii.net/pokemon/art/025-gi.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/025-gi.png",
+      "https://www.serebii.net/pokemon/art/025-g.png"
+    ],
+    "labels": [
+      "Gigantamax Pikachu"
+    ]
+  },
+  {
+    "id": 133,
+    "species": "Eevee",
+    "key": "gigantamax",
+    "selected": "https://www.serebii.net/pokemon/art/133-gi.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/133-gi.png",
+      "https://www.serebii.net/pokemon/art/133-g.png"
+    ],
+    "labels": [
+      "Gigantamax Eevee"
+    ]
+  },
+  {
+    "id": 172,
+    "species": "Pichu",
+    "key": "spiky eared",
+    "selected": "https://www.serebii.net/pokemon/art/172-s.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/172-s.png",
+      "https://www.serebii.net/pokemon/art/172-se.png"
+    ],
+    "labels": [
+      "Spiky-eared Pichu"
+    ]
+  },
+  {
+    "id": 351,
+    "species": "Castform",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/351.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/351.png",
+      "https://www.serebii.net/pokemon/art/351-n.png"
+    ],
+    "labels": [
+      "Castform",
+      "Normal"
+    ]
+  },
+  {
+    "id": 412,
+    "species": "Burmy",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/412.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/412.png",
+      "https://www.serebii.net/pokemon/art/412-n.png"
+    ],
+    "labels": [
+      "Burmy",
+      "No Cloak"
+    ]
+  },
+  {
+    "id": 493,
+    "species": "Arceus",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/493.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/493.png",
+      "https://www.serebii.net/pokemon/art/493-normal.png"
+    ],
+    "labels": [
+      "Arceus",
+      "Normal-type"
+    ]
+  },
+  {
+    "id": 555,
+    "species": "Darmanitan",
+    "key": "zen mode",
+    "selected": "https://www.serebii.net/pokemon/art/555-z.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/555-z.png",
+      "https://www.serebii.net/pokemon/art/555-d.png"
+    ],
+    "labels": [
+      "Unovan Zen Mode",
+      "Zen Mode"
+    ]
+  },
+  {
+    "id": 649,
+    "species": "Genesect",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/649.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/649.png",
+      "https://www.serebii.net/pokemon/art/649-n.png"
+    ],
+    "labels": [
+      "Genesect",
+      "Normal"
+    ]
+  },
+  {
+    "id": 666,
+    "species": "Vivillon",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/666.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/666.png",
+      "https://www.serebii.net/pokemon/art/666-m.png"
+    ],
+    "labels": [
+      "Meadow Pattern",
+      "Vivillon"
+    ]
+  },
+  {
+    "id": 669,
+    "species": "Flabébé",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/669.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/669.png",
+      "https://www.serebii.net/pokemon/art/669-r.png"
+    ],
+    "labels": [
+      "Flabébé",
+      "Red Flower"
+    ]
+  },
+  {
+    "id": 670,
+    "species": "Floette",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/670.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/670.png",
+      "https://www.serebii.net/pokemon/art/670-r.png"
+    ],
+    "labels": [
+      "Floette",
+      "Red Flower"
+    ]
+  },
+  {
+    "id": 671,
+    "species": "Florges",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/671.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/671.png",
+      "https://www.serebii.net/pokemon/art/671-r.png"
+    ],
+    "labels": [
+      "Florges",
+      "Red Flower"
+    ]
+  },
+  {
+    "id": 676,
+    "species": "Furfrou",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/676.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/676.png",
+      "https://www.serebii.net/pokemon/art/676-n.png"
+    ],
+    "labels": [
+      "Furfrou",
+      "Male",
+      "Natural Form"
+    ]
+  },
+  {
+    "id": 773,
+    "species": "Silvally",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/773.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/773.png",
+      "https://www.serebii.net/pokemon/art/773-normal.png"
+    ],
+    "labels": [
+      "Silvally",
+      "Type: Normal"
+    ]
+  },
+  {
+    "id": 778,
+    "species": "Mimikyu",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/778.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/778.png",
+      "https://www.serebii.net/pokemon/art/778-d.png"
+    ],
+    "labels": [
+      "Disguised Form",
+      "Mimikyu"
+    ]
+  },
+  {
+    "id": 1017,
+    "species": "Ogerpon",
+    "key": "cornerstone mask",
+    "selected": "https://www.serebii.net/pokemon/art/1017-c.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/1017-c.png",
+      "https://www.serebii.net/pokemon/art/1017-cm.png"
+    ],
+    "labels": [
+      "Cornerstone Mask"
+    ]
+  },
+  {
+    "id": 1017,
+    "species": "Ogerpon",
+    "key": "hearthflame mask",
+    "selected": "https://www.serebii.net/pokemon/art/1017-h.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/1017-h.png",
+      "https://www.serebii.net/pokemon/art/1017-hm.png"
+    ],
+    "labels": [
+      "Hearthflame Mask"
+    ]
+  },
+  {
+    "id": 1017,
+    "species": "Ogerpon",
+    "key": "original",
+    "selected": "https://www.serebii.net/pokemon/art/1017.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/1017.png",
+      "https://www.serebii.net/pokemon/art/1017-m.png"
+    ],
+    "labels": [
+      "Ogerpon",
+      "Teal Mask"
+    ]
+  },
+  {
+    "id": 1017,
+    "species": "Ogerpon",
+    "key": "wellspring mask",
+    "selected": "https://www.serebii.net/pokemon/art/1017-w.png",
+    "references": [
+      "https://www.serebii.net/pokemon/art/1017-w.png",
+      "https://www.serebii.net/pokemon/art/1017-wm.png"
+    ],
+    "labels": [
+      "Wellspring Mask"
+    ]
+  }
+]

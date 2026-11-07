@@ -1,0 +1,119 @@
+{
+  "recorded_utc": "2026-11-07T01:51:19.309067+00:00",
+  "replay_completed_by_utc": "2026-11-07T01:50:21Z",
+  "status": "Targeted-review F1/F2 findings fixed; final checks and complete cached metadata/image-reference gate pass. Ready for root assessment and the already approved simplification review.",
+  "source_species": 1025,
+  "raw_owned_references": 1458,
+  "canonical_forms": 1427,
+  "original_portraits_preserved": 1025,
+  "approved_exclusions": [
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "label": "Captain Pikachu",
+      "artwork_url": "https://www.serebii.net/pokemon/art/025-captain.png",
+      "reason": "approved_unsupported_type_evidence",
+      "source_context": "No supported named per-form type join in the inspected source-linked evidence; exact exclusion approved in D32 on 2026-11-07. Source labels and evidence: docs/logs/20261107-serebii-correctness-unresolved.json"
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "label": "Mr. Windychu",
+      "artwork_url": "https://www.serebii.net/pokemon/art/025-mrwindychu.png",
+      "reason": "approved_unsupported_type_evidence",
+      "source_context": "No supported named per-form type join in the inspected source-linked evidence; exact exclusion approved in D32 on 2026-11-07. Source labels and evidence: docs/logs/20261107-serebii-correctness-unresolved.json"
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "label": "Ms. Waveychu",
+      "artwork_url": "https://www.serebii.net/pokemon/art/025-mswaveychu.png",
+      "reason": "approved_unsupported_type_evidence",
+      "source_context": "No supported named per-form type join in the inspected source-linked evidence; exact exclusion approved in D32 on 2026-11-07. Source labels and evidence: docs/logs/20261107-serebii-correctness-unresolved.json"
+    },
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotom Phone",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-p.png",
+      "reason": "non_battle_device_without_types",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    },
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotom Drone",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-drone.png",
+      "reason": "non_battle_device_without_types",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    },
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotomi",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-rotomi.png",
+      "reason": "non_battle_device_without_types",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    },
+    {
+      "id": 479,
+      "species": "Rotom",
+      "label": "Rotom Phone Paldea Ver.",
+      "artwork_url": "https://www.serebii.net/pokemon/art/479-p2.png",
+      "reason": "non_battle_device_without_types",
+      "source_context": "Rotom changes form by interacting with various appliances in the warehouse within various locations in the game. The Rotom Pokédex is not usable as a Pokémon but is a device possessed by a Rotom which acted as a companion in games and featured prominently in the anime. This continued on with the Rotom Phone and then Rotom's possession of two other devices: a camera in stadiums and the PC"
+    },
+    {
+      "id": 718,
+      "species": "Zygarde",
+      "label": "Cell",
+      "artwork_url": "https://www.serebii.net/pokemon/art/718-cell.png",
+      "reason": "approved_unsupported_type_evidence",
+      "source_context": "No supported named per-form type join in the inspected source-linked evidence; exact exclusion approved in D32 on 2026-11-07. Source labels and evidence: docs/logs/20261107-serebii-correctness-unresolved.json"
+    },
+    {
+      "id": 718,
+      "species": "Zygarde",
+      "label": "Core",
+      "artwork_url": "https://www.serebii.net/pokemon/art/718-core.png",
+      "reason": "approved_unsupported_type_evidence",
+      "source_context": "No supported named per-form type join in the inspected source-linked evidence; exact exclusion approved in D32 on 2026-11-07. Source labels and evidence: docs/logs/20261107-serebii-correctness-unresolved.json"
+    },
+    {
+      "id": 1012,
+      "species": "Poltchageist",
+      "label": "Artisan Form",
+      "artwork_url": "https://www.serebii.net/pokemon/art/1012-m.png",
+      "reason": "approved_unavailable_illustration",
+      "source_context": "Source-linked illustration returned HTTP 404 on 2026-11-07T00:53:46–47Z; exact exclusion approved in D31. Response evidence: docs/logs/20261107-serebii-catalogue-source-verification.json"
+    },
+    {
+      "id": 1013,
+      "species": "Sinistcha",
+      "label": "Masterpiece Form",
+      "artwork_url": "https://www.serebii.net/pokemon/art/1013-m.png",
+      "reason": "approved_unavailable_illustration",
+      "source_context": "Source-linked illustration returned HTTP 404 on 2026-11-07T00:53:46–47Z; exact exclusion approved in D31. Response evidence: docs/logs/20261107-serebii-catalogue-source-verification.json"
+    }
+  ],
+  "extra_same_identity_references": 20,
+  "alias_groups": 20,
+  "unresolved_type_joins": [],
+  "unresolved_original_named_identity_pairs": [],
+  "selected_png_valid": 1427,
+  "selected_png_unavailable": [],
+  "all_selected_pngs_nonblank_with_transparency": true,
+  "distinct_selected_sha256": 1427,
+  "type_evidence_hubs": 1270,
+  "type_evidence_linked_pages": 157,
+  "checks": {
+    "cargo fmt --check": "passed",
+    "cargo test --locked": "passed: 33 integration tests (24 Serebii + 9 archived)",
+    "cargo clippy --locked --all-targets -- -D warnings": "passed",
+    "git diff --check": "passed",
+    "full_offline_metadata_and_image_gate": "passed: 1025 species,1427 canonical forms,0 unresolved; every selected image has successful PNG byte validation"
+  },
+  "source_sha256": "cebb06daad67b88dd1c27729dc7b9836fcb3b5fcc6f678031977b76f14f5052b",
+  "targeted_identity_diff": "docs/logs/20261107-serebii-targeted-identity-diff.json",
+  "source_alias_evidence": "docs/20261107-serebii-targeted-review-fixes.md"
+}

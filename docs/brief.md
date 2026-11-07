@@ -28,7 +28,17 @@ Sample uniformly without replacement. `--exclude` is repeatable, and an unknown 
 
 Print art for pokemon with id or name matching (name case insensitive). For a specified Pokémon, use the original form unless `--form` explicitly selects an alternate form. No specified pokemon produces random artwork, with equal probability for every species/form artwork entry, including originals and alternate forms. Species with more forms therefore have a greater combined probability. Transparent pixels should be trimmed off the source png before display (crop to only visible pixels).
 
+2026-11-07 artwork preference: use illustration-style artwork. HOME's 3D game-render style was inspected and rejected by the user; do not select it as the default merely because it has complete PNG coverage. Local artwork remains PNG. See [D27](20261106-design.md#d27--use-illustration-style-artwork--2026-11-07).
+
 `--form` accepts descriptive, case-insensitive names rather than numeric form indexes. Invalid-form errors list the available form names for the selected Pokémon. Alternate artwork includes Mega Evolutions as well as regional forms, Gigantamax, and other forms exposed by the source. Distinct Mega forms must remain separately selectable.
+
+2026-11-07 eligibility decision: include alternate forms only when a matching illustration PNG is available from Serebii. Every original species remains included. Variations available only as game renders or sprites are omitted; there is no render/sprite fallback or substitution of an original image for a distinct form. Preserve all illustrated Mega, regional, Gigantamax and other forms. See [D29](20261106-design.md#d29--illustration-only-form-eligibility--2026-11-07).
+
+Exclude Rotom Phone, Rotom Drone, Rotomi and Rotom Phone Paldea Ver.: these non-battle device illustrations lack supported type data. Original Rotom and its battle forms remain included. See [D30](20261106-design.md#d30--exclude-four-untyped-non-battle-device-entries--2026-11-07).
+
+Exclude Artisan Poltchageist and Masterpiece Sinistcha: their source illustration links are confirmed missing, with no linked illustration alternatives. Preserve their unavailable-artwork evidence; other download failures remain errors. See [D31](20261106-design.md#d31--exclude-two-unavailable-source-illustrations--2026-11-07).
+
+Exclude Captain Pikachu, Mr. Windychu, Ms. Waveychu, Zygarde Cell and Zygarde Core because the checked source-linked pages do not support their form types. Preserve their exclusion evidence and retain original Pikachu/Zygarde and other supported forms. See [D32](20261106-design.md#d32--exclude-five-unsupported-non-battle-depictions--2026-11-07).
 
 When `--form` is provided without a Pokémon name or ID, choose uniformly from all species/form artwork entries matching that form name. Report an error if no entries match.
 
@@ -68,7 +78,15 @@ Keep successfully downloaded artwork so interrupted bootstrap can resume without
 
 ## Data
 
-Sourced from https://www.pokemon.com/us/pokedex or another official English-language Pokémon website, provided equivalent species, forms, types, and artwork coverage is verified. Unofficial sources are not an accepted fallback.
+Source species, forms, types and artwork from [Serebii's National Pokédex](https://www.serebii.net/pokemon/nationalpokedex.shtml) and its source-linked detail pages. Verify complete discovery and required artwork coverage before adoption; derive counts and form identities from the source.
+
+2026-11-06 source correction: the user instructed switching to Serebii after main-site anti-bot challenges blocked complete discovery. This supersedes D06's official-only restriction and D22's main-site priority. Complete species/form coverage remains required. See [D25](20261106-design.md#d25--switch-to-serebiis-national-pokedex--2026-11-06). The earlier official-only and main-site decisions remain in the design history.
+
+2026-11-06 current investigation update: the user now requests official-looking PNG artwork for all Pokémon from Pokémon Database and a fresh investigator. Verify native PNG coverage and actual image quality for every original species; report alternate-form coverage separately. Production source adoption and any image conversion/fallback policy remain subject to the resulting evidence. See [D26](20261106-design.md#d26--fresh-pokemon-database-artwork-investigation--2026-11-06).
+
+2026-11-07 artwork source decision: after inspecting the render style and native illustration evidence, the user selected Serebii's illustration PNGs. All 1,025 original species and the 45 newer Mega candidates were downloaded and fully verified as visible, transparent native PNGs. Continue with Serebii; no JPEG conversion or HOME default is adopted. D29 subsequently settled alternate eligibility as illustration-only, and D30 excludes exactly four untyped Rotom devices. See [D28](20261106-design.md#d28--select-serebiis-native-illustration-pngs--2026-11-07).
+
+All data requests impersonate a browser by default using an appropriate, consistent browser HTTP request profile. This uses HTTP clients and does not require browser automation. See [D23](20261106-design.md#d23--browser-impersonation-for-all-data-requests--2026-11-06).
 
 Bootstrap needs to pull in data about all the pokemon by fetching from the website. Save the pokedex number, the name, the primary and secondary type. Also save the image. Save in a format that's simple and fast to read - used on every call. Also need to save all the png artwork for every Pokemon.
 
@@ -78,7 +96,9 @@ Store a versioned JSON catalogue using `serde` and `serde_json`, alongside PNG a
 
 The catalogue contains its schema version, source information, and species list. Each species stores its Pokédex number, original name, original-form reference, and forms. Each form stores its descriptive key, display name, source identifier, primary and optional secondary type, artwork URL, and local file reference. Types are stored per form rather than duplicated on the species record. `choose` uses species names; `art` resolves a form.
 
-### Image URLs
+### Historical image URLs
+
+These original Pokémon.com examples are retained as history. Current Serebii artwork URLs must be discovered from source-linked pages rather than generated from these patterns.
 
 - Artwork under 1000 padded to 3 digits with 0: https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/001.png
 - Artwork 1000 and over not padded: https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/1000.png
@@ -87,7 +107,7 @@ The catalogue contains its schema version, source information, and species list.
 ## Dependencies
 
 - clap: cmdline handling
-- reqwest: http stuff
+- wreq 0.16.3 and wreq-util 0.2.0: browser-profile HTTP, replacing the originally requested reqwest under D24
 - ratatui-image: for displaying images on the cmdline
 - serde and serde_json: versioned local JSON catalogue
 

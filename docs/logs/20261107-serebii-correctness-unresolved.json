@@ -1,0 +1,52 @@
+[
+  {
+    "id": 25,
+    "species": "Pikachu",
+    "key": "captain",
+    "label": "Captain Pikachu",
+    "artwork_url": "https://www.serebii.net/pokemon/art/025-captain.png",
+    "source": "https://www.serebii.net/pokemon/pikachu",
+    "reason": "Named character illustration lacks a supported per-form type join in the selected hub-linked SV/XY captures",
+    "approved_for_exclusion": false
+  },
+  {
+    "id": 25,
+    "species": "Pikachu",
+    "key": "mr windychu",
+    "label": "Mr. Windychu",
+    "artwork_url": "https://www.serebii.net/pokemon/art/025-mrwindychu.png",
+    "source": "https://www.serebii.net/pokemon/pikachu",
+    "reason": "Named character illustration lacks a supported per-form type join in the selected hub-linked SV/XY captures",
+    "approved_for_exclusion": false
+  },
+  {
+    "id": 25,
+    "species": "Pikachu",
+    "key": "ms waveychu",
+    "label": "Ms. Waveychu",
+    "artwork_url": "https://www.serebii.net/pokemon/art/025-mswaveychu.png",
+    "source": "https://www.serebii.net/pokemon/pikachu",
+    "reason": "Named character illustration lacks a supported per-form type join in the selected hub-linked SV/XY captures",
+    "approved_for_exclusion": false
+  },
+  {
+    "id": 718,
+    "species": "Zygarde",
+    "key": "cell",
+    "label": "Cell",
+    "artwork_url": "https://www.serebii.net/pokemon/art/718-cell.png",
+    "source": "https://www.serebii.net/pokemon/zygarde",
+    "reason": "Hub explicitly describes Core/Cells as item-like variants not factored in as game forms; no supported named type join",
+    "approved_for_exclusion": false
+  },
+  {
+    "id": 718,
+    "species": "Zygarde",
+    "key": "core",
+    "label": "Core",
+    "artwork_url": "https://www.serebii.net/pokemon/art/718-core.png",
+    "source": "https://www.serebii.net/pokemon/zygarde",
+    "reason": "Hub explicitly describes Core/Cells as item-like variants not factored in as game forms; no supported named type join",
+    "approved_for_exclusion": false
+  }
+]

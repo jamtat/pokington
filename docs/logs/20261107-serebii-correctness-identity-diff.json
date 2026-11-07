@@ -1,0 +1,2064 @@
+{
+  "recorded_utc": "2026-11-07T01:36:23.887262+00:00",
+  "scope": "Complete post-D32 source catalogue compared with the pre-correctness-review 1431-entry snapshot",
+  "added_source_candidates": [
+    {
+      "id": 412,
+      "species": "Burmy",
+      "key": "plant cloak",
+      "url": "https://www.serebii.net/pokemon/art/412-p.png",
+      "identity_status": "Distinct source Plant Cloak slot"
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "meadow pattern",
+      "url": "https://www.serebii.net/pokemon/art/666-m.png",
+      "identity_status": "Named source slot; biological identity relative to generic OG portrait remains unresolved"
+    },
+    {
+      "id": 669,
+      "species": "Flabébé",
+      "key": "red flower",
+      "url": "https://www.serebii.net/pokemon/art/669-r.png",
+      "identity_status": "Named source slot; biological identity relative to generic OG portrait remains unresolved"
+    },
+    {
+      "id": 670,
+      "species": "Floette",
+      "key": "red flower",
+      "url": "https://www.serebii.net/pokemon/art/670-r.png",
+      "identity_status": "Named source slot; biological identity relative to generic OG portrait remains unresolved"
+    },
+    {
+      "id": 671,
+      "species": "Florges",
+      "key": "red flower",
+      "url": "https://www.serebii.net/pokemon/art/671-r.png",
+      "identity_status": "Named source slot; biological identity relative to generic OG portrait remains unresolved"
+    },
+    {
+      "id": 778,
+      "species": "Mimikyu",
+      "key": "disguised",
+      "url": "https://www.serebii.net/pokemon/art/778-d.png",
+      "identity_status": "Named source slot; biological identity relative to generic OG portrait remains unresolved"
+    }
+  ],
+  "removed_entries": [
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "mr windychu",
+      "url": "https://www.serebii.net/pokemon/art/025-mrwindychu.png",
+      "reason": "Exact D32 approved unsupported-type exclusion"
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "ms waveychu",
+      "url": "https://www.serebii.net/pokemon/art/025-mswaveychu.png",
+      "reason": "Exact D32 approved unsupported-type exclusion"
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "captain",
+      "url": "https://www.serebii.net/pokemon/art/025-captain.png",
+      "reason": "Exact D32 approved unsupported-type exclusion"
+    },
+    {
+      "id": 718,
+      "species": "Zygarde",
+      "key": "cell",
+      "url": "https://www.serebii.net/pokemon/art/718-cell.png",
+      "reason": "Exact D32 approved unsupported-type exclusion"
+    },
+    {
+      "id": 718,
+      "species": "Zygarde",
+      "key": "core",
+      "url": "https://www.serebii.net/pokemon/art/718-core.png",
+      "reason": "Exact D32 approved unsupported-type exclusion"
+    }
+  ],
+  "original_portrait_changes": [],
+  "alias_changes": [
+    {
+      "id": 412,
+      "species": "Burmy",
+      "key": "original",
+      "before": [
+        "https://www.serebii.net/pokemon/art/412.png",
+        "https://www.serebii.net/pokemon/art/412-n.png",
+        "https://www.serebii.net/pokemon/art/412-p.png"
+      ],
+      "after": [
+        "https://www.serebii.net/pokemon/art/412.png",
+        "https://www.serebii.net/pokemon/art/412-n.png"
+      ]
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "original",
+      "before": [
+        "https://www.serebii.net/pokemon/art/666.png",
+        "https://www.serebii.net/pokemon/art/666-m.png"
+      ],
+      "after": [
+        "https://www.serebii.net/pokemon/art/666.png"
+      ]
+    },
+    {
+      "id": 669,
+      "species": "Flabébé",
+      "key": "original",
+      "before": [
+        "https://www.serebii.net/pokemon/art/669.png",
+        "https://www.serebii.net/pokemon/art/669-r.png"
+      ],
+      "after": [
+        "https://www.serebii.net/pokemon/art/669.png"
+      ]
+    },
+    {
+      "id": 670,
+      "species": "Floette",
+      "key": "original",
+      "before": [
+        "https://www.serebii.net/pokemon/art/670.png",
+        "https://www.serebii.net/pokemon/art/670-r.png"
+      ],
+      "after": [
+        "https://www.serebii.net/pokemon/art/670.png"
+      ]
+    },
+    {
+      "id": 671,
+      "species": "Florges",
+      "key": "original",
+      "before": [
+        "https://www.serebii.net/pokemon/art/671.png",
+        "https://www.serebii.net/pokemon/art/671-r.png"
+      ],
+      "after": [
+        "https://www.serebii.net/pokemon/art/671.png"
+      ]
+    },
+    {
+      "id": 778,
+      "species": "Mimikyu",
+      "key": "original",
+      "before": [
+        "https://www.serebii.net/pokemon/art/778.png",
+        "https://www.serebii.net/pokemon/art/778-d.png"
+      ],
+      "after": [
+        "https://www.serebii.net/pokemon/art/778.png"
+      ]
+    }
+  ],
+  "type_value_changes": [],
+  "type_evidence_changes": [
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "partner cap",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Shared type panel for independently named form: partner cap"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "world cap",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Shared type panel for independently named form: world cap"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "pop star",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-xy/025.shtml",
+        "label": "Shared type panel for independently named form: pop star"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "original cap",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Shared type panel for independently named form: original cap"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "alolan cap",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Shared type panel for independently named form: alolan cap"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "kalos cap",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Shared type panel for independently named form: kalos cap"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "ph d",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-xy/025.shtml",
+        "label": "Shared type panel for independently named form: ph d"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "unova cap",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Shared type panel for independently named form: unova cap"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "sinnoh cap",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Shared type panel for independently named form: sinnoh cap"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "libre",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-xy/025.shtml",
+        "label": "Shared type panel for independently named form: libre"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "hoenn cap",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Shared type panel for independently named form: hoenn cap"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "rock star",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-xy/025.shtml",
+        "label": "Shared type panel for independently named form: rock star"
+      }
+    },
+    {
+      "id": 25,
+      "species": "Pikachu",
+      "key": "belle",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pikachu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-xy/025.shtml",
+        "label": "Shared type panel for independently named form: belle"
+      }
+    },
+    {
+      "id": 150,
+      "species": "Mewtwo",
+      "key": "armored",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/mewtwo/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokemongo/pokemon/150.shtml",
+        "label": "Shared type panel for independently named form: armored"
+      }
+    },
+    {
+      "id": 172,
+      "species": "Pichu",
+      "key": "spiky eared",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pichu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-dp/172.shtml",
+        "label": "Shared type panel for independently named form: spiky eared"
+      }
+    },
+    {
+      "id": 386,
+      "species": "Deoxys",
+      "key": "speed",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/deoxys/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/deoxys/",
+        "label": "Shared type panel for independently named form: speed"
+      }
+    },
+    {
+      "id": 386,
+      "species": "Deoxys",
+      "key": "attack",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/deoxys/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/deoxys/",
+        "label": "Shared type panel for independently named form: attack"
+      }
+    },
+    {
+      "id": 386,
+      "species": "Deoxys",
+      "key": "defense",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/deoxys/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/deoxys/",
+        "label": "Shared type panel for independently named form: defense"
+      }
+    },
+    {
+      "id": 412,
+      "species": "Burmy",
+      "key": "trash cloak",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-swsh/burmy/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/burmy/",
+        "label": "Shared type panel for independently named form: trash cloak"
+      }
+    },
+    {
+      "id": 412,
+      "species": "Burmy",
+      "key": "sandy cloak",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-swsh/burmy/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/burmy/",
+        "label": "Shared type panel for independently named form: sandy cloak"
+      }
+    },
+    {
+      "id": 421,
+      "species": "Cherrim",
+      "key": "sunshine",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-swsh/cherrim/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/cherrim/",
+        "label": "Shared type panel for independently named form: sunshine"
+      }
+    },
+    {
+      "id": 422,
+      "species": "Shellos",
+      "key": "east sea",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/shellos/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/shellos/",
+        "label": "Shared type panel for independently named form: east sea"
+      }
+    },
+    {
+      "id": 423,
+      "species": "Gastrodon",
+      "key": "east sea",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/gastrodon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/gastrodon/",
+        "label": "Shared type panel for independently named form: east sea"
+      }
+    },
+    {
+      "id": 483,
+      "species": "Dialga",
+      "key": "origin",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/dialga/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/dialga/",
+        "label": "Shared type panel for independently named form: origin"
+      }
+    },
+    {
+      "id": 484,
+      "species": "Palkia",
+      "key": "origin",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/palkia/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/palkia/",
+        "label": "Shared type panel for independently named form: origin"
+      }
+    },
+    {
+      "id": 487,
+      "species": "Giratina",
+      "key": "origin",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/giratina/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/giratina/",
+        "label": "Shared type panel for independently named form: origin"
+      }
+    },
+    {
+      "id": 521,
+      "species": "Unfezant",
+      "key": "female",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-swsh/unfezant/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/unfezant/",
+        "label": "Shared type panel for independently named form: female"
+      }
+    },
+    {
+      "id": 550,
+      "species": "Basculin",
+      "key": "white striped",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/basculin/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/basculin/",
+        "label": "Shared type panel for independently named form: white striped"
+      }
+    },
+    {
+      "id": 550,
+      "species": "Basculin",
+      "key": "blue striped",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/basculin/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/basculin/",
+        "label": "Shared type panel for independently named form: blue striped"
+      }
+    },
+    {
+      "id": 585,
+      "species": "Deerling",
+      "key": "winter",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/deerling/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/deerling/",
+        "label": "Shared type panel for independently named form: winter"
+      }
+    },
+    {
+      "id": 585,
+      "species": "Deerling",
+      "key": "autumn",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/deerling/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/deerling/",
+        "label": "Shared type panel for independently named form: autumn"
+      }
+    },
+    {
+      "id": 585,
+      "species": "Deerling",
+      "key": "summer",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/deerling/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/deerling/",
+        "label": "Shared type panel for independently named form: summer"
+      }
+    },
+    {
+      "id": 586,
+      "species": "Sawsbuck",
+      "key": "winter",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/sawsbuck/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/sawsbuck/",
+        "label": "Shared type panel for independently named form: winter"
+      }
+    },
+    {
+      "id": 586,
+      "species": "Sawsbuck",
+      "key": "autumn",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/sawsbuck/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/sawsbuck/",
+        "label": "Shared type panel for independently named form: autumn"
+      }
+    },
+    {
+      "id": 586,
+      "species": "Sawsbuck",
+      "key": "summer",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/sawsbuck/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/sawsbuck/",
+        "label": "Shared type panel for independently named form: summer"
+      }
+    },
+    {
+      "id": 592,
+      "species": "Frillish",
+      "key": "female",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-swsh/frillish/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/frillish/",
+        "label": "Shared type panel for independently named form: female"
+      }
+    },
+    {
+      "id": 593,
+      "species": "Jellicent",
+      "key": "female",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-swsh/jellicent/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/jellicent/",
+        "label": "Shared type panel for independently named form: female"
+      }
+    },
+    {
+      "id": 641,
+      "species": "Tornadus",
+      "key": "therian",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/tornadus/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/tornadus/",
+        "label": "Shared type panel for independently named form: therian"
+      }
+    },
+    {
+      "id": 642,
+      "species": "Thundurus",
+      "key": "therian",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/thundurus/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/thundurus/",
+        "label": "Shared type panel for independently named form: therian"
+      }
+    },
+    {
+      "id": 645,
+      "species": "Landorus",
+      "key": "therian",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/landorus/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/landorus/",
+        "label": "Shared type panel for independently named form: therian"
+      }
+    },
+    {
+      "id": 646,
+      "species": "Kyurem",
+      "key": "white",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/kyurem/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/kyurem/",
+        "label": "Shared type panel for independently named form: white"
+      }
+    },
+    {
+      "id": 646,
+      "species": "Kyurem",
+      "key": "black",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/kyurem/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/kyurem/",
+        "label": "Shared type panel for independently named form: black"
+      }
+    },
+    {
+      "id": 647,
+      "species": "Keldeo",
+      "key": "resolute",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/keldeo/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/keldeo/",
+        "label": "Shared type panel for independently named form: resolute"
+      }
+    },
+    {
+      "id": 649,
+      "species": "Genesect",
+      "key": "electric",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/genesect/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/genesect/",
+        "label": "Shared type panel for independently named form: electric"
+      }
+    },
+    {
+      "id": 649,
+      "species": "Genesect",
+      "key": "ice",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/genesect/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/genesect/",
+        "label": "Shared type panel for independently named form: ice"
+      }
+    },
+    {
+      "id": 649,
+      "species": "Genesect",
+      "key": "water",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/genesect/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/genesect/",
+        "label": "Shared type panel for independently named form: water"
+      }
+    },
+    {
+      "id": 649,
+      "species": "Genesect",
+      "key": "fire",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/genesect/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/genesect/",
+        "label": "Shared type panel for independently named form: fire"
+      }
+    },
+    {
+      "id": 658,
+      "species": "Greninja",
+      "key": "ash",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/greninja/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sm/658.shtml",
+        "label": "Shared type panel for independently named form: ash"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "ocean pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: ocean pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "archipelago pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: archipelago pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "river pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: river pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "tundra pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: tundra pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "fancy pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: fancy pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "elegant pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: elegant pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "high plains pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: high plains pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "marine pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: marine pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "modern pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: modern pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "sun pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: sun pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "jungle pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: jungle pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "icy snow pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: icy snow pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "continental pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: continental pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "sandstorm pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: sandstorm pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "poke ball pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: poke ball pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "polar pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: polar pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "monsoon pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: monsoon pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "garden pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: garden pattern"
+      }
+    },
+    {
+      "id": 666,
+      "species": "Vivillon",
+      "key": "savanna pattern",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/vivillon/",
+        "label": "Shared type panel for independently named form: savanna pattern"
+      }
+    },
+    {
+      "id": 668,
+      "species": "Pyroar",
+      "key": "female",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pyroar/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/pyroar/",
+        "label": "Shared type panel for independently named form: female"
+      }
+    },
+    {
+      "id": 669,
+      "species": "Flabébé",
+      "key": "yellow flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/flabebe/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/flabebe/",
+        "label": "Shared type panel for independently named form: yellow flower"
+      }
+    },
+    {
+      "id": 669,
+      "species": "Flabébé",
+      "key": "white flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/flabebe/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/flabebe/",
+        "label": "Shared type panel for independently named form: white flower"
+      }
+    },
+    {
+      "id": 669,
+      "species": "Flabébé",
+      "key": "blue flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/flabebe/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/flabebe/",
+        "label": "Shared type panel for independently named form: blue flower"
+      }
+    },
+    {
+      "id": 669,
+      "species": "Flabébé",
+      "key": "orange flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/flabebe/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/flabebe/",
+        "label": "Shared type panel for independently named form: orange flower"
+      }
+    },
+    {
+      "id": 670,
+      "species": "Floette",
+      "key": "yellow flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/floette/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/floette/",
+        "label": "Shared type panel for independently named form: yellow flower"
+      }
+    },
+    {
+      "id": 670,
+      "species": "Floette",
+      "key": "blue flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/floette/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/floette/",
+        "label": "Shared type panel for independently named form: blue flower"
+      }
+    },
+    {
+      "id": 670,
+      "species": "Floette",
+      "key": "white flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/floette/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/floette/",
+        "label": "Shared type panel for independently named form: white flower"
+      }
+    },
+    {
+      "id": 670,
+      "species": "Floette",
+      "key": "orange flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/floette/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/floette/",
+        "label": "Shared type panel for independently named form: orange flower"
+      }
+    },
+    {
+      "id": 670,
+      "species": "Floette",
+      "key": "eternal flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/floette/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/floette/",
+        "label": "Shared type panel for independently named form: eternal flower"
+      }
+    },
+    {
+      "id": 671,
+      "species": "Florges",
+      "key": "yellow flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/florges/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/florges/",
+        "label": "Shared type panel for independently named form: yellow flower"
+      }
+    },
+    {
+      "id": 671,
+      "species": "Florges",
+      "key": "white flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/florges/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/florges/",
+        "label": "Shared type panel for independently named form: white flower"
+      }
+    },
+    {
+      "id": 671,
+      "species": "Florges",
+      "key": "blue flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/florges/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/florges/",
+        "label": "Shared type panel for independently named form: blue flower"
+      }
+    },
+    {
+      "id": 671,
+      "species": "Florges",
+      "key": "orange flower",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/florges/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/florges/",
+        "label": "Shared type panel for independently named form: orange flower"
+      }
+    },
+    {
+      "id": 676,
+      "species": "Furfrou",
+      "key": "star trim",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Shared type panel for independently named form: star trim"
+      }
+    },
+    {
+      "id": 676,
+      "species": "Furfrou",
+      "key": "matron trim",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Shared type panel for independently named form: matron trim"
+      }
+    },
+    {
+      "id": 676,
+      "species": "Furfrou",
+      "key": "pharaoh trim",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Shared type panel for independently named form: pharaoh trim"
+      }
+    },
+    {
+      "id": 676,
+      "species": "Furfrou",
+      "key": "diamond trim",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Shared type panel for independently named form: diamond trim"
+      }
+    },
+    {
+      "id": 676,
+      "species": "Furfrou",
+      "key": "la reine trim",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Shared type panel for independently named form: la reine trim"
+      }
+    },
+    {
+      "id": 676,
+      "species": "Furfrou",
+      "key": "dandy trim",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Shared type panel for independently named form: dandy trim"
+      }
+    },
+    {
+      "id": 676,
+      "species": "Furfrou",
+      "key": "debutante trim",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Shared type panel for independently named form: debutante trim"
+      }
+    },
+    {
+      "id": 676,
+      "species": "Furfrou",
+      "key": "kabuki trim",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Shared type panel for independently named form: kabuki trim"
+      }
+    },
+    {
+      "id": 676,
+      "species": "Furfrou",
+      "key": "heart trim",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/furfrou/",
+        "label": "Shared type panel for independently named form: heart trim"
+      }
+    },
+    {
+      "id": 678,
+      "species": "Meowstic",
+      "key": "female",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/meowstic/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/meowstic/",
+        "label": "Shared type panel for independently named form: female"
+      }
+    },
+    {
+      "id": 681,
+      "species": "Aegislash",
+      "key": "blade",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/aegislash/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/aegislash/",
+        "label": "Shared type panel for independently named form: blade"
+      }
+    },
+    {
+      "id": 710,
+      "species": "Pumpkaboo",
+      "key": "large size",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pumpkaboo/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/pumpkaboo/",
+        "label": "Shared type panel for independently named form: large size"
+      }
+    },
+    {
+      "id": 710,
+      "species": "Pumpkaboo",
+      "key": "average size",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pumpkaboo/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/pumpkaboo/",
+        "label": "Shared type panel for independently named form: average size"
+      }
+    },
+    {
+      "id": 710,
+      "species": "Pumpkaboo",
+      "key": "small size",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pumpkaboo/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/pumpkaboo/",
+        "label": "Shared type panel for independently named form: small size"
+      }
+    },
+    {
+      "id": 710,
+      "species": "Pumpkaboo",
+      "key": "super size",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/pumpkaboo/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/pumpkaboo/",
+        "label": "Shared type panel for independently named form: super size"
+      }
+    },
+    {
+      "id": 711,
+      "species": "Gourgeist",
+      "key": "large size",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/gourgeist/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/gourgeist/",
+        "label": "Shared type panel for independently named form: large size"
+      }
+    },
+    {
+      "id": 711,
+      "species": "Gourgeist",
+      "key": "average size",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/gourgeist/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/gourgeist/",
+        "label": "Shared type panel for independently named form: average size"
+      }
+    },
+    {
+      "id": 711,
+      "species": "Gourgeist",
+      "key": "small size",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/gourgeist/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/gourgeist/",
+        "label": "Shared type panel for independently named form: small size"
+      }
+    },
+    {
+      "id": 711,
+      "species": "Gourgeist",
+      "key": "super size",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/gourgeist/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/gourgeist/",
+        "label": "Shared type panel for independently named form: super size"
+      }
+    },
+    {
+      "id": 718,
+      "species": "Zygarde",
+      "key": "10%",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/zygarde/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/zygarde/",
+        "label": "Shared type panel for independently named form: 10%"
+      }
+    },
+    {
+      "id": 718,
+      "species": "Zygarde",
+      "key": "complete",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/zygarde/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/zygarde/",
+        "label": "Shared type panel for independently named form: complete"
+      }
+    },
+    {
+      "id": 745,
+      "species": "Lycanroc",
+      "key": "dusk",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/lycanroc/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/lycanroc/",
+        "label": "Shared type panel for independently named form: dusk"
+      }
+    },
+    {
+      "id": 745,
+      "species": "Lycanroc",
+      "key": "midnight",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/lycanroc/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/lycanroc/",
+        "label": "Shared type panel for independently named form: midnight"
+      }
+    },
+    {
+      "id": 746,
+      "species": "Wishiwashi",
+      "key": "school",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-swsh/wishiwashi/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/wishiwashi/",
+        "label": "Shared type panel for independently named form: school"
+      }
+    },
+    {
+      "id": 774,
+      "species": "Minior",
+      "key": "yellow core",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Shared type panel for independently named form: yellow core"
+      }
+    },
+    {
+      "id": 774,
+      "species": "Minior",
+      "key": "orange core",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Shared type panel for independently named form: orange core"
+      }
+    },
+    {
+      "id": 774,
+      "species": "Minior",
+      "key": "green core",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Shared type panel for independently named form: green core"
+      }
+    },
+    {
+      "id": 774,
+      "species": "Minior",
+      "key": "red core",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Shared type panel for independently named form: red core"
+      }
+    },
+    {
+      "id": 774,
+      "species": "Minior",
+      "key": "violet core",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Shared type panel for independently named form: violet core"
+      }
+    },
+    {
+      "id": 774,
+      "species": "Minior",
+      "key": "blue core",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Shared type panel for independently named form: blue core"
+      }
+    },
+    {
+      "id": 774,
+      "species": "Minior",
+      "key": "indigo core",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Shared type panel for independently named form: indigo core"
+      }
+    },
+    {
+      "id": 774,
+      "species": "Minior",
+      "key": "core",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Shared type panel for independently named form: core"
+      }
+    },
+    {
+      "id": 774,
+      "species": "Minior",
+      "key": "meteor",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/minior/",
+        "label": "Shared type panel for independently named form: meteor"
+      }
+    },
+    {
+      "id": 778,
+      "species": "Mimikyu",
+      "key": "busted",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/mimikyu/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/mimikyu/",
+        "label": "Shared type panel for independently named form: busted"
+      }
+    },
+    {
+      "id": 801,
+      "species": "Magearna",
+      "key": "original color",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/magearna/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/magearna/",
+        "label": "Shared type panel for independently named form: original color"
+      }
+    },
+    {
+      "id": 845,
+      "species": "Cramorant",
+      "key": "gulping",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/cramorant/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/cramorant/",
+        "label": "Shared type panel for independently named form: gulping"
+      }
+    },
+    {
+      "id": 845,
+      "species": "Cramorant",
+      "key": "gorging",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/cramorant/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/cramorant/",
+        "label": "Shared type panel for independently named form: gorging"
+      }
+    },
+    {
+      "id": 849,
+      "species": "Toxtricity",
+      "key": "low key",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/toxtricity/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/toxtricity/",
+        "label": "Shared type panel for independently named form: low key"
+      }
+    },
+    {
+      "id": 854,
+      "species": "Sinistea",
+      "key": "antique",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/sinistea/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/sinistea/",
+        "label": "Shared type panel for independently named form: antique"
+      }
+    },
+    {
+      "id": 855,
+      "species": "Polteageist",
+      "key": "antique",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/polteageist/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/polteageist/",
+        "label": "Shared type panel for independently named form: antique"
+      }
+    },
+    {
+      "id": 875,
+      "species": "Eiscue",
+      "key": "noice face",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/eiscue/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/eiscue/",
+        "label": "Shared type panel for independently named form: noice face"
+      }
+    },
+    {
+      "id": 876,
+      "species": "Indeedee",
+      "key": "female",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/indeedee/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/indeedee/",
+        "label": "Shared type panel for independently named form: female"
+      }
+    },
+    {
+      "id": 877,
+      "species": "Morpeko",
+      "key": "hangry mode",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/morpeko/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/morpeko/",
+        "label": "Shared type panel for independently named form: hangry mode"
+      }
+    },
+    {
+      "id": 890,
+      "species": "Eternatus",
+      "key": "eternamax",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/eternatus/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-swsh/eternatus/",
+        "label": "Shared type panel for independently named form: eternamax"
+      }
+    },
+    {
+      "id": 893,
+      "species": "Zarude",
+      "key": "dada",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/zarude/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/zarude/",
+        "label": "Shared type panel for independently named form: dada"
+      }
+    },
+    {
+      "id": 902,
+      "species": "Basculegion",
+      "key": "female",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/basculegion/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/basculegion/",
+        "label": "Shared type panel for independently named form: female"
+      }
+    },
+    {
+      "id": 905,
+      "species": "Enamorus",
+      "key": "therian",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/enamorus/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/enamorus/",
+        "label": "Shared type panel for independently named form: therian"
+      }
+    },
+    {
+      "id": 916,
+      "species": "Oinkologne",
+      "key": "female",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/oinkologne/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/oinkologne/",
+        "label": "Shared type panel for independently named form: female"
+      }
+    },
+    {
+      "id": 925,
+      "species": "Maushold",
+      "key": "family of four",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/maushold/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/maushold/",
+        "label": "Shared type panel for independently named form: family of four"
+      }
+    },
+    {
+      "id": 931,
+      "species": "Squawkabilly",
+      "key": "blue plumage",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/squawkabilly/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/squawkabilly/",
+        "label": "Shared type panel for independently named form: blue plumage"
+      }
+    },
+    {
+      "id": 931,
+      "species": "Squawkabilly",
+      "key": "white plumage",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/squawkabilly/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/squawkabilly/",
+        "label": "Shared type panel for independently named form: white plumage"
+      }
+    },
+    {
+      "id": 931,
+      "species": "Squawkabilly",
+      "key": "yellow plumage",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/squawkabilly/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/squawkabilly/",
+        "label": "Shared type panel for independently named form: yellow plumage"
+      }
+    },
+    {
+      "id": 964,
+      "species": "Palafin",
+      "key": "hero",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/palafin/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/palafin/",
+        "label": "Shared type panel for independently named form: hero"
+      }
+    },
+    {
+      "id": 978,
+      "species": "Tatsugiri",
+      "key": "droopy",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/tatsugiri/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/tatsugiri/",
+        "label": "Shared type panel for independently named form: droopy"
+      }
+    },
+    {
+      "id": 978,
+      "species": "Tatsugiri",
+      "key": "stretchy",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/tatsugiri/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/tatsugiri/",
+        "label": "Shared type panel for independently named form: stretchy"
+      }
+    },
+    {
+      "id": 982,
+      "species": "Dudunsparce",
+      "key": "three segment",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/dudunsparce/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/dudunsparce/",
+        "label": "Shared type panel for independently named form: three segment"
+      }
+    },
+    {
+      "id": 999,
+      "species": "Gimmighoul",
+      "key": "roaming",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/gimmighoul/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/gimmighoul/",
+        "label": "Shared type panel for independently named form: roaming"
+      }
+    },
+    {
+      "id": 1007,
+      "species": "Koraidon",
+      "key": "limited build",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/koraidon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/koraidon/",
+        "label": "Shared type panel for independently named form: limited build"
+      }
+    },
+    {
+      "id": 1007,
+      "species": "Koraidon",
+      "key": "gliding build",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/koraidon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/koraidon/",
+        "label": "Shared type panel for independently named form: gliding build"
+      }
+    },
+    {
+      "id": 1007,
+      "species": "Koraidon",
+      "key": "sprinting build",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/koraidon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/koraidon/",
+        "label": "Shared type panel for independently named form: sprinting build"
+      }
+    },
+    {
+      "id": 1008,
+      "species": "Miraidon",
+      "key": "low power mode",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/miraidon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/miraidon/",
+        "label": "Shared type panel for independently named form: low power mode"
+      }
+    },
+    {
+      "id": 1008,
+      "species": "Miraidon",
+      "key": "glide mode",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/miraidon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/miraidon/",
+        "label": "Shared type panel for independently named form: glide mode"
+      }
+    },
+    {
+      "id": 1008,
+      "species": "Miraidon",
+      "key": "drive mode",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/miraidon/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/miraidon/",
+        "label": "Shared type panel for independently named form: drive mode"
+      }
+    },
+    {
+      "id": 1024,
+      "species": "Terapagos",
+      "key": "terastal",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/terapagos/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/terapagos/",
+        "label": "Shared type panel for independently named form: terastal"
+      }
+    },
+    {
+      "id": 1024,
+      "species": "Terapagos",
+      "key": "stellar",
+      "before": {
+        "url": "https://www.serebii.net/pokedex-sv/terapagos/",
+        "label": "Unqualified shared species type panel"
+      },
+      "after": {
+        "url": "https://www.serebii.net/pokedex-sv/terapagos/",
+        "label": "Shared type panel for independently named form: stellar"
+      }
+    }
+  ],
+  "unresolved_type_joins": []
+}

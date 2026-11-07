@@ -1,0 +1,1175 @@
+{
+  "source": "https://pokemondb.net/pokedex/all",
+  "investigation_started_date": "2026-11-06",
+  "png_validation_completed_utc": "2026-11-06T23:59:38.385572+00:00",
+  "catalogue_species": 1025,
+  "catalogue_stat_rows": 1261,
+  "home_species_with_validated_original_candidate": 1025,
+  "home_missing_species": [],
+  "global_link_species": 807,
+  "global_link_missing_species": [
+    {
+      "id": 808,
+      "name": "Meltan",
+      "path": "/pokedex/meltan"
+    },
+    {
+      "id": 809,
+      "name": "Melmetal",
+      "path": "/pokedex/melmetal"
+    },
+    {
+      "id": 810,
+      "name": "Grookey",
+      "path": "/pokedex/grookey"
+    },
+    {
+      "id": 811,
+      "name": "Thwackey",
+      "path": "/pokedex/thwackey"
+    },
+    {
+      "id": 812,
+      "name": "Rillaboom",
+      "path": "/pokedex/rillaboom"
+    },
+    {
+      "id": 813,
+      "name": "Scorbunny",
+      "path": "/pokedex/scorbunny"
+    },
+    {
+      "id": 814,
+      "name": "Raboot",
+      "path": "/pokedex/raboot"
+    },
+    {
+      "id": 815,
+      "name": "Cinderace",
+      "path": "/pokedex/cinderace"
+    },
+    {
+      "id": 816,
+      "name": "Sobble",
+      "path": "/pokedex/sobble"
+    },
+    {
+      "id": 817,
+      "name": "Drizzile",
+      "path": "/pokedex/drizzile"
+    },
+    {
+      "id": 818,
+      "name": "Inteleon",
+      "path": "/pokedex/inteleon"
+    },
+    {
+      "id": 819,
+      "name": "Skwovet",
+      "path": "/pokedex/skwovet"
+    },
+    {
+      "id": 820,
+      "name": "Greedent",
+      "path": "/pokedex/greedent"
+    },
+    {
+      "id": 821,
+      "name": "Rookidee",
+      "path": "/pokedex/rookidee"
+    },
+    {
+      "id": 822,
+      "name": "Corvisquire",
+      "path": "/pokedex/corvisquire"
+    },
+    {
+      "id": 823,
+      "name": "Corviknight",
+      "path": "/pokedex/corviknight"
+    },
+    {
+      "id": 824,
+      "name": "Blipbug",
+      "path": "/pokedex/blipbug"
+    },
+    {
+      "id": 825,
+      "name": "Dottler",
+      "path": "/pokedex/dottler"
+    },
+    {
+      "id": 826,
+      "name": "Orbeetle",
+      "path": "/pokedex/orbeetle"
+    },
+    {
+      "id": 827,
+      "name": "Nickit",
+      "path": "/pokedex/nickit"
+    },
+    {
+      "id": 828,
+      "name": "Thievul",
+      "path": "/pokedex/thievul"
+    },
+    {
+      "id": 829,
+      "name": "Gossifleur",
+      "path": "/pokedex/gossifleur"
+    },
+    {
+      "id": 830,
+      "name": "Eldegoss",
+      "path": "/pokedex/eldegoss"
+    },
+    {
+      "id": 831,
+      "name": "Wooloo",
+      "path": "/pokedex/wooloo"
+    },
+    {
+      "id": 832,
+      "name": "Dubwool",
+      "path": "/pokedex/dubwool"
+    },
+    {
+      "id": 833,
+      "name": "Chewtle",
+      "path": "/pokedex/chewtle"
+    },
+    {
+      "id": 834,
+      "name": "Drednaw",
+      "path": "/pokedex/drednaw"
+    },
+    {
+      "id": 835,
+      "name": "Yamper",
+      "path": "/pokedex/yamper"
+    },
+    {
+      "id": 836,
+      "name": "Boltund",
+      "path": "/pokedex/boltund"
+    },
+    {
+      "id": 837,
+      "name": "Rolycoly",
+      "path": "/pokedex/rolycoly"
+    },
+    {
+      "id": 838,
+      "name": "Carkol",
+      "path": "/pokedex/carkol"
+    },
+    {
+      "id": 839,
+      "name": "Coalossal",
+      "path": "/pokedex/coalossal"
+    },
+    {
+      "id": 840,
+      "name": "Applin",
+      "path": "/pokedex/applin"
+    },
+    {
+      "id": 841,
+      "name": "Flapple",
+      "path": "/pokedex/flapple"
+    },
+    {
+      "id": 842,
+      "name": "Appletun",
+      "path": "/pokedex/appletun"
+    },
+    {
+      "id": 843,
+      "name": "Silicobra",
+      "path": "/pokedex/silicobra"
+    },
+    {
+      "id": 844,
+      "name": "Sandaconda",
+      "path": "/pokedex/sandaconda"
+    },
+    {
+      "id": 845,
+      "name": "Cramorant",
+      "path": "/pokedex/cramorant"
+    },
+    {
+      "id": 846,
+      "name": "Arrokuda",
+      "path": "/pokedex/arrokuda"
+    },
+    {
+      "id": 847,
+      "name": "Barraskewda",
+      "path": "/pokedex/barraskewda"
+    },
+    {
+      "id": 848,
+      "name": "Toxel",
+      "path": "/pokedex/toxel"
+    },
+    {
+      "id": 849,
+      "name": "Toxtricity",
+      "path": "/pokedex/toxtricity"
+    },
+    {
+      "id": 850,
+      "name": "Sizzlipede",
+      "path": "/pokedex/sizzlipede"
+    },
+    {
+      "id": 851,
+      "name": "Centiskorch",
+      "path": "/pokedex/centiskorch"
+    },
+    {
+      "id": 852,
+      "name": "Clobbopus",
+      "path": "/pokedex/clobbopus"
+    },
+    {
+      "id": 853,
+      "name": "Grapploct",
+      "path": "/pokedex/grapploct"
+    },
+    {
+      "id": 854,
+      "name": "Sinistea",
+      "path": "/pokedex/sinistea"
+    },
+    {
+      "id": 855,
+      "name": "Polteageist",
+      "path": "/pokedex/polteageist"
+    },
+    {
+      "id": 856,
+      "name": "Hatenna",
+      "path": "/pokedex/hatenna"
+    },
+    {
+      "id": 857,
+      "name": "Hattrem",
+      "path": "/pokedex/hattrem"
+    },
+    {
+      "id": 858,
+      "name": "Hatterene",
+      "path": "/pokedex/hatterene"
+    },
+    {
+      "id": 859,
+      "name": "Impidimp",
+      "path": "/pokedex/impidimp"
+    },
+    {
+      "id": 860,
+      "name": "Morgrem",
+      "path": "/pokedex/morgrem"
+    },
+    {
+      "id": 861,
+      "name": "Grimmsnarl",
+      "path": "/pokedex/grimmsnarl"
+    },
+    {
+      "id": 862,
+      "name": "Obstagoon",
+      "path": "/pokedex/obstagoon"
+    },
+    {
+      "id": 863,
+      "name": "Perrserker",
+      "path": "/pokedex/perrserker"
+    },
+    {
+      "id": 864,
+      "name": "Cursola",
+      "path": "/pokedex/cursola"
+    },
+    {
+      "id": 865,
+      "name": "Sirfetch'd",
+      "path": "/pokedex/sirfetchd"
+    },
+    {
+      "id": 866,
+      "name": "Mr. Rime",
+      "path": "/pokedex/mr-rime"
+    },
+    {
+      "id": 867,
+      "name": "Runerigus",
+      "path": "/pokedex/runerigus"
+    },
+    {
+      "id": 868,
+      "name": "Milcery",
+      "path": "/pokedex/milcery"
+    },
+    {
+      "id": 869,
+      "name": "Alcremie",
+      "path": "/pokedex/alcremie"
+    },
+    {
+      "id": 870,
+      "name": "Falinks",
+      "path": "/pokedex/falinks"
+    },
+    {
+      "id": 871,
+      "name": "Pincurchin",
+      "path": "/pokedex/pincurchin"
+    },
+    {
+      "id": 872,
+      "name": "Snom",
+      "path": "/pokedex/snom"
+    },
+    {
+      "id": 873,
+      "name": "Frosmoth",
+      "path": "/pokedex/frosmoth"
+    },
+    {
+      "id": 874,
+      "name": "Stonjourner",
+      "path": "/pokedex/stonjourner"
+    },
+    {
+      "id": 875,
+      "name": "Eiscue",
+      "path": "/pokedex/eiscue"
+    },
+    {
+      "id": 876,
+      "name": "Indeedee",
+      "path": "/pokedex/indeedee"
+    },
+    {
+      "id": 877,
+      "name": "Morpeko",
+      "path": "/pokedex/morpeko"
+    },
+    {
+      "id": 878,
+      "name": "Cufant",
+      "path": "/pokedex/cufant"
+    },
+    {
+      "id": 879,
+      "name": "Copperajah",
+      "path": "/pokedex/copperajah"
+    },
+    {
+      "id": 880,
+      "name": "Dracozolt",
+      "path": "/pokedex/dracozolt"
+    },
+    {
+      "id": 881,
+      "name": "Arctozolt",
+      "path": "/pokedex/arctozolt"
+    },
+    {
+      "id": 882,
+      "name": "Dracovish",
+      "path": "/pokedex/dracovish"
+    },
+    {
+      "id": 883,
+      "name": "Arctovish",
+      "path": "/pokedex/arctovish"
+    },
+    {
+      "id": 884,
+      "name": "Duraludon",
+      "path": "/pokedex/duraludon"
+    },
+    {
+      "id": 885,
+      "name": "Dreepy",
+      "path": "/pokedex/dreepy"
+    },
+    {
+      "id": 886,
+      "name": "Drakloak",
+      "path": "/pokedex/drakloak"
+    },
+    {
+      "id": 887,
+      "name": "Dragapult",
+      "path": "/pokedex/dragapult"
+    },
+    {
+      "id": 888,
+      "name": "Zacian",
+      "path": "/pokedex/zacian"
+    },
+    {
+      "id": 889,
+      "name": "Zamazenta",
+      "path": "/pokedex/zamazenta"
+    },
+    {
+      "id": 890,
+      "name": "Eternatus",
+      "path": "/pokedex/eternatus"
+    },
+    {
+      "id": 891,
+      "name": "Kubfu",
+      "path": "/pokedex/kubfu"
+    },
+    {
+      "id": 892,
+      "name": "Urshifu",
+      "path": "/pokedex/urshifu"
+    },
+    {
+      "id": 893,
+      "name": "Zarude",
+      "path": "/pokedex/zarude"
+    },
+    {
+      "id": 894,
+      "name": "Regieleki",
+      "path": "/pokedex/regieleki"
+    },
+    {
+      "id": 895,
+      "name": "Regidrago",
+      "path": "/pokedex/regidrago"
+    },
+    {
+      "id": 896,
+      "name": "Glastrier",
+      "path": "/pokedex/glastrier"
+    },
+    {
+      "id": 897,
+      "name": "Spectrier",
+      "path": "/pokedex/spectrier"
+    },
+    {
+      "id": 898,
+      "name": "Calyrex",
+      "path": "/pokedex/calyrex"
+    },
+    {
+      "id": 899,
+      "name": "Wyrdeer",
+      "path": "/pokedex/wyrdeer"
+    },
+    {
+      "id": 900,
+      "name": "Kleavor",
+      "path": "/pokedex/kleavor"
+    },
+    {
+      "id": 901,
+      "name": "Ursaluna",
+      "path": "/pokedex/ursaluna"
+    },
+    {
+      "id": 902,
+      "name": "Basculegion",
+      "path": "/pokedex/basculegion"
+    },
+    {
+      "id": 903,
+      "name": "Sneasler",
+      "path": "/pokedex/sneasler"
+    },
+    {
+      "id": 904,
+      "name": "Overqwil",
+      "path": "/pokedex/overqwil"
+    },
+    {
+      "id": 905,
+      "name": "Enamorus",
+      "path": "/pokedex/enamorus"
+    },
+    {
+      "id": 906,
+      "name": "Sprigatito",
+      "path": "/pokedex/sprigatito"
+    },
+    {
+      "id": 907,
+      "name": "Floragato",
+      "path": "/pokedex/floragato"
+    },
+    {
+      "id": 908,
+      "name": "Meowscarada",
+      "path": "/pokedex/meowscarada"
+    },
+    {
+      "id": 909,
+      "name": "Fuecoco",
+      "path": "/pokedex/fuecoco"
+    },
+    {
+      "id": 910,
+      "name": "Crocalor",
+      "path": "/pokedex/crocalor"
+    },
+    {
+      "id": 911,
+      "name": "Skeledirge",
+      "path": "/pokedex/skeledirge"
+    },
+    {
+      "id": 912,
+      "name": "Quaxly",
+      "path": "/pokedex/quaxly"
+    },
+    {
+      "id": 913,
+      "name": "Quaxwell",
+      "path": "/pokedex/quaxwell"
+    },
+    {
+      "id": 914,
+      "name": "Quaquaval",
+      "path": "/pokedex/quaquaval"
+    },
+    {
+      "id": 915,
+      "name": "Lechonk",
+      "path": "/pokedex/lechonk"
+    },
+    {
+      "id": 916,
+      "name": "Oinkologne",
+      "path": "/pokedex/oinkologne"
+    },
+    {
+      "id": 917,
+      "name": "Tarountula",
+      "path": "/pokedex/tarountula"
+    },
+    {
+      "id": 918,
+      "name": "Spidops",
+      "path": "/pokedex/spidops"
+    },
+    {
+      "id": 919,
+      "name": "Nymble",
+      "path": "/pokedex/nymble"
+    },
+    {
+      "id": 920,
+      "name": "Lokix",
+      "path": "/pokedex/lokix"
+    },
+    {
+      "id": 921,
+      "name": "Pawmi",
+      "path": "/pokedex/pawmi"
+    },
+    {
+      "id": 922,
+      "name": "Pawmo",
+      "path": "/pokedex/pawmo"
+    },
+    {
+      "id": 923,
+      "name": "Pawmot",
+      "path": "/pokedex/pawmot"
+    },
+    {
+      "id": 924,
+      "name": "Tandemaus",
+      "path": "/pokedex/tandemaus"
+    },
+    {
+      "id": 925,
+      "name": "Maushold",
+      "path": "/pokedex/maushold"
+    },
+    {
+      "id": 926,
+      "name": "Fidough",
+      "path": "/pokedex/fidough"
+    },
+    {
+      "id": 927,
+      "name": "Dachsbun",
+      "path": "/pokedex/dachsbun"
+    },
+    {
+      "id": 928,
+      "name": "Smoliv",
+      "path": "/pokedex/smoliv"
+    },
+    {
+      "id": 929,
+      "name": "Dolliv",
+      "path": "/pokedex/dolliv"
+    },
+    {
+      "id": 930,
+      "name": "Arboliva",
+      "path": "/pokedex/arboliva"
+    },
+    {
+      "id": 931,
+      "name": "Squawkabilly",
+      "path": "/pokedex/squawkabilly"
+    },
+    {
+      "id": 932,
+      "name": "Nacli",
+      "path": "/pokedex/nacli"
+    },
+    {
+      "id": 933,
+      "name": "Naclstack",
+      "path": "/pokedex/naclstack"
+    },
+    {
+      "id": 934,
+      "name": "Garganacl",
+      "path": "/pokedex/garganacl"
+    },
+    {
+      "id": 935,
+      "name": "Charcadet",
+      "path": "/pokedex/charcadet"
+    },
+    {
+      "id": 936,
+      "name": "Armarouge",
+      "path": "/pokedex/armarouge"
+    },
+    {
+      "id": 937,
+      "name": "Ceruledge",
+      "path": "/pokedex/ceruledge"
+    },
+    {
+      "id": 938,
+      "name": "Tadbulb",
+      "path": "/pokedex/tadbulb"
+    },
+    {
+      "id": 939,
+      "name": "Bellibolt",
+      "path": "/pokedex/bellibolt"
+    },
+    {
+      "id": 940,
+      "name": "Wattrel",
+      "path": "/pokedex/wattrel"
+    },
+    {
+      "id": 941,
+      "name": "Kilowattrel",
+      "path": "/pokedex/kilowattrel"
+    },
+    {
+      "id": 942,
+      "name": "Maschiff",
+      "path": "/pokedex/maschiff"
+    },
+    {
+      "id": 943,
+      "name": "Mabosstiff",
+      "path": "/pokedex/mabosstiff"
+    },
+    {
+      "id": 944,
+      "name": "Shroodle",
+      "path": "/pokedex/shroodle"
+    },
+    {
+      "id": 945,
+      "name": "Grafaiai",
+      "path": "/pokedex/grafaiai"
+    },
+    {
+      "id": 946,
+      "name": "Bramblin",
+      "path": "/pokedex/bramblin"
+    },
+    {
+      "id": 947,
+      "name": "Brambleghast",
+      "path": "/pokedex/brambleghast"
+    },
+    {
+      "id": 948,
+      "name": "Toedscool",
+      "path": "/pokedex/toedscool"
+    },
+    {
+      "id": 949,
+      "name": "Toedscruel",
+      "path": "/pokedex/toedscruel"
+    },
+    {
+      "id": 950,
+      "name": "Klawf",
+      "path": "/pokedex/klawf"
+    },
+    {
+      "id": 951,
+      "name": "Capsakid",
+      "path": "/pokedex/capsakid"
+    },
+    {
+      "id": 952,
+      "name": "Scovillain",
+      "path": "/pokedex/scovillain"
+    },
+    {
+      "id": 953,
+      "name": "Rellor",
+      "path": "/pokedex/rellor"
+    },
+    {
+      "id": 954,
+      "name": "Rabsca",
+      "path": "/pokedex/rabsca"
+    },
+    {
+      "id": 955,
+      "name": "Flittle",
+      "path": "/pokedex/flittle"
+    },
+    {
+      "id": 956,
+      "name": "Espathra",
+      "path": "/pokedex/espathra"
+    },
+    {
+      "id": 957,
+      "name": "Tinkatink",
+      "path": "/pokedex/tinkatink"
+    },
+    {
+      "id": 958,
+      "name": "Tinkatuff",
+      "path": "/pokedex/tinkatuff"
+    },
+    {
+      "id": 959,
+      "name": "Tinkaton",
+      "path": "/pokedex/tinkaton"
+    },
+    {
+      "id": 960,
+      "name": "Wiglett",
+      "path": "/pokedex/wiglett"
+    },
+    {
+      "id": 961,
+      "name": "Wugtrio",
+      "path": "/pokedex/wugtrio"
+    },
+    {
+      "id": 962,
+      "name": "Bombirdier",
+      "path": "/pokedex/bombirdier"
+    },
+    {
+      "id": 963,
+      "name": "Finizen",
+      "path": "/pokedex/finizen"
+    },
+    {
+      "id": 964,
+      "name": "Palafin",
+      "path": "/pokedex/palafin"
+    },
+    {
+      "id": 965,
+      "name": "Varoom",
+      "path": "/pokedex/varoom"
+    },
+    {
+      "id": 966,
+      "name": "Revavroom",
+      "path": "/pokedex/revavroom"
+    },
+    {
+      "id": 967,
+      "name": "Cyclizar",
+      "path": "/pokedex/cyclizar"
+    },
+    {
+      "id": 968,
+      "name": "Orthworm",
+      "path": "/pokedex/orthworm"
+    },
+    {
+      "id": 969,
+      "name": "Glimmet",
+      "path": "/pokedex/glimmet"
+    },
+    {
+      "id": 970,
+      "name": "Glimmora",
+      "path": "/pokedex/glimmora"
+    },
+    {
+      "id": 971,
+      "name": "Greavard",
+      "path": "/pokedex/greavard"
+    },
+    {
+      "id": 972,
+      "name": "Houndstone",
+      "path": "/pokedex/houndstone"
+    },
+    {
+      "id": 973,
+      "name": "Flamigo",
+      "path": "/pokedex/flamigo"
+    },
+    {
+      "id": 974,
+      "name": "Cetoddle",
+      "path": "/pokedex/cetoddle"
+    },
+    {
+      "id": 975,
+      "name": "Cetitan",
+      "path": "/pokedex/cetitan"
+    },
+    {
+      "id": 976,
+      "name": "Veluza",
+      "path": "/pokedex/veluza"
+    },
+    {
+      "id": 977,
+      "name": "Dondozo",
+      "path": "/pokedex/dondozo"
+    },
+    {
+      "id": 978,
+      "name": "Tatsugiri",
+      "path": "/pokedex/tatsugiri"
+    },
+    {
+      "id": 979,
+      "name": "Annihilape",
+      "path": "/pokedex/annihilape"
+    },
+    {
+      "id": 980,
+      "name": "Clodsire",
+      "path": "/pokedex/clodsire"
+    },
+    {
+      "id": 981,
+      "name": "Farigiraf",
+      "path": "/pokedex/farigiraf"
+    },
+    {
+      "id": 982,
+      "name": "Dudunsparce",
+      "path": "/pokedex/dudunsparce"
+    },
+    {
+      "id": 983,
+      "name": "Kingambit",
+      "path": "/pokedex/kingambit"
+    },
+    {
+      "id": 984,
+      "name": "Great Tusk",
+      "path": "/pokedex/great-tusk"
+    },
+    {
+      "id": 985,
+      "name": "Scream Tail",
+      "path": "/pokedex/scream-tail"
+    },
+    {
+      "id": 986,
+      "name": "Brute Bonnet",
+      "path": "/pokedex/brute-bonnet"
+    },
+    {
+      "id": 987,
+      "name": "Flutter Mane",
+      "path": "/pokedex/flutter-mane"
+    },
+    {
+      "id": 988,
+      "name": "Slither Wing",
+      "path": "/pokedex/slither-wing"
+    },
+    {
+      "id": 989,
+      "name": "Sandy Shocks",
+      "path": "/pokedex/sandy-shocks"
+    },
+    {
+      "id": 990,
+      "name": "Iron Treads",
+      "path": "/pokedex/iron-treads"
+    },
+    {
+      "id": 991,
+      "name": "Iron Bundle",
+      "path": "/pokedex/iron-bundle"
+    },
+    {
+      "id": 992,
+      "name": "Iron Hands",
+      "path": "/pokedex/iron-hands"
+    },
+    {
+      "id": 993,
+      "name": "Iron Jugulis",
+      "path": "/pokedex/iron-jugulis"
+    },
+    {
+      "id": 994,
+      "name": "Iron Moth",
+      "path": "/pokedex/iron-moth"
+    },
+    {
+      "id": 995,
+      "name": "Iron Thorns",
+      "path": "/pokedex/iron-thorns"
+    },
+    {
+      "id": 996,
+      "name": "Frigibax",
+      "path": "/pokedex/frigibax"
+    },
+    {
+      "id": 997,
+      "name": "Arctibax",
+      "path": "/pokedex/arctibax"
+    },
+    {
+      "id": 998,
+      "name": "Baxcalibur",
+      "path": "/pokedex/baxcalibur"
+    },
+    {
+      "id": 999,
+      "name": "Gimmighoul",
+      "path": "/pokedex/gimmighoul"
+    },
+    {
+      "id": 1000,
+      "name": "Gholdengo",
+      "path": "/pokedex/gholdengo"
+    },
+    {
+      "id": 1001,
+      "name": "Wo-Chien",
+      "path": "/pokedex/wo-chien"
+    },
+    {
+      "id": 1002,
+      "name": "Chien-Pao",
+      "path": "/pokedex/chien-pao"
+    },
+    {
+      "id": 1003,
+      "name": "Ting-Lu",
+      "path": "/pokedex/ting-lu"
+    },
+    {
+      "id": 1004,
+      "name": "Chi-Yu",
+      "path": "/pokedex/chi-yu"
+    },
+    {
+      "id": 1005,
+      "name": "Roaring Moon",
+      "path": "/pokedex/roaring-moon"
+    },
+    {
+      "id": 1006,
+      "name": "Iron Valiant",
+      "path": "/pokedex/iron-valiant"
+    },
+    {
+      "id": 1007,
+      "name": "Koraidon",
+      "path": "/pokedex/koraidon"
+    },
+    {
+      "id": 1008,
+      "name": "Miraidon",
+      "path": "/pokedex/miraidon"
+    },
+    {
+      "id": 1009,
+      "name": "Walking Wake",
+      "path": "/pokedex/walking-wake"
+    },
+    {
+      "id": 1010,
+      "name": "Iron Leaves",
+      "path": "/pokedex/iron-leaves"
+    },
+    {
+      "id": 1011,
+      "name": "Dipplin",
+      "path": "/pokedex/dipplin"
+    },
+    {
+      "id": 1012,
+      "name": "Poltchageist",
+      "path": "/pokedex/poltchageist"
+    },
+    {
+      "id": 1013,
+      "name": "Sinistcha",
+      "path": "/pokedex/sinistcha"
+    },
+    {
+      "id": 1014,
+      "name": "Okidogi",
+      "path": "/pokedex/okidogi"
+    },
+    {
+      "id": 1015,
+      "name": "Munkidori",
+      "path": "/pokedex/munkidori"
+    },
+    {
+      "id": 1016,
+      "name": "Fezandipiti",
+      "path": "/pokedex/fezandipiti"
+    },
+    {
+      "id": 1017,
+      "name": "Ogerpon",
+      "path": "/pokedex/ogerpon"
+    },
+    {
+      "id": 1018,
+      "name": "Archaludon",
+      "path": "/pokedex/archaludon"
+    },
+    {
+      "id": 1019,
+      "name": "Hydrapple",
+      "path": "/pokedex/hydrapple"
+    },
+    {
+      "id": 1020,
+      "name": "Gouging Fire",
+      "path": "/pokedex/gouging-fire"
+    },
+    {
+      "id": 1021,
+      "name": "Raging Bolt",
+      "path": "/pokedex/raging-bolt"
+    },
+    {
+      "id": 1022,
+      "name": "Iron Boulder",
+      "path": "/pokedex/iron-boulder"
+    },
+    {
+      "id": 1023,
+      "name": "Iron Crown",
+      "path": "/pokedex/iron-crown"
+    },
+    {
+      "id": 1024,
+      "name": "Terapagos",
+      "path": "/pokedex/terapagos"
+    },
+    {
+      "id": 1025,
+      "name": "Pecharunt",
+      "path": "/pokedex/pecharunt"
+    }
+  ],
+  "png_validated_count": 2606,
+  "png_failures": [],
+  "global_link_pngs": 1066,
+  "global_link_opaque_png": "https://img.pokemondb.net/artwork/vector/large/rhydon.png",
+  "home_pngs": 1540,
+  "home_png_dimensions": [
+    256,
+    256
+  ],
+  "home_all_rgba_and_transparent": true,
+  "catalogue_mega_forms": 93,
+  "home_matching_mega_forms": 48,
+  "home_missing_mega_forms": [
+    "Mega Raichu X",
+    "Mega Raichu Y",
+    "Mega Clefable",
+    "Mega Victreebel",
+    "Mega Starmie",
+    "Mega Dragonite",
+    "Mega Meganium",
+    "Mega Feraligatr",
+    "Mega Skarmory",
+    "Mega Chimecho",
+    "Mega Absol Z",
+    "Mega Staraptor",
+    "Mega Garchomp Z",
+    "Mega Lucario Z",
+    "Mega Froslass",
+    "Mega Heatran",
+    "Mega Darkrai",
+    "Mega Emboar",
+    "Mega Excadrill",
+    "Mega Scolipede",
+    "Mega Scrafty",
+    "Mega Eelektross",
+    "Mega Chandelure",
+    "Mega Golurk",
+    "Mega Chesnaught",
+    "Mega Delphox",
+    "Mega Greninja",
+    "Mega Pyroar",
+    "Mega Floette",
+    "Mega Meowstic",
+    "Mega Malamar",
+    "Mega Barbaracle",
+    "Mega Dragalge",
+    "Mega Hawlucha",
+    "Mega Zygarde",
+    "Mega Crabominable",
+    "Mega Golisopod",
+    "Mega Drampa",
+    "Mega Magearna",
+    "Mega Zeraora",
+    "Mega Falinks",
+    "Mega Scovillain",
+    "Mega Glimmora",
+    "Mega Tatsugiri",
+    "Mega Baxcalibur"
+  ],
+  "home_matching_explicit_regional_rows": 55,
+  "home_paldean_tauros_breeds": [
+    "Combat Breed",
+    "Blaze Breed",
+    "Aqua Breed"
+  ],
+  "gigantamax_sugimori_entries": 33,
+  "gigantamax_home_entries": 33,
+  "gigantamax_species": 32,
+  "original_association_counts": {
+    "Unlabelled HOME original": 872,
+    "Catalogue original is unqualified; source HOME normal variant shown (gender/cosmetic/default selection remains separate)": 113,
+    "Exact catalogue original-form label; Form/Forme spelling normalized": 40
+  }
+}

@@ -28,6 +28,13 @@ Date: 2026-11-06. Status: stage sequence and CLI refinements approved with D19 g
 
 ## Sources and precedence
 
+- 2026-11-07 unsupported non-battle depictions (D32): exclude exactly Captain Pikachu, Mr. Windychu, Ms. Waveychu, Zygarde Cell and Zygarde Core, retaining source references and reasons. Original species and other supported forms remain required. Q16 authorises one additional targeted correctness follow-up; default illustration identities remain under assessment.
+- 2026-11-07 unavailable illustrations (D31): exclude exactly Artisan Poltchageist and Masterpiece Sinistcha after confirmed source 404s and no linked illustration alternatives. Retain their evidence; arbitrary download failures remain fatal.
+- 2026-11-07 eligibility decision (D29): the user chose illustration-only entries. Include every original species and all source-linked alternate illustration PNGs; omit variations exposed only as sprites/game renders. This supersedes any earlier requirement to exhaust every canonical or raw API form regardless of illustration availability. Complete discovery/type/identity validation applies to the eligible illustrated set, with no fabricated art, substituted original picture, render fallback or guessed URLs.
+- 2026-11-07 exclusions (D30): exclude exactly Rotom Phone, Rotom Drone, Rotomi and Rotom Phone Paldea Ver., whose non-battle device illustrations lack supported types. Preserve other eligible entries and fail on unresolved metadata rather than generalising this exclusion.
+- 2026-11-07 selected source (D28): the user selected Serebii's native illustration PNGs after the fresh investigation verified every original species and the 45 newer Mega candidate files. This concludes the Pokémon Database/HOME trial as an unselected visual tier. Source integration continues on Serebii, with illustration-only eligibility now settled by D29, subject to full form/type validation, required reviews and approved commit. No JPEG conversion or source-native 3D-render default.
+- 2026-11-06 latest investigation update (D26): following source comparisons, the user requested official-looking PNG artwork for all Pokémon from Pokémon Database and replacement of the existing investigator with a fresh agent. Artwork feasibility work now follows that request; derive all-species coverage from the source and report alternate forms separately. Do not equate small icons or battle sprites with suitable full artwork, silently convert JPEGs, or claim production adoption from sample success. Earlier source attempts and their code/evidence remain historical until a provider passes the gate.
+- 2026-11-06 current source update (D25): the user explicitly switched discovery to [Serebii's National Pokédex](https://www.serebii.net/pokemon/nationalpokedex.shtml) after complete main-site access failed. This supersedes this plan's earlier official-only/main-site source constraints, including those in the historical continuation prompt. Apply existing species/form/type/artwork completeness, validation, browser-profile fetching and per-task evidence gates to Serebii. Keep historical source failures; do not repeat official-site tuning by default.
 - Current user instructions and scoped permissions govern actions. The continuation prompt is deliberately narrower than the generic skill template to preserve specific review and commit approval requirements.
 - [Brief](brief.md) governs application behavior. [Design decisions](20261106-design.md) record D01–D21 and historical alternatives; rejected proposals are not requirements.
 - This plan proposes build order, implementation details, and verification. [Log index](20261106-implementation-log.md) will locate actual work and permission records.
@@ -63,9 +70,10 @@ Engineering details to settle inside tasks: bounded HTTP concurrency/timeouts/re
 
 Suggested batch sequence: **Furfrou → Vivillon → Greedent → Dustox**. Each batch maps to exactly one existing stage, reusing its Pokémon name and unchanged task IDs. B01–B04 remain stable identifiers; the Pokémon names are the primary batch names used in scope recommendations. Batches are scope-selection conveniences, not extra tasks or goals. Implementation tasks and their two review passes run sequentially on `main`. Review-agent launches require specific approval; implementation delegation is not requested by this plan. S01 must establish both external feasibility gates before the application stages begin.
 
-- Source gate: find a complete, discoverable species/form catalogue on an allowed official English-language site. Derive catalogue size, form identities and artwork URLs from source data; do not guess an upper Pokédex number or probe suffixes until a request fails. Verify regional coverage before adopting it. Sample Meowth, a species with distinct Mega forms, dual-type forms, and the newest entries discovered from the source. If official sources cannot meet coverage, stop and discuss a contract change.
+- Source gate (D25): prove complete, discoverable species/form coverage from Serebii's National Pokédex and source-linked pages. Derive catalogue size, form identities and artwork URLs from source data; do not guess an upper Pokédex number or probe suffixes until a request fails. Verify coverage across game generations before adopting a single game-specific detail route. Sample Meowth, a species with distinct Mega forms, dual-type forms, and the newest entries discovered from the source. If Serebii cannot meet required coverage, stop and discuss that concrete gap. Historical official-site attempts remain evidence, not the current sourcing restriction.
 - Rendering gate: verify inline output with `ratatui-image`, safe bounded capability queries, terminal restoration, and native 1:1 cropped-image pixel sizing. The [Picker documentation](https://docs.rs/ratatui-image/11.1.0/ratatui_image/picker/struct.Picker.html) describes stdio queries and recommends alternate-screen initialization; an interactive example does not prove the required inline behavior. Do not silently substitute a full-screen UI or resize `original` output.
 - Dependencies already requested: `clap`, `reqwest`, `ratatui-image`, `serde`, `serde_json`. Select compatible versions during S01/S02 and record them in Cargo files. Add focused support crates for PNG transforms, standard data directories, progress, sampling and safe storage as needed; avoid inventing a general framework.
+- 2026-11-06 update (D24): the user approved testing `wreq` 0.16.3 plus `wreq-util` 0.2.0 instead of reqwest for S01.T01's official-source prototype, because standard browser headers alone did not provide repeatable access. Full crawl, native build and task acceptance remain pending; later transport use must follow the verified result rather than assuming either client passed.
 
 ## Suggested batches
 
@@ -168,10 +176,10 @@ No task goal was created during planning; the planning check returned no active 
 Suggested batch: Furfrou (B01). Prerequisites: selected implementation scope approved; work remains on the already authorised `main` branch; network access to allowed public sources; access to a terminal supporting at least one native image protocol for visual evidence.
 
 <a id="s01-t01"></a>
-#### S01.T01 — Slowpoke: prove complete official-source discovery
+#### S01.T01 — Slowpoke: prove complete source discovery
 
 - Depends on: no implementation task.
-- Work: investigate official catalogue/index/pagination and species/form metadata; validate completeness against source-provided evidence; identify original forms and descriptive keys; sample referenced PNGs. Keep any focused parser prototype reusable, and record endpoints, field meanings, observed coverage and failure detection in the stage log.
+- Work: investigate Serebii's National Pokédex index, source-linked species/form metadata and artwork (D25); validate completeness against source-provided evidence; identify original forms and descriptive keys; sample referenced PNGs. Keep any focused parser prototype reusable, and record endpoints, field meanings, observed coverage and failure detection in the stage log.
 - Verify: fixture parsing rejects anti-bot HTML, malformed/partial catalogues, duplicate IDs/keys and missing required references. Capture live full-metadata discovery and representative artwork retrieval without embedding a fixed Pokémon count in application logic.
 - Required evidence: source URLs, observed totals derived from source data, base/regional/Gigantamax/distinct-Mega examples and PNG checks. If coverage cannot be established, leave the task incomplete and return for a design decision.
 
@@ -250,7 +258,7 @@ Stage exit: final Rust checks, real complete-data offline commands, rendering ma
 
 | Requirement | Source | Tasks | Required acceptance |
 | --- | --- | --- | --- |
-| Complete official data, dynamic species/form counts | Brief data; D01, D03, D06 | S01.T01, S02.T02 | Full discovery evidence and real bootstrap; no guessed count or suffix range |
+| Complete Serebii data, dynamic species/form counts | Brief data; D01, D03, D25 supersedes D06 source restriction | S01.T01, S02.T02 | Full discovery evidence and real bootstrap; no guessed count or suffix range |
 | Versioned species/form JSON and per-form types | D08, D17 | S02.T01 | Round trip, reference/schema validation and form type examples |
 | Full first run, explicit refresh/force, progress | D05, D07 | S02.T02 | Complete real download; refresh/skip/force tests; bar and log on stderr |
 | Resume and preserve old dataset on failure | D09 | S02.T01, S02.T02 | Interrupted initial/forced refresh tests with intact active metadata/artwork |
@@ -279,7 +287,7 @@ Live-site discovery and manual terminal/platform evidence are external acceptanc
 
 ## External prerequisites and exclusions
 
-- Required: Rust toolchain/dependency access, an allowed official source with complete coverage, and actual macOS/Linux terminal validation. None is currently recorded as verified implementation evidence.
+- Required: Rust toolchain/dependency access, user-selected Serebii source access with complete coverage (D25), and actual macOS/Linux terminal validation. Current partial implementation evidence and remaining gates are recorded in the stage log; do not treat fixture checks or earlier official-site samples as full source acceptance.
 - Outside this release: Windows, unofficial data fallbacks, lazy artwork downloads, full-screen interactive UI, and scheduling automatic refreshes. These are scope exclusions, not unfinished required acceptance. No separate TODO file is created.
 - Storage cleanup/migrations beyond rejecting unsupported schemas can be designed later; do not remove artwork still referenced by active or pending metadata. Required crash/retry behavior remains in S02.
 
@@ -291,8 +299,8 @@ Every task has one goal under the procedure above. Its implementation, evidence,
 
 | ID | Done | Stage or task | Implementation | Review | Rationale | Comments |
 | --- | --- | --- | --- | --- | --- | --- |
-| [S01.T00](#s01-t00) |  | **Furfrou (B01) — feasibility stage completion** | — | Stage integration in S01.T02 correctness; both task review pairs complete | Prevent building against unproven integrations | First suggested batch; scope pending |
-| [S01.T01](#s01-t01) |  | Slowpoke — complete official-source discovery | Astra high | 1 Sol xhigh correctness; then 1 Sol xhigh simplification/Rust | Investigate uncertain official data; challenge completeness independently | Not started; goal pending |
+| [S01.T00](#s01-t00) |  | **Furfrou (B01) — feasibility stage completion** | — | Stage integration in S01.T02 correctness; both task review pairs complete | Prevent building against unproven integrations | Selected by Q01; S01.T01 ongoing, S01.T02 not started |
+| [S01.T01](#s01-t01) | ✅ | Slowpoke — complete source discovery | Astra high | 1 Sol xhigh correctness; then 1 Sol xhigh simplification/Rust | Investigate source data; challenge completeness independently | D28–D32 applied; correctness findings resolved, simplification complete/applied with byte-identical output; 33 tests/full 1,025-species/1,427-form replay pass; final local commit approved in [Run 01 Q17](logs/20261106-s01-implementation-log.md#q17--concrete-s01t01-commit-proposal); completed by this task's final commit |
 | [S01.T02](#s01-t02) |  | Poliwag — inline native graphics and pixel sizing | Astra high | 1 Sol xhigh correctness including S01 integration; then 1 Sol xhigh simplification/Rust | Native dimensions and terminal state need direct evidence | Not started; goal pending |
 | [S02.T00](#s02-t00) |  | **Vivillon (B02) — bootstrap stage completion** | — | Stage integration in S02.T02 correctness; both task review pairs complete | Failed refreshes must preserve working offline data | Not started |
 | [S02.T01](#s02-t01) |  | Koraidon — catalogue and safe local storage | Sol xhigh | 1 Astra high correctness; then 1 Sol xhigh simplification/Rust | Independently check metadata/artwork recovery invariants | Not started; goal pending |
