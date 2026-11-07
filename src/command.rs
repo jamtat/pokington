@@ -28,6 +28,9 @@ enum Command {
     /// Display an original or alternate-form illustration inline.
     Art {
         name: Option<String>,
+        /// Print the Pokémon's form display name on a line below the artwork.
+        #[arg(long = "name")]
+        show_name: bool,
         #[arg(long)]
         form: Option<String>,
         #[arg(long, value_enum, default_value_t)]
@@ -262,13 +265,14 @@ impl<R: Rng + Send> Runtime<R> {
         match command {
             Command::Art {
                 name,
+                show_name,
                 form,
                 mode,
                 width,
                 color,
             } => {
                 let catalogue = catalogue(&self.store, self.bootstrap.as_ref(), stderr).await?;
-                let (_, selected) =
+                let (species, selected) =
                     art::select(&catalogue, name.as_deref(), form.as_deref(), &mut self.rng)?;
                 let bytes = self.store.read_artwork(&selected.local_artwork)?;
                 let image = image::load_from_memory_with_format(&bytes, image::ImageFormat::Png)
@@ -281,21 +285,29 @@ impl<R: Rng + Send> Runtime<R> {
                     .native_frame(&image, width.unwrap_or_default(), mode)
                     .map_err(|error| image_error(&self.store, selected, error))?
                 {
-                    return frame.write_to(stdout).map_err(CommandError::Output);
+                    frame.write_to(stdout).map_err(CommandError::Output)?;
+                } else {
+                    let blocks = mode == Mode::Blocks
+                        || (mode == Mode::Auto
+                            && self.terminal.is_terminal
+                            && self.terminal.unicode);
+                    let prepared = art::prepare(
+                        &image,
+                        width.unwrap_or_default(),
+                        self.terminal.geometry,
+                        blocks,
+                    )
+                    .map_err(|error| image_error(&self.store, selected, error))?;
+                    let text =
+                        crate::text_art::render(&prepared, blocks, self.terminal.color(color));
+                    stdout
+                        .write_all(text.as_bytes())
+                        .map_err(CommandError::Output)?;
                 }
-                let blocks = mode == Mode::Blocks
-                    || (mode == Mode::Auto && self.terminal.is_terminal && self.terminal.unicode);
-                let prepared = art::prepare(
-                    &image,
-                    width.unwrap_or_default(),
-                    self.terminal.geometry,
-                    blocks,
-                )
-                .map_err(|error| image_error(&self.store, selected, error))?;
-                let text = crate::text_art::render(&prepared, blocks, self.terminal.color(color));
-                stdout
-                    .write_all(text.as_bytes())
-                    .map_err(CommandError::Output)?;
+                if show_name {
+                    writeln!(stdout, "{}", art::display_name(species, selected))
+                        .map_err(CommandError::Output)?;
+                }
             }
             Command::Choose {
                 count,

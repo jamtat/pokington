@@ -4,6 +4,7 @@ Run `pokington art` to sample uniformly from installed species/form artwork. The
 
 ```sh
 pokington art Charizard
+pokington art Sandshrew --form alolan --name
 pokington art 6 --form 'mega x'
 pokington art Meowth --form galarian --mode blocks
 pokington art --form gigantamax
@@ -15,6 +16,7 @@ Names and descriptive form keys ignore case. Named species default to the origin
 
 | Option | Behavior |
 | --- | --- |
+| `--name` | Print the selected form's name on its own line immediately below the artwork. |
 | `--mode auto` | Native graphics when verified; otherwise Unicode blocks in a suitable terminal, then ASCII. Redirected output uses ASCII. |
 | `--mode img` | Native images only; unsupported contexts report an error suggesting text modes. |
 | `--mode blocks` | Two sample rows per character using Unicode half-blocks; monochrome output retains upper/lower positions. |
@@ -25,6 +27,8 @@ Names and descriptive form keys ignore case. Named species default to the origin
 | `--color auto` | Terminal-appropriate colour depth; redirected text is plain. |
 | `--color always` | Emit ANSI text colour even when redirected. |
 | `--color never` | Monochrome text. Native images retain their colours. |
+
+With `--name`, a form display name containing the species name (ignoring case) is printed as stored, for example `Mega Dragonite`. Otherwise, the label combines the species name and the form display name in parentheses, removing the standalone word “form” (ignoring case): `Sandshrew` with `Alola Form` becomes `Sandshrew (Alola)`. This applies to named and random selections in every rendering mode. Omit `--name` to display only the artwork.
 
 Transparent margins are trimmed before sizing. Text uses alpha-weighted brightness/colour over black; fully transparent cells leave blank terminal cells. Native PNG output retains alpha. Downscaling and enlargement resample premultiplied RGBA; original width preserves source pixels.
 

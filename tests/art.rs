@@ -31,6 +31,33 @@ fn catalogue() -> Result<Catalogue, Box<dyn std::error::Error>> {
 }
 
 #[test]
+fn artwork_labels_use_form_display_names_without_repeating_species() {
+    let catalogue = catalogue().unwrap();
+    let mut species = catalogue.species.first().unwrap().clone();
+    let mut form = species.forms.first().unwrap().clone();
+    for (name, display_name, expected) in [
+        ("Dragonite", "Mega Dragonite", "Mega Dragonite"),
+        ("Dragonite", "Mega dRaGoNiTe", "Mega dRaGoNiTe"),
+        ("Flabébé", "Mega FLABÉBÉ", "Mega FLABÉBÉ"),
+        ("Sandshrew", "Alola Form", "Sandshrew (Alola)"),
+        ("Sandshrew", "Alola fOrM", "Sandshrew (Alola)"),
+        ("Deoxys", "Attack Forme", "Deoxys (Attack Forme)"),
+        ("Mew", "Original", "Mew (Original)"),
+        ("Mew", "Form", "Mew"),
+        ("Castform", "Rainy Form", "Castform (Rainy)"),
+        ("Castform", "Castform Rainy Form", "Castform Rainy Form"),
+    ] {
+        species.name = name.into();
+        form.display_name = display_name.into();
+        assert_eq!(
+            art::display_name(&species, &form),
+            expected,
+            "{name}: {display_name}"
+        );
+    }
+}
+
+#[test]
 fn named_lookup_and_random_filter_use_identical_case_insensitive_keys() {
     let catalogue = catalogue().unwrap();
     let species = catalogue.species.first().unwrap();
