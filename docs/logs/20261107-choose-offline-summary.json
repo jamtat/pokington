@@ -1,0 +1,135 @@
+{
+  "evidence_directory": "/private/tmp/pokington-b03-offline-9p5u5n3x",
+  "store": "/private/tmp/pokington-b02-live.mQwTZE/store",
+  "network_policy": "(version 1)(allow default)(deny network*)",
+  "species": 1025,
+  "forms": 1427,
+  "cases": [
+    {
+      "case": "choose-all",
+      "command": [
+        "/Users/ben/code/pokington/target/debug/examples/command_data",
+        "/private/tmp/pokington-b02-live.mQwTZE/store",
+        "choose",
+        "-c",
+        "1025"
+      ],
+      "started_at": "2026-11-07T04:37:39.558870+00:00",
+      "finished_at": "2026-11-07T04:37:40.309696+00:00",
+      "elapsed_seconds": 0.751,
+      "exit_code": 0,
+      "stdout_bytes": 8896,
+      "stderr_bytes": 0
+    },
+    {
+      "case": "substring-and-explicit",
+      "command": [
+        "/Users/ben/code/pokington/target/debug/examples/command_data",
+        "/private/tmp/pokington-b02-live.mQwTZE/store",
+        "choose",
+        "-c",
+        "1022",
+        "-e",
+        "cHaRiZaRd",
+        "-e",
+        "CHARIZARD",
+        "-e",
+        "unknown pokemon",
+        "/private/tmp/pokington-b03-offline-9p5u5n3x/excluded.txt"
+      ],
+      "started_at": "2026-11-07T04:37:40.309716+00:00",
+      "finished_at": "2026-11-07T04:37:40.345150+00:00",
+      "elapsed_seconds": 0.035,
+      "exit_code": 0,
+      "stdout_bytes": 8875,
+      "stderr_bytes": 0
+    },
+    {
+      "case": "zero",
+      "command": [
+        "/Users/ben/code/pokington/target/debug/examples/command_data",
+        "/private/tmp/pokington-b02-live.mQwTZE/store",
+        "choose",
+        "-c",
+        "0"
+      ],
+      "started_at": "2026-11-07T04:37:40.345163+00:00",
+      "finished_at": "2026-11-07T04:37:40.375491+00:00",
+      "elapsed_seconds": 0.03,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "case": "impossible",
+      "command": [
+        "/Users/ben/code/pokington/target/debug/examples/command_data",
+        "/private/tmp/pokington-b02-live.mQwTZE/store",
+        "choose",
+        "-c",
+        "1026"
+      ],
+      "started_at": "2026-11-07T04:37:40.375513+00:00",
+      "finished_at": "2026-11-07T04:37:40.408644+00:00",
+      "elapsed_seconds": 0.033,
+      "exit_code": 1,
+      "stdout_bytes": 0,
+      "stderr_bytes": 70
+    },
+    {
+      "case": "help",
+      "command": [
+        "/Users/ben/code/pokington/target/debug/pokington",
+        "--help"
+      ],
+      "started_at": "2026-11-07T04:37:40.408657+00:00",
+      "finished_at": "2026-11-07T04:37:40.853132+00:00",
+      "elapsed_seconds": 0.444,
+      "exit_code": 0,
+      "stdout_bytes": 372,
+      "stderr_bytes": 0
+    },
+    {
+      "case": "bootstrap-help",
+      "command": [
+        "/Users/ben/code/pokington/target/debug/pokington",
+        "bootstrap",
+        "--help"
+      ],
+      "started_at": "2026-11-07T04:37:40.853147+00:00",
+      "finished_at": "2026-11-07T04:37:40.869414+00:00",
+      "elapsed_seconds": 0.016,
+      "exit_code": 0,
+      "stdout_bytes": 199,
+      "stderr_bytes": 0
+    },
+    {
+      "case": "version",
+      "command": [
+        "/Users/ben/code/pokington/target/debug/pokington",
+        "--version"
+      ],
+      "started_at": "2026-11-07T04:37:40.869430+00:00",
+      "finished_at": "2026-11-07T04:37:40.882085+00:00",
+      "elapsed_seconds": 0.013,
+      "exit_code": 0,
+      "stdout_bytes": 16,
+      "stderr_bytes": 0
+    },
+    {
+      "case": "invalid-count",
+      "command": [
+        "/Users/ben/code/pokington/target/debug/pokington",
+        "choose",
+        "-c",
+        "-1"
+      ],
+      "started_at": "2026-11-07T04:37:40.882095+00:00",
+      "finished_at": "2026-11-07T04:37:40.894211+00:00",
+      "elapsed_seconds": 0.012,
+      "exit_code": 2,
+      "stdout_bytes": 0,
+      "stderr_bytes": 182
+    }
+  ]
+}

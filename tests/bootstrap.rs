@@ -204,6 +204,8 @@ impl Drop for Server {
     }
 }
 fn serve(mut stream: TcpStream, state: &Mutex<State>) -> Result<(), Failure> {
+    // Accepted sockets inherit the listener's nonblocking mode on macOS.
+    stream.set_nonblocking(false)?;
     stream.set_read_timeout(Some(Duration::from_secs(2)))?;
     let mut request = Vec::new();
     let mut bytes = [0; 1024];
@@ -776,4 +778,123 @@ async fn request_timeout_is_bounded_and_leaves_the_active_catalogue_usable() {
     assert!(started.elapsed() < Duration::from_secs(3));
     assert_eq!(server.hits("/pokemon/art/006.png").unwrap(), 4);
     installed(&temp.store().unwrap(), &old).unwrap();
+}
+
+#[tokio::test]
+async fn choose_first_run_completes_bootstrap_with_names_only_on_stdout() {
+    use pokington::command::{self, Runtime};
+    use rand::{SeedableRng, rngs::StdRng};
+
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
+    let store = temp.store().unwrap();
+    let source = server.source().unwrap();
+    let mut stdout = Vec::new();
+    let mut stderr = Vec::new();
+    let code = command::run(
+        ["pokington", "choose", "-c", "1"],
+        || Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(3)).with_bootstrap(source.clone())),
+        &mut stdout,
+        &mut stderr,
+    )
+    .await;
+    assert_eq!(code, 0);
+    assert_eq!(stdout, b"Charizard\n");
+    let progress = String::from_utf8(stderr).unwrap();
+    assert!(progress.contains("Downloading"));
+    assert!(progress.contains("Artwork [########################] 4/4"));
+    let catalogue = store
+        .load_active()
+        .unwrap()
+        .ok_or("first run did not install data")
+        .unwrap();
+    installed(&store, &catalogue).unwrap();
+    assert_eq!(server.image_hits().unwrap(), 4);
+
+    let mut stdout = Vec::new();
+    let mut stderr = Vec::new();
+    let code = command::run(
+        ["pokington", "choose", "-c", "1"],
+        || Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(3)).with_bootstrap(source)),
+        &mut stdout,
+        &mut stderr,
+    )
+    .await;
+    assert_eq!(code, 0);
+    assert_eq!(stdout, b"Charizard\n");
+    assert_eq!(stderr, b"");
+    assert_eq!(server.hits(INDEX_PATH).unwrap(), 1);
+    assert_eq!(server.image_hits().unwrap(), 4);
+}
+
+#[tokio::test]
+async fn bootstrap_command_refreshes_skips_and_forces_through_the_existing_engine() {
+    use pokington::command::{self, Runtime};
+    use rand::{SeedableRng, rngs::StdRng};
+
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
+    let store = temp.store().unwrap();
+    let source = server.source().unwrap();
+    for (args, expected_images) in [
+        (vec!["pokington", "bootstrap"], 4),
+        (vec!["pokington", "bootstrap"], 4),
+        (vec!["pokington", "bootstrap", "--force"], 8),
+    ] {
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        let code = command::run(
+            args,
+            || {
+                Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(3))
+                    .with_bootstrap(source.clone()))
+            },
+            &mut stdout,
+            &mut stderr,
+        )
+        .await;
+        assert_eq!(code, 0);
+        assert_eq!(stdout, b"");
+        assert!(
+            String::from_utf8(stderr)
+                .unwrap()
+                .contains("Complete: 1 species, 4 forms")
+        );
+        assert_eq!(server.image_hits().unwrap(), expected_images);
+    }
+    assert_eq!(server.hits(INDEX_PATH).unwrap(), 3);
+}
+
+#[tokio::test]
+async fn failed_first_run_reports_bootstrap_error_without_printing_names() {
+    use pokington::command::{self, Runtime};
+    use rand::{SeedableRng, rngs::StdRng};
+
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
+    server
+        .route(
+            "/pokemon/art/006.png",
+            vec![Response::new(503, "text/html", b"unavailable".to_vec())],
+        )
+        .unwrap();
+    let store = temp.store().unwrap();
+    let source = server.source().unwrap();
+    let mut stdout = Vec::new();
+    let mut stderr = Vec::new();
+    let code = command::run(
+        ["pokington", "choose", "-c", "1"],
+        || Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(3)).with_bootstrap(source)),
+        &mut stdout,
+        &mut stderr,
+    )
+    .await;
+    assert_eq!(code, 1);
+    assert_eq!(stdout, b"");
+    let stderr = String::from_utf8(stderr).unwrap();
+    assert!(stderr.contains("Downloading"));
+    assert!(stderr.contains("error:"));
+    assert!(stderr.contains("503"));
+    assert!(store.load_active().unwrap().is_none());
+    assert_eq!(server.hits("/pokemon/art/006.png").unwrap(), 3);
 }

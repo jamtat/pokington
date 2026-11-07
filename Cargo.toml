@@ -17,6 +17,8 @@ png = "0.18"
 ratatui = { version = "0.30.1", default-features = false }
 ratatui-image = { version = "=11.1.0", default-features = false }
 rustix = { version = "0.38", features = ["termios", "stdio", "fs"] }
+clap = { version = "4.6.7", features = ["derive"] }
+rand = { version = "0.10.3", features = ["unbiased"] }
 
 [dev-dependencies]
 nix = { version = "0.31", features = ["term", "fs"] }
