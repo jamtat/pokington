@@ -28,6 +28,12 @@ enum Command {
     /// Display an original or alternate-form illustration inline.
     Art {
         name: Option<String>,
+        /// Exclude an exact species name, ignoring case. May be repeated.
+        #[arg(short, long, value_name = "NAME")]
+        exclude: Vec<String>,
+        /// Exclude species names occurring in this UTF-8 file, ignoring case. May be repeated.
+        #[arg(long, value_name = "FILE")]
+        exclude_file: Vec<PathBuf>,
         /// Print the Pokémon's form display name on a line below the artwork.
         #[arg(long = "name")]
         show_name: bool,
@@ -67,6 +73,7 @@ enum Command {
 #[derive(Debug)]
 pub enum CommandError {
     Art(ArtError),
+    ExcludedSpecies(String),
     Store(StoreError),
     Bootstrap(BootstrapError),
     File {
@@ -84,6 +91,7 @@ impl fmt::Display for CommandError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Art(error) => error.fmt(f),
+            Self::ExcludedSpecies(name) => write!(f, "Pokémon is excluded: {name}"),
             Self::Store(error) => error.fmt(f),
             Self::Bootstrap(error) => error.fmt(f),
             Self::File { path, source } => write!(f, "exclusion file {}: {source}", path.display()),
@@ -133,6 +141,25 @@ pub fn exclusion_text(files: &[PathBuf]) -> Result<Vec<String>, CommandError> {
         .collect()
 }
 
+struct Exclusions<'a> {
+    names: Vec<String>,
+    file_text: &'a [String],
+}
+
+impl<'a> Exclusions<'a> {
+    fn new(names: &[String], file_text: &'a [String]) -> Self {
+        Self {
+            names: names.iter().map(|name| name.to_lowercase()).collect(),
+            file_text,
+        }
+    }
+
+    fn permits(&self, name: &str) -> bool {
+        let name = name.to_lowercase();
+        !self.names.contains(&name) && !self.file_text.iter().any(|text| text.contains(&name))
+    }
+}
+
 /// Sample species names without replacement; forms never add selection entries.
 /// File contents must already be lowercase, as returned by `exclusion_text`.
 ///
@@ -145,15 +172,12 @@ pub fn choose<'a>(
     file_text: &[String],
     rng: &mut impl Rng,
 ) -> Result<Vec<&'a str>, CommandError> {
-    let exclude: Vec<_> = exclude.iter().map(|name| name.to_lowercase()).collect();
+    let exclusions = Exclusions::new(exclude, file_text);
     let mut candidates: Vec<_> = catalogue
         .species
         .iter()
-        .filter_map(|species| {
-            let name = species.name.to_lowercase();
-            (!exclude.contains(&name) && !file_text.iter().any(|text| text.contains(&name)))
-                .then_some(species.name.as_str())
-        })
+        .filter(|species| exclusions.permits(&species.name))
+        .map(|species| species.name.as_str())
         .collect();
     if count > candidates.len() {
         return Err(CommandError::Insufficient {
@@ -271,6 +295,8 @@ impl<R: Rng + Send> Runtime<R> {
         match command {
             Command::Art {
                 name,
+                exclude,
+                exclude_file,
                 show_name,
                 no_newline,
                 title,
@@ -279,9 +305,19 @@ impl<R: Rng + Send> Runtime<R> {
                 width,
                 color,
             } => {
-                let catalogue = catalogue(&self.store, self.bootstrap.as_ref(), stderr).await?;
+                let text = exclusion_text(&exclude_file)?;
+                let exclusions = Exclusions::new(&exclude, &text);
+                let mut catalogue = catalogue(&self.store, self.bootstrap.as_ref(), stderr).await?;
+                if name.is_none() {
+                    catalogue
+                        .species
+                        .retain(|species| exclusions.permits(&species.name));
+                }
                 let (species, selected) =
                     art::select(&catalogue, name.as_deref(), form.as_deref(), &mut self.rng)?;
+                if !exclusions.permits(&species.name) {
+                    return Err(CommandError::ExcludedSpecies(species.name.clone()));
+                }
                 let bytes = self.store.read_artwork(&selected.local_artwork)?;
                 let image = image::load_from_memory_with_format(&bytes, image::ImageFormat::Png)
                     .map_err(|error| StoreError::RepairRequired {

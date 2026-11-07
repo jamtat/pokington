@@ -92,6 +92,7 @@ If a file is unreadable or is not valid UTF-8, or too few eligible names remain,
 ```text
 pokington art [NAME_OR_ID] [--form FORM] [--mode auto|img|blocks|ascii]
               [--width N|original] [--color auto|always|never]
+              [--exclude NAME]... [--exclude-file FILE]...
               [--name] [--no-newline] [--title]
 ```
 
@@ -111,11 +112,19 @@ pokington art
 
 # Pick a random illustration matching a form name.
 pokington art --form gigantamax
+
+# Exclude entire species, including all their forms.
+pokington art -e Pikachu --exclude Eevee
+
+# Avoid species named in files, combined with exact exclusions.
+pokington art --exclude-file tasks.md --exclude-file archive.md -e Ditto
 ```
 
 Pokémon and form names are case-insensitive. A named Pokémon defaults to its original form. Form names are descriptive, such as `mega x` or `alolan`; an invalid form reports the available form names for that Pokémon.
 
 Random artwork gives every species/form illustration an equal chance, so species with more illustrated forms appear more often overall. With `--form` and no Pokémon, selection is limited to entries matching that form.
+
+`-e` / `--exclude` and `--exclude-file` use the same matching rules as `choose`: exact names ignore case, and file exclusions match species names as case-insensitive substrings anywhere in UTF-8 text. Unknown exclusion names have no effect. Excluding a species removes all its forms; form names alone do not exclude artwork. Unreadable or invalid UTF-8 files, an explicitly requested species that is excluded, or no remaining matching artwork cause an error before any artwork is printed.
 
 The catalogue uses illustration PNGs from [Serebii](https://www.serebii.net/pokemon/nationalpokedex.shtml). Alternate forms are included when a matching illustration and supported type data are available.
 

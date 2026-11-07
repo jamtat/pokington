@@ -78,7 +78,7 @@ impl fmt::Display for ArtError {
                 available.join(", ")
             ),
             Self::NoMatchingForm(form) => write!(f, "no artwork matches form {form:?}"),
-            Self::EmptyCatalogue => f.write_str("catalogue contains no artwork"),
+            Self::EmptyCatalogue => f.write_str("no eligible artwork remains"),
             Self::Image(error) => error.fmt(f),
         }
     }
