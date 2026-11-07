@@ -1,0 +1,99 @@
+name: Release builds
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            runner: macos-15
+          - target: x86_64-apple-darwin
+            runner: macos-15-intel
+          - target: x86_64-unknown-linux-musl
+            runner: ubuntu-24.04
+          - target: aarch64-unknown-linux-musl
+            runner: ubuntu-24.04-arm
+    env:
+      TARGET: ${{ matrix.target }}
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Identify runner image
+        id: image
+        if: runner.os == 'Linux'
+        run: echo "version=${ImageOS:?}-${ImageVersion:?}" >> "$GITHUB_OUTPUT"
+      - name: Cache musl sysroot
+        id: musl-cache
+        if: runner.os == 'Linux'
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.cache/pokington-musl
+          key: musl-${{ runner.arch }}-${{ steps.image.outputs.version }}-${{ hashFiles('.github/scripts/setup-musl.sh') }}
+      - name: Configure musl compiler
+        if: runner.os == 'Linux'
+        run: bash .github/scripts/setup-musl.sh
+      - name: Save prepared musl sysroot
+        if: runner.os == 'Linux' && steps.musl-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.cache/pokington-musl
+          key: ${{ steps.musl-cache.outputs.cache-primary-key }}
+      - uses: ./.github/actions/rust
+        with:
+          target: ${{ matrix.target }}
+          cache-key: release-${{ matrix.target }}-${{ steps.image.outputs.version }}-${{ hashFiles('.github/scripts/setup-musl.sh') }}
+      - name: Find cached nextest
+        id: nextest
+        shell: bash
+        run: |
+          version=$(cargo nextest --version 2>/dev/null || true)
+          if [[ "$version" == 'cargo-nextest 0.9.151 ('* || "$version" == 'cargo-nextest 0.9.151' ]]; then
+            echo 'present=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install nextest
+        if: steps.nextest.outputs.present != 'true'
+        uses: taiki-e/install-action@3a3daafd3b7f23b8f65d9f5ba2db203fb59b79e2 # v2
+        with:
+          tool: cargo-nextest@0.9.151
+          fallback: none
+      - name: Run full release tests
+        id: tests
+        run: cargo test-ci --release --target "$TARGET"
+      - name: Publish test report
+        if: ${{ !cancelled() && steps.tests.outcome != 'skipped' }}
+        uses: mikepenz/action-junit-report@a16be3a69023e9bd7e748ede768b3282ea7b30ce # v6
+        with:
+          report_paths: target/nextest/ci/junit.xml
+          annotate_only: true
+          resolve_ignore_classname: true
+          detailed_summary: true
+          failed_summary_logs: true
+          require_tests: true
+          fail_on_parse_error: true
+      - name: Build release executable
+        run: cargo build --release --locked --bin pokington --target "$TARGET"
+      - name: Package and verify extracted executable
+        env:
+          PACKAGE_OUTPUT: ${{ runner.temp }}/packages
+        run: node .github/scripts/release.mjs package "$TARGET" "$PACKAGE_OUTPUT"
+      - name: Upload checked archive
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: release-${{ matrix.target }}
+          path: ${{ runner.temp }}/packages/*
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+          overwrite: true

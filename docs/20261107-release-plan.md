@@ -8,7 +8,7 @@ Use $jamtat-work to continue GitHub releases using docs/20261107-release-plan.md
 For the same open Run 01, honour its approval of S06.T01 and S07.T01, four specific fresh reviews, automatic coherent commits and stage continuation, followed by one branch push and PR to main, Diffle and the completion summon. Show commit subjects and file tables without asking again. Never infer additional review approval from this prompt: each approved review's scope/model/effort/count is fixed in the run. New runs or additional reviews require explicit approval under the user's AGENTS.md. Do not push a version tag, create/publish a real release, merge, start/rerun/cancel CI manually or run unapproved sudo commands. Record checks, deviations, review outcomes and permissions in separate stage logs. Keep native hosted acceptance distinct from local checks; do not mark missing evidence as passed. Stop after the requested PR, Diffle and summon, or at a material unresolved blocker.
 ```
 
-Date: 2026-11-07. Status: approved implementation run; tasks not yet complete.
+Date: 2026-11-07. Status: S06 complete; S07 implementation/local validation/reviews complete, hosted acceptance pending publication.
 
 ## Scope and precedence
 
@@ -96,5 +96,5 @@ Done remains blank until checks and required reviews pass. S07 hosted acceptance
 | --- | --- | --- | --- | --- | --- | --- |
 | [S06.T00](#s06-t00) | ✅ | Quilava: allocator stage completion | — | Both approved T01 reviews passed | Small isolated prerequisite | [S06 evidence](logs/20261107-s06-release-log.md); task commit follows |
 | [S06.T01](#s06-t01) | ✅ | Vigoroth: executable allocator | Primary agent | Sol high correctness and Sol medium simplification: no findings | Verify ownership and keep integration minimal | [108 local tests and checks passed](logs/20261107-s06-release-log.md); native release evidence remains S07 |
-| [S07.T00](#s07-t00) |  | Xurkitree: release stage completion | — | Covered by T01's two approved reviews | One integrated pipeline and evidence | Not started |
-| [S07.T01](#s07-t01) |  | Dratini: release pipeline and CI setup | Primary agent | 1 Sol high correctness; 1 Sol high simplification | Matrix, external writes and recovery need detailed review | Not started |
+| [S07.T00](#s07-t00) |  | Xurkitree: release stage completion | — | T01 reviews complete; hosted acceptance pending | One integrated pipeline and evidence | [S07 evidence](logs/20261107-s07-release-log.md); final hosted outcome recorded in PR checks/description |
+| [S07.T01](#s07-t01) |  | Dratini: release pipeline and CI setup | Primary agent | Sol high correctness: one P1 resolved/tested; Sol high simplification: no findings | Matrix, external writes and recovery need detailed review | [111 local release tests, ten helper tests and static checks pass](logs/20261107-s07-release-log.md); other native targets await PR CI |

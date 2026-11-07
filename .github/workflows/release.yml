@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate release tag
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check tag and package versions
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node .github/scripts/release.mjs version "$RELEASE_TAG"
+  checks:
+    needs: validate
+    uses: ./.github/workflows/ci.yml
+  draft:
+    name: Prepare draft release
+    needs: [validate, checks]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/incoming
+      - name: Validate and collect release assets
+        env:
+          INCOMING: ${{ runner.temp }}/incoming
+          ASSETS: ${{ runner.temp }}/release-assets
+        run: node .github/scripts/release.mjs collect "$INCOMING" "$ASSETS"
+      - name: Create or repair draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          ASSETS: ${{ runner.temp }}/release-assets
+        run: node .github/scripts/release.mjs draft "$RELEASE_TAG" "$ASSETS"

@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
@@ -18,10 +19,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2
         with:
-          components: rustfmt, clippy
-          build-warnings: ""
+          persist-credentials: false
+      - uses: ./.github/actions/rust
+        with:
+          components: rustfmt clippy
+          cache-key: lint
       - name: Check formatting
         run: cargo fmt --check
       - name: Check compilation
@@ -29,29 +32,16 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features --locked -- -D warnings
 
-  rust-test:
-    name: Rust test
-    runs-on: ubuntu-latest
+  release-scripts:
+    name: Release helper tests
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2
         with:
-          build-warnings: ""
-      - name: Install nextest
-        uses: taiki-e/install-action@3a3daafd3b7f23b8f65d9f5ba2db203fb59b79e2 # v2
-        with:
-          tool: cargo-nextest@0.9.151
-      - name: Run tests
-        id: tests
-        run: cargo test-ci
-      - name: Publish test report
-        if: ${{ !cancelled() && steps.tests.outcome != 'skipped' }}
-        uses: mikepenz/action-junit-report@a16be3a69023e9bd7e748ede768b3282ea7b30ce # v6
-        with:
-          report_paths: target/nextest/ci/junit.xml
-          annotate_only: true
-          resolve_ignore_classname: true
-          detailed_summary: true
-          failed_summary_logs: true
-          require_tests: true
-          fail_on_parse_error: true
+          persist-credentials: false
+      - run: node --test .github/scripts/release.test.mjs
+      - run: bash -n .github/scripts/setup-musl.sh && shellcheck .github/scripts/setup-musl.sh
+
+  rust-test:
+    name: Rust test
+    uses: ./.github/workflows/build.yml

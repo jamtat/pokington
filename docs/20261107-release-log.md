@@ -9,8 +9,9 @@ Plan: [Implementation plan](20261107-release-plan.md). Current contract: [Releas
 | Stage | Log and canonical run |
 | --- | --- |
 | S06 — Quilava | [Allocator integration and canonical Run 01](logs/20261107-s06-release-log.md) |
+| S07 — Xurkitree | [Release pipeline and CI evidence](logs/20261107-s07-release-log.md); authority remains Run 01 |
 
-Create S07's dated stage log when its work starts. Cross-stage entries link to canonical Run 01 rather than copying grants.
+Cross-stage entries link to canonical Run 01 rather than copying grants.
 
 ## Recording rules
 

@@ -32,7 +32,28 @@ Pokington chooses random names, avoids names you have already used, and displays
 
 ## Installation
 
-With [Rust and Cargo](https://www.rust-lang.org/tools/install) installed, run this from the repository directory:
+Download the archive for your platform and `SHA256SUMS` from [GitHub Releases](https://github.com/jamtat/pokington/releases). Release binaries use mimalloc; Linux binaries are statically linked with musl.
+
+| Platform | Archive target suffix |
+| --- | --- |
+| macOS Apple Silicon | `aarch64-apple-darwin` |
+| macOS Intel | `x86_64-apple-darwin` |
+| Linux x86-64 | `x86_64-unknown-linux-musl` |
+| Linux ARM64 | `aarch64-unknown-linux-musl` |
+
+For example, after downloading the macOS Apple Silicon archive for version `0.0.1`:
+
+```sh
+archive=pokington-0.0.1-aarch64-apple-darwin.tar.gz
+grep -F "  $archive" SHA256SUMS | shasum -a 256 --check
+tar -xzf "$archive"
+mkdir -p "$HOME/.local/bin"
+install -m 755 "${archive%.tar.gz}/pokington" "$HOME/.local/bin/pokington"
+```
+
+On Linux, select the matching archive and replace `shasum -a 256 --check` with `sha256sum --check`. Continue only if checksum verification succeeds. Make sure `~/.local/bin` is on your `PATH`. The archive includes the executable and README; catalogue and artwork download on first use.
+
+To build from source with [Rust and Cargo](https://www.rust-lang.org/tools/install), run this from the repository directory:
 
 ```sh
 cargo install --locked --path .
@@ -235,7 +256,7 @@ cargo install-nextest
 
 This installs `cargo-nextest` 0.9.151 into Cargo's binary directory, usually `~/.cargo/bin`. The first installation compiles nextest and can take a few minutes.
 
-Run the same test command used by GitHub CI and the prek test hook:
+Run the test command used by the prek test hook:
 
 ```sh
 cargo test-ci
@@ -243,4 +264,12 @@ cargo test-ci
 
 The alias runs `cargo nextest run --profile ci --all-targets --all-features --locked`. It completes the full test suite after failures and writes the JUnit report to `target/nextest/ci/junit.xml`.
 
-CI installs the same nextest version from a prebuilt binary to keep setup fast. Keep the version in `.cargo/config.toml` and `.github/workflows/ci.yml` aligned when upgrading nextest.
+CI runs this alias with `--release --target TARGET` on all four release targets and checks each extracted archive. It restores cached Rust dependencies and nextest, downloading a prebuilt nextest binary on cache misses. Keep the nextest version in `.cargo/config.toml` and `.github/workflows/build.yml` aligned when upgrading it. Linux musl sysroots are cached by runner image and architecture, so warm runs skip apt setup.
+
+Release helper tests use Node's built-in runner and require no npm dependencies:
+
+```sh
+node --test .github/scripts/release.test.mjs
+```
+
+See the [maintainer release guide](docs/20261107-releasing.md) for version tags, draft review, failed-run recovery and CI cache behavior.
