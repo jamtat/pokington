@@ -50,6 +50,7 @@ jobs:
         with:
           report_paths: target/nextest/ci/junit.xml
           annotate_only: true
+          resolve_ignore_classname: true
           detailed_summary: true
           failed_summary_logs: true
           require_tests: true
