@@ -383,6 +383,129 @@ fn install_artwork(store: &Store) -> Result<(), Failure> {
 }
 
 #[tokio::test]
+async fn art_excludes_species_using_repeated_exact_names_without_excluding_forms() {
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    install_artwork(&store).unwrap();
+    let mut catalogue = catalogue().unwrap();
+    for species in &mut catalogue.species {
+        for form in &mut species.forms {
+            form.display_name = format!("{} {}", species.name, form.key);
+        }
+    }
+    fs::write(
+        store.root().join("installed/catalogue.json"),
+        serde_json::to_vec(&catalogue).unwrap(),
+    )
+    .unwrap();
+    let eevee = catalogue
+        .species
+        .iter()
+        .find(|s| s.name == "Eevee")
+        .unwrap();
+    for form in &eevee.forms {
+        let words = args(&[
+            "pokington",
+            "art",
+            "--name",
+            "--width",
+            "4",
+            "-e",
+            "mEw",
+            "--exclude",
+            "MEWTWO",
+            "-e",
+            "FLABÉBÉ",
+            "-e",
+            "unknown",
+            "-e",
+            "Mew",
+            // Form keys must not act as species exclusions.
+            "-e",
+            &form.key,
+        ]);
+        for selection in [vec![], vec!["--form", &form.key]] {
+            let mut selected = words.clone();
+            selected.extend(args(&selection));
+            let (code, stdout, stderr) = invoke(&store, selected).await.unwrap();
+            assert_eq!((code, stderr.as_str()), (0, ""));
+            assert!(stdout.lines().last().unwrap().starts_with("Eevee "));
+            if !selection.is_empty() {
+                assert!(stdout.ends_with(&format!("{}\n", form.display_name)));
+            }
+        }
+        // A named or numeric request must also respect exclusions, including alternate forms.
+        for name in ["Eevee", "3"] {
+            let mut selected = words.clone();
+            selected.extend(args(&[name, "--form", &form.key, "-e", "EEVEE", "--title"]));
+            let (code, stdout, stderr) = invoke(&store, selected).await.unwrap();
+            assert_eq!((code, stdout.as_str()), (1, ""));
+            assert!(stderr.contains("Pokémon is excluded: Eevee"));
+        }
+    }
+}
+
+#[tokio::test]
+async fn art_combines_multiple_exclusion_files_with_exact_names_and_reports_exhaustion() {
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    install_artwork(&store).unwrap();
+    let first = temp.0.join("first.txt");
+    let second = temp.0.join("second.txt");
+    fs::write(&first, "before MEWTWO after").unwrap();
+    fs::write(&second, "FLABÉBÉ").unwrap();
+    let mut words = args(&["pokington", "art", "--name", "--title", "--width", "4"]);
+    for file in [&first, &second] {
+        words.push("--exclude-file".into());
+        words.push(file.as_os_str().into());
+    }
+    // Only Eevee remains; its forms are all available.
+    let (code, stdout, stderr) = invoke(&store, words.clone()).await.unwrap();
+    assert_eq!((code, stderr.as_str()), (0, ""));
+    assert_ne!(stdout, "");
+    // File substring matching excludes both Mew and Mewtwo, for names and IDs alike.
+    for name in ["Mew", "2", "Flabébé"] {
+        let mut selected = words.clone();
+        selected.push(name.into());
+        let (code, stdout, stderr) = invoke(&store, selected).await.unwrap();
+        assert_eq!((code, stdout.as_str()), (1, ""));
+        assert!(stderr.contains("Pokémon is excluded:"));
+    }
+    words.extend(args(&["-e", "eEvEe"]));
+    let (code, stdout, stderr) = invoke(&store, words.clone()).await.unwrap();
+    assert_eq!((code, stdout.as_str()), (1, ""));
+    assert!(stderr.contains("no eligible artwork remains"));
+    words.extend(args(&["--form", "original"]));
+    let (code, stdout, stderr) = invoke(&store, words).await.unwrap();
+    assert_eq!((code, stdout.as_str()), (1, ""));
+    assert!(stderr.contains("no artwork matches form"));
+}
+
+#[tokio::test]
+async fn art_validates_every_exclusion_file_before_bootstrap_or_output() {
+    let temp = Temp::new().unwrap();
+    // An empty store proves file validation happens before automatic bootstrap.
+    let store = temp.store().unwrap();
+    let valid = temp.0.join("valid.txt");
+    let invalid = temp.0.join("invalid-utf8.txt");
+    let missing = temp.0.join("missing.txt");
+    fs::write(&valid, "unrelated").unwrap();
+    fs::write(&invalid, [0xff, 0xfe]).unwrap();
+    for file in [&missing, &invalid, &temp.0] {
+        let mut words = args(&["pokington", "art", "--name", "--title"]);
+        for path in [&valid, file] {
+            words.push("--exclude-file".into());
+            words.push(path.as_os_str().into());
+        }
+        let (code, stdout, stderr) = invoke(&store, words).await.unwrap();
+        assert_eq!((code, stdout.as_str()), (1, ""));
+        assert!(stderr.contains("exclusion file"));
+        assert!(stderr.contains(&file.display().to_string()));
+        assert!(!stderr.contains("Downloading"));
+    }
+}
+
+#[tokio::test]
 async fn art_runner_uses_local_data_and_redirected_color_policy() {
     let temp = Temp::new().unwrap();
     let store = temp.install().unwrap();
