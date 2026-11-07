@@ -27,9 +27,9 @@ pass_filenames = false
 always_run = true
 
 [[repos.hooks]]
-id = "cargo test"
-name = "cargo test"
+id = "cargo test-ci"
+name = "cargo test-ci"
 language = "system"
-entry = "cargo test --all-targets --all-features --locked"
+entry = "cargo test-ci"
 pass_filenames = false
 always_run = true

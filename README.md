@@ -18,6 +18,7 @@ Pokington chooses random names, avoids names you have already used, and displays
 - [Download and refresh data](#download-and-refresh-data)
 - [Local data](#local-data)
 - [Help and scripting](#help-and-scripting)
+- [Development](#development)
 
 ## Features
 
@@ -214,3 +215,23 @@ Help and version commands work without downloading data. Requested names and art
 | `0` | Success, including help and version output. |
 | `1` | An operation failed, such as a download, file read, lookup, or name selection. |
 | `2` | Invalid command-line arguments. |
+
+## Development
+
+Install the pinned nextest version with Cargo from the repository directory:
+
+```sh
+cargo install-nextest
+```
+
+This installs `cargo-nextest` 0.9.151 into Cargo's binary directory, usually `~/.cargo/bin`. The first installation compiles nextest and can take a few minutes.
+
+Run the same test command used by GitHub CI and the prek test hook:
+
+```sh
+cargo test-ci
+```
+
+The alias runs `cargo nextest run --profile ci --all-targets --all-features --locked`. It completes the full test suite after failures and writes the JUnit report to `target/nextest/ci/junit.xml`.
+
+CI installs the same nextest version from a prebuilt binary to keep setup fast. Keep the version in `.cargo/config.toml` and `.github/workflows/ci.yml` aligned when upgrading nextest.

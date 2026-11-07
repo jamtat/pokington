@@ -1,0 +1,3 @@
+[alias]
+install-nextest = "install --locked --version 0.9.151 cargo-nextest"
+test-ci = "nextest run --profile ci --all-targets --all-features --locked"
