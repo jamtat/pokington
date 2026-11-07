@@ -437,7 +437,7 @@ async fn art_runner_uses_local_data_and_redirected_color_policy() {
 }
 
 #[tokio::test]
-async fn art_name_flag_prints_the_selected_form_label_below_the_image() {
+async fn art_name_and_title_flags_use_the_selected_form_label() {
     let temp = Temp::new().unwrap();
     let store = temp.install().unwrap();
     install_artwork(&store).unwrap();
@@ -486,10 +486,19 @@ async fn art_name_flag_prints_the_selected_form_label_below_the_image() {
             let (code, image, stderr) = invoke(&store, args(&words)).await.unwrap();
             assert_eq!((code, stderr.as_str()), (0, ""));
             assert!(image.ends_with('\n'));
+            words.push("--title");
+            let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
+            assert_eq!((code, stderr.as_str()), (0, ""));
+            assert_eq!(stdout, format!("{image}\x1b]2;{expected}\x07"));
+            words.pop();
             words.push("--name");
             let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
             assert_eq!((code, stderr.as_str()), (0, ""));
             assert_eq!(stdout, format!("{image}{expected}\n"));
+            words.push("--title");
+            let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
+            assert_eq!((code, stderr.as_str()), (0, ""));
+            assert_eq!(stdout, format!("{image}{expected}\n\x1b]2;{expected}\x07"));
         }
     }
 }
@@ -512,6 +521,7 @@ async fn art_runner_reports_lookup_and_selected_png_errors_without_output() {
     ] {
         let mut words = words;
         words.push("--name");
+        words.push("--title");
         let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
         assert_eq!(code, 1);
         assert_eq!(stdout, "");

@@ -31,6 +31,9 @@ enum Command {
         /// Print the Pokémon's form display name on a line below the artwork.
         #[arg(long = "name")]
         show_name: bool,
+        /// Set the terminal title to the same display name as --name.
+        #[arg(long)]
+        title: bool,
         #[arg(long)]
         form: Option<String>,
         #[arg(long, value_enum, default_value_t)]
@@ -266,6 +269,7 @@ impl<R: Rng + Send> Runtime<R> {
             Command::Art {
                 name,
                 show_name,
+                title,
                 form,
                 mode,
                 width,
@@ -304,9 +308,15 @@ impl<R: Rng + Send> Runtime<R> {
                         .write_all(text.as_bytes())
                         .map_err(CommandError::Output)?;
                 }
-                if show_name {
-                    writeln!(stdout, "{}", art::display_name(species, selected))
-                        .map_err(CommandError::Output)?;
+                if show_name || title {
+                    let display_name = art::display_name(species, selected);
+                    if show_name {
+                        writeln!(stdout, "{display_name}").map_err(CommandError::Output)?;
+                    }
+                    if title {
+                        write!(stdout, "\x1b]2;{display_name}\x07")
+                            .map_err(CommandError::Output)?;
+                    }
                 }
             }
             Command::Choose {
