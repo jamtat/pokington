@@ -72,6 +72,10 @@ Data commands trigger initial bootstrap when no completed dataset exists. After 
 
 Run the bootstrap process. Skip already downloaded assets. `--force` forces redownloading all assets. Bootstrap should always show a measure of progress in some way with both a progress bar and a log of what is being downloaded.
 
+2026-11-07 reporting correction: for the worker queue refactor, the user permits dropping the progress bar. Retain download logs and a final completion summary on stderr; this supersedes the preceding bar requirement. The refactor uses one dynamic queue of `BootstrapTask` values wrapped with execution metadata and four workers. Fallible execution returns results and follow-up tasks. After terminal failure, stop taking queued work, finish running tasks and retain their successful artwork before returning the first error. See [worker decisions](20261107-bootstrap-worker-design.md).
+
+2026-11-07 concurrency extension: `POKINGTON_CONCURRENCY=n` sets the number of bootstrap workers, defaulting to 4 when unset. Accept positive integers; invalid values fail before store writes or downloads. This supersedes the fixed-four worker count above. Example: `POKINGTON_CONCURRENCY=8 pokington bootstrap`.
+
 Each explicit `bootstrap` refreshes the catalogue from the source, discovering new Pokémon and forms, then downloads new or missing artwork while skipping existing files. `--force` also redownloads existing artwork. After successful first-run bootstrap, ordinary `choose` and `art` commands use local data without checking for catalogue updates.
 
 Keep successfully downloaded artwork so interrupted bootstrap can resume without downloading completed assets again. Initial bootstrap is complete only when the catalogue and all artwork are ready. During updates, keep the previous complete dataset usable until its replacement is ready, including during `--force`. Download failures print to stderr and exit nonzero.

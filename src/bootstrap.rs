@@ -1,24 +1,30 @@
 //! Complete source discovery and recoverable artwork downloads. Ordinary data reads use Store.
 
-use std::{fmt, io::Write, time::Duration};
-
-use http_body_util::{BodyExt, Limited};
-use tokio::task::JoinSet;
-
-use crate::{
-    catalogue::Catalogue,
-    serebii::{self, INDEX_URL, ORIGIN},
-    source::{self, SourceError},
-    store::{Store, StoreError, validate_png},
+use std::{
+    collections::VecDeque, ffi::OsStr, fmt, io::Write, num::NonZeroUsize, sync::Arc, time::Duration,
 };
 
-const CONCURRENCY: usize = 4;
-const ATTEMPTS: usize = 3;
+use http_body_util::{BodyExt, Limited};
+use tokio::{
+    sync::{Mutex, Notify, mpsc},
+    task::JoinSet,
+};
+
+use crate::{
+    catalogue::{ArtworkRef, Catalogue},
+    serebii::{self, INDEX_URL, ORIGIN},
+    source::{self, SourceError},
+    store::{Store, StoreError, Writer, validate_png},
+};
+
+const DEFAULT_CONCURRENCY: usize = 4;
+const ATTEMPTS: u64 = 3;
 const MAX_HTML_BYTES: usize = 4 * 1024 * 1024;
 const MAX_PNG_BYTES: usize = 20 * 1024 * 1024;
 
 #[derive(Debug)]
 pub enum BootstrapError {
+    Configuration(String),
     Http { url: String, reason: String },
     Source(SourceError),
     Store(StoreError),
@@ -29,6 +35,7 @@ pub enum BootstrapError {
 impl fmt::Display for BootstrapError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::Configuration(reason) => f.write_str(reason),
             Self::Http { url, reason } => write!(f, "{url}: {reason}"),
             Self::Source(error) => error.fmt(f),
             Self::Store(error) => error.fmt(f),
@@ -88,7 +95,6 @@ impl Bootstrap {
     }
 
     /// The caller supplies stderr (or a capture in tests); this method never writes stdout.
-    /// Plain bar snapshots also work when stderr is redirected, without terminal controls.
     ///
     /// # Errors
     ///
@@ -99,96 +105,62 @@ impl Bootstrap {
         force: bool,
         progress: &mut impl Write,
     ) -> Result<Catalogue, BootstrapError> {
-        let mut writer = store.try_writer()?;
+        let concurrency = concurrency(std::env::var_os("POKINGTON_CONCURRENCY").as_deref())?;
+        let mut discovery = Discovery {
+            writer: store.try_writer()?,
+            store,
+            force,
+            index: None,
+            species: Vec::new(),
+        };
         let mut progress = Progress(progress);
-        progress.download(INDEX_URL)?;
-        let index = serebii::parse_index(&self.html(INDEX_URL).await?)?;
-        progress.bar("Index", 1, 1)?;
-        let mut records = Vec::with_capacity(index.species.len());
-        progress.bar("Species", 0, index.species.len())?;
-        for batch in index.species.chunks(CONCURRENCY) {
-            let mut jobs = JoinSet::new();
-            for species in batch {
-                let url = format!("{ORIGIN}{}", species.detail_path);
-                progress.download(&url)?;
-                let source = self.clone();
-                let species = species.clone();
-                jobs.spawn(
-                    async move { Ok::<_, BootstrapError>((species, source.html(&url).await?)) },
-                );
-            }
-            while let Some(result) = jobs.join_next().await {
-                let (link, html) = result.map_err(BootstrapError::Task)??;
-                let hub = serebii::parse_hub(&html, &link)?;
-                let mut evidence = Vec::new();
-                let mut record = serebii::reconcile(&hub, &evidence);
-                // Older linked games can independently identify forms absent from current games.
-                for path in &hub.game_links {
-                    if record.is_ok() {
-                        break;
+        let queue = Arc::new(TaskQueue::new());
+        let (sender, mut receiver) = mpsc::channel(DEFAULT_CONCURRENCY);
+        let mut workers = JoinSet::new();
+        for _ in 0..concurrency {
+            workers.spawn(worker(self.clone(), queue.clone(), sender.clone()));
+        }
+        drop(sender);
+        let mut failure = None;
+        loop {
+            let result = tokio::select! {
+                event = receiver.recv() => match event {
+                    Some(WorkerEvent::Downloading(url)) => progress.download(&url),
+                    Some(WorkerEvent::Finished(result)) => {
+                        let result = result.and_then(|output| {
+                            discovery.accept(output, failure.is_none())
+                        });
+                        let tasks = match result {
+                            Ok(tasks) => tasks,
+                            Err(error) => {
+                                failure.get_or_insert(error);
+                                queue.stop().await;
+                                Vec::new()
+                            }
+                        };
+                        queue.complete(tasks).await;
+                        Ok(())
                     }
-                    let url = format!("{ORIGIN}{path}");
-                    progress.download(&url)?;
-                    evidence.push(serebii::parse_enrichment(
-                        &hub,
-                        path,
-                        &self.html(&url).await?,
-                    )?);
-                    record = serebii::reconcile(&hub, &evidence);
+                    None => break,
+                },
+                result = workers.join_next(), if !workers.is_empty() => {
+                    result.transpose().map(|_| ()).map_err(BootstrapError::Task)
                 }
-                records.push(record?);
-                progress.bar("Species", records.len(), index.species.len())?;
+            };
+            if let Err(error) = result {
+                failure.get_or_insert(error);
+                queue.stop().await;
             }
         }
-        records.sort_by_key(|species| species.id);
-        writer.prepare(&index, records, force)?;
-        if !force && let Ok(Some(active)) = store.load_active() {
-            writer.reuse_active(&active)?;
-        }
-        let checkpoint = writer.checkpoint()?;
-        let total = checkpoint.catalogue().forms().count();
-        let mut done = checkpoint.completed().len();
-        let downloads: Vec<_> = checkpoint
-            .catalogue()
-            .forms()
-            .filter(|form| !checkpoint.completed().contains(&form.local_artwork))
-            .map(|form| (form.local_artwork.clone(), form.artwork_url.clone()))
-            .collect();
-        progress.bar("Artwork", done, total)?;
-        for batch in downloads.chunks(CONCURRENCY) {
-            let mut jobs = JoinSet::new();
-            for (reference, url) in batch {
-                progress.download(url)?;
-                let source = self.clone();
-                let reference = reference.clone();
-                let url = url.clone();
-                jobs.spawn(async move { (reference, source.fetch(&url, Content::Png).await) });
-            }
-            // Finish successful downloads in this batch even if another request fails.
-            let mut failure = None;
-            while let Some(result) = jobs.join_next().await {
-                let saved = match result {
-                    Ok((reference, Ok(bytes))) => writer
-                        .write_artwork(&reference, &bytes)
-                        .map_err(BootstrapError::from),
-                    Ok((_, Err(error))) => Err(error),
-                    Err(error) => Err(BootstrapError::Task(error)),
-                };
-                match saved {
-                    Ok(()) => {
-                        done = done.saturating_add(1);
-                        progress.bar("Artwork", done, total)?;
-                    }
-                    Err(error) => {
-                        failure.get_or_insert(error);
-                    }
-                }
-            }
-            if let Some(error) = failure {
-                return Err(error);
+        while let Some(result) = workers.join_next().await {
+            if let Err(error) = result {
+                failure.get_or_insert(BootstrapError::Task(error));
             }
         }
-        let catalogue = writer.publish()?;
+        if let Some(error) = failure {
+            return Err(error);
+        }
+        let catalogue = discovery.writer.publish()?;
         report_complete(&mut progress, &catalogue)?;
         Ok(catalogue)
     }
@@ -211,23 +183,12 @@ impl Bootstrap {
                 BootstrapError::Source(SourceError(format!("unsupported source URL: {url}")))
             })?;
         let request_url = format!("{}{path}", self.origin);
-        let mut reason = String::new();
-        for attempt in 1..=ATTEMPTS {
-            match self.fetch_once(&request_url, content).await {
-                Ok(bytes) => return Ok(bytes),
-                Err(error) => reason = error,
-            }
-            if attempt < ATTEMPTS {
-                let delay = u64::try_from(attempt)
-                    .unwrap_or(u64::MAX)
-                    .saturating_mul(100);
-                tokio::time::sleep(Duration::from_millis(delay)).await;
-            }
-        }
-        Err(BootstrapError::Http {
-            url: url.into(),
-            reason: format!("{reason} (after {ATTEMPTS} attempts)"),
-        })
+        self.fetch_once(&request_url, content)
+            .await
+            .map_err(|reason| BootstrapError::Http {
+                url: url.into(),
+                reason,
+            })
     }
 
     async fn fetch_once(&self, url: &str, content: Content) -> Result<Vec<u8>, String> {
@@ -285,6 +246,286 @@ impl Bootstrap {
     }
 }
 
+fn concurrency(value: Option<&OsStr>) -> Result<usize, BootstrapError> {
+    let Some(value) = value else {
+        return Ok(DEFAULT_CONCURRENCY);
+    };
+    value
+        .to_str()
+        .and_then(|value| value.parse::<NonZeroUsize>().ok())
+        .map(NonZeroUsize::get)
+        .ok_or_else(|| {
+            BootstrapError::Configuration("POKINGTON_CONCURRENCY must be a positive integer".into())
+        })
+}
+
+// Task variants describe work only. Retry bookkeeping belongs to the queue entry.
+enum BootstrapTask {
+    NationalPokedex,
+    Pokemon(serebii::SpeciesLink),
+    GamePage {
+        hub: Arc<serebii::Hub>,
+        evidence: Vec<serebii::Enrichment>,
+        path: String,
+    },
+    Artwork {
+        reference: ArtworkRef,
+        url: String,
+    },
+}
+
+struct BootstrapTaskResult {
+    data: BootstrapData,
+    tasks: Vec<BootstrapTask>,
+}
+
+enum BootstrapData {
+    Index(serebii::Index),
+    Species(serebii::Species),
+    Artwork(ArtworkRef, Vec<u8>),
+    None,
+}
+
+impl BootstrapTask {
+    fn url(&self) -> String {
+        match self {
+            Self::NationalPokedex => INDEX_URL.into(),
+            Self::Pokemon(link) => format!("{ORIGIN}{}", link.detail_path),
+            Self::GamePage { path, .. } => format!("{ORIGIN}{path}"),
+            Self::Artwork { url, .. } => url.clone(),
+        }
+    }
+
+    async fn execute(&mut self, source: &Bootstrap) -> Result<BootstrapTaskResult, BootstrapError> {
+        let url = self.url();
+        match self {
+            Self::NationalPokedex => {
+                let index = serebii::parse_index(&source.html(&url).await?)?;
+                let tasks = index.species.iter().cloned().map(Self::Pokemon).collect();
+                Ok(BootstrapTaskResult {
+                    data: BootstrapData::Index(index),
+                    tasks,
+                })
+            }
+            Self::Pokemon(link) => {
+                let hub = serebii::parse_hub(&source.html(&url).await?, link)?;
+                reconcile(Arc::new(hub), Vec::new())
+            }
+            Self::GamePage {
+                hub,
+                evidence,
+                path,
+            } => {
+                evidence.push(serebii::parse_enrichment(
+                    hub,
+                    path,
+                    &source.html(&url).await?,
+                )?);
+                reconcile(hub.clone(), std::mem::take(evidence))
+            }
+            Self::Artwork { reference, .. } => Ok(BootstrapTaskResult {
+                data: BootstrapData::Artwork(
+                    reference.clone(),
+                    source.fetch(&url, Content::Png).await?,
+                ),
+                tasks: Vec::new(),
+            }),
+        }
+    }
+}
+
+fn reconcile(
+    hub: Arc<serebii::Hub>,
+    evidence: Vec<serebii::Enrichment>,
+) -> Result<BootstrapTaskResult, BootstrapError> {
+    match serebii::reconcile(&hub, &evidence) {
+        Ok(species) => Ok(BootstrapTaskResult {
+            data: BootstrapData::Species(species),
+            tasks: Vec::new(),
+        }),
+        Err(error) => {
+            let path = hub.game_links.get(evidence.len()).ok_or(error)?.clone();
+            Ok(BootstrapTaskResult {
+                data: BootstrapData::None,
+                tasks: vec![BootstrapTask::GamePage {
+                    hub,
+                    evidence,
+                    path,
+                }],
+            })
+        }
+    }
+}
+
+struct QueuedBootstrapTask {
+    task: BootstrapTask,
+    attempts: u64,
+}
+
+impl QueuedBootstrapTask {
+    async fn execute(&mut self, source: &Bootstrap) -> Result<BootstrapTaskResult, BootstrapError> {
+        loop {
+            self.attempts = self.attempts.saturating_add(1);
+            match self.task.execute(source).await {
+                Err(BootstrapError::Http { url, reason }) => {
+                    if self.attempts == ATTEMPTS {
+                        return Err(BootstrapError::Http {
+                            url,
+                            reason: format!("{reason} (after {ATTEMPTS} attempts)"),
+                        });
+                    }
+                    tokio::time::sleep(Duration::from_millis(self.attempts.saturating_mul(100)))
+                        .await;
+                }
+                result => return result,
+            }
+        }
+    }
+}
+
+struct TaskQueue {
+    state: Mutex<QueueState>,
+    ready: Notify,
+}
+
+struct QueueState {
+    tasks: VecDeque<QueuedBootstrapTask>,
+    active: usize,
+    stopped: bool,
+}
+
+impl TaskQueue {
+    fn new() -> Self {
+        Self {
+            state: Mutex::new(QueueState {
+                tasks: VecDeque::from([QueuedBootstrapTask {
+                    task: BootstrapTask::NationalPokedex,
+                    attempts: 0,
+                }]),
+                active: 0,
+                stopped: false,
+            }),
+            ready: Notify::new(),
+        }
+    }
+
+    async fn pop(&self) -> Option<QueuedBootstrapTask> {
+        loop {
+            // Register before checking the queue so enqueue/stop cannot lose a wakeup.
+            let ready = self.ready.notified();
+            let mut state = self.state.lock().await;
+            if state.stopped {
+                return None;
+            }
+            if let Some(task) = state.tasks.pop_front() {
+                state.active = state.active.saturating_add(1);
+                return Some(task);
+            }
+            drop(state);
+            ready.await;
+        }
+    }
+
+    async fn complete(&self, tasks: Vec<BootstrapTask>) {
+        let mut state = self.state.lock().await;
+        // Include finished tasks until their results and follow-up work have been applied.
+        state.active = state.active.saturating_sub(1);
+        if !state.stopped {
+            state.tasks.extend(
+                tasks
+                    .into_iter()
+                    .map(|task| QueuedBootstrapTask { task, attempts: 0 }),
+            );
+            state.stopped = state.active == 0 && state.tasks.is_empty();
+        }
+        drop(state);
+        self.ready.notify_waiters();
+    }
+
+    async fn stop(&self) {
+        let mut state = self.state.lock().await;
+        state.stopped = true;
+        state.tasks.clear();
+        drop(state);
+        self.ready.notify_waiters();
+    }
+}
+
+enum WorkerEvent {
+    Downloading(String),
+    Finished(Result<BootstrapTaskResult, BootstrapError>),
+}
+
+async fn worker(source: Bootstrap, queue: Arc<TaskQueue>, sender: mpsc::Sender<WorkerEvent>) {
+    while let Some(mut task) = queue.pop().await {
+        if sender
+            .send(WorkerEvent::Downloading(task.task.url()))
+            .await
+            .is_err()
+        {
+            return;
+        }
+        let result = task.execute(&source).await;
+        if result.is_err() {
+            queue.stop().await;
+        }
+        if sender.send(WorkerEvent::Finished(result)).await.is_err() {
+            return;
+        }
+    }
+}
+
+struct Discovery<'a> {
+    writer: Writer,
+    store: &'a Store,
+    force: bool,
+    index: Option<serebii::Index>,
+    species: Vec<serebii::Species>,
+}
+
+impl Discovery<'_> {
+    fn accept(
+        &mut self,
+        output: BootstrapTaskResult,
+        admit: bool,
+    ) -> Result<Vec<BootstrapTask>, BootstrapError> {
+        match output.data {
+            BootstrapData::Artwork(reference, bytes) => {
+                self.writer.write_artwork(&reference, &bytes)?;
+            }
+            _ if !admit => return Ok(Vec::new()),
+            BootstrapData::Index(index) => self.index = Some(index),
+            BootstrapData::Species(species) => {
+                self.species.push(species);
+                if let Some(index) = &self.index
+                    && self.species.len() == index.species.len()
+                {
+                    self.species.sort_by_key(|species| species.id);
+                    self.writer
+                        .prepare(index, std::mem::take(&mut self.species), self.force)?;
+                    if !self.force
+                        && let Ok(Some(active)) = self.store.load_active()
+                    {
+                        self.writer.reuse_active(&active)?;
+                    }
+                    let checkpoint = self.writer.checkpoint()?;
+                    return Ok(checkpoint
+                        .catalogue()
+                        .forms()
+                        .filter(|form| !checkpoint.completed().contains(&form.local_artwork))
+                        .map(|form| BootstrapTask::Artwork {
+                            reference: form.local_artwork.clone(),
+                            url: form.artwork_url.clone(),
+                        })
+                        .collect());
+                }
+            }
+            BootstrapData::None => (),
+        }
+        Ok(output.tasks)
+    }
+}
+
 struct Progress<'a, W>(&'a mut W);
 impl<W: Write> Progress<'_, W> {
     fn line(&mut self, message: &str) -> Result<(), BootstrapError> {
@@ -294,18 +535,6 @@ impl<W: Write> Progress<'_, W> {
     }
     fn download(&mut self, url: &str) -> Result<(), BootstrapError> {
         self.line(&format!("Downloading {url}"))
-    }
-    fn bar(&mut self, label: &str, done: usize, total: usize) -> Result<(), BootstrapError> {
-        let filled = 24_usize
-            .saturating_mul(done)
-            .checked_div(total)
-            .unwrap_or(24)
-            .min(24);
-        self.line(&format!(
-            "{label} [{}{}] {done}/{total}",
-            "#".repeat(filled),
-            "-".repeat(24_usize.saturating_sub(filled))
-        ))
     }
 }
 
@@ -323,4 +552,39 @@ fn report_complete<W: Write>(
         catalogue.species.len(),
         catalogue.forms().count(),
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn worker_failure_stops_dequeue_and_rejects_follow_up_tasks() {
+        let queue = Arc::new(TaskQueue::new());
+        // Replace the seed with two tasks that fail before making any HTTP request.
+        let _seed = queue.pop().await.unwrap();
+        let task = || BootstrapTask::Artwork {
+            reference: ArtworkRef::new("artwork/00000000000000000000000000000000-1.png".into())
+                .unwrap(),
+            url: "unsupported-source".into(),
+        };
+        queue.complete(vec![task(), task()]).await;
+        let (sender, mut receiver) = mpsc::channel(DEFAULT_CONCURRENCY);
+        worker(Bootstrap::new().unwrap(), queue.clone(), sender).await;
+        assert!(matches!(
+            receiver.recv().await,
+            Some(WorkerEvent::Downloading(_))
+        ));
+        assert!(matches!(
+            receiver.recv().await,
+            Some(WorkerEvent::Finished(Err(BootstrapError::Source(_))))
+        ));
+        assert!(
+            receiver.recv().await.is_none(),
+            "the second task must not start"
+        );
+        queue.complete(vec![task()]).await;
+        assert!(queue.pop().await.is_none());
+        assert!(queue.state.lock().await.tasks.is_empty());
+    }
 }

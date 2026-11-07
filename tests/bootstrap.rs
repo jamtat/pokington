@@ -4,12 +4,15 @@ use std::{
     collections::{BTreeMap, VecDeque},
     env,
     error::Error,
+    ffi::OsString,
     fs,
     io::{Read, Write},
     net::{TcpListener, TcpStream},
+    os::unix::ffi::OsStringExt,
     path::PathBuf,
+    process::Command,
     sync::{
-        Arc, Mutex,
+        Arc, Condvar, Mutex,
         atomic::{AtomicBool, AtomicUsize, Ordering},
     },
     thread,
@@ -58,6 +61,7 @@ struct Response {
     body: Vec<u8>,
     length: usize,
     delay: Duration,
+    gate: Option<Arc<Gate>>,
 }
 impl Response {
     fn new(status: u16, mime: &str, body: Vec<u8>) -> Self {
@@ -67,6 +71,7 @@ impl Response {
             length: body.len(),
             body,
             delay: Duration::ZERO,
+            gate: None,
         }
     }
     fn html(value: &str) -> Result<Self, Failure> {
@@ -94,11 +99,40 @@ impl Response {
 }
 
 #[derive(Default)]
+struct Gate {
+    open: Mutex<bool>,
+    changed: Condvar,
+}
+
+impl Gate {
+    fn wait(&self) -> Result<(), Failure> {
+        drop(
+            self.changed
+                .wait_while(self.open.lock().map_err(|_| "gate poisoned")?, |open| {
+                    !*open
+                })
+                .map_err(|_| "gate poisoned")?,
+        );
+        Ok(())
+    }
+
+    fn release(&self) {
+        *self
+            .open
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = true;
+        self.changed.notify_all();
+    }
+}
+
+#[derive(Default)]
 struct State {
     routes: BTreeMap<String, VecDeque<Response>>,
     hits: Vec<String>,
     active_images: usize,
     max_images: usize,
+    active: usize,
+    max_active: usize,
 }
 struct Server {
     origin: String,
@@ -174,6 +208,53 @@ impl Server {
             &self.origin,
         ))
     }
+    fn many_species() -> Result<Self, Failure> {
+        let server = Self::new()?;
+        let row = INDEX
+            .get(
+                INDEX.find("<tr>\n").ok_or("missing index row")?
+                    ..INDEX.rfind("</table></body>").ok_or("missing table end")?,
+            )
+            .ok_or("invalid row")?;
+        let mut rows = String::new();
+        for id in 6..=11 {
+            rows.push_str(
+                &row.replace("0006", &format!("{id:04}"))
+                    .replace("Charizard", &format!("Pokemon{id}"))
+                    .replace("charizard", &format!("pokemon{id}")),
+            );
+            let hub = original_hub()?
+                .replace("006", &format!("{id:03}"))
+                .replace("Charizard", &format!("Pokemon{id}"))
+                .replace("charizard", &format!("pokemon{id}"));
+            server.route(
+                &format!("/pokemon/pokemon{id}"),
+                vec![Response::html(&hub)?],
+            )?;
+            server.route(&format!("/pokemon/art/{id:03}.png"), vec![Response::png()?])?;
+        }
+        server.route(
+            INDEX_PATH,
+            vec![Response::html(
+                &INDEX.replace(row, &rows).replace("006-006", "006-011"),
+            )?],
+        )?;
+        Ok(server)
+    }
+
+    fn hold(&self, path: &str) -> Result<Arc<Gate>, Failure> {
+        let gate = Arc::new(Gate::default());
+        self.state
+            .lock()
+            .map_err(|_| "fixture state poisoned")?
+            .routes
+            .get_mut(path)
+            .ok_or("missing held route")?
+            .back_mut()
+            .ok_or("missing held response")?
+            .gate = Some(gate.clone());
+        Ok(gate)
+    }
     fn hits(&self, path: &str) -> Result<usize, Failure> {
         Ok(self
             .state
@@ -198,6 +279,19 @@ impl Server {
 impl Drop for Server {
     fn drop(&mut self) {
         self.stop.store(true, Ordering::Relaxed);
+        // Unblock held fixture responses even when an ordering assertion panics.
+        for response in self
+            .state
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .routes
+            .values()
+            .flatten()
+        {
+            if let Some(gate) = &response.gate {
+                gate.release();
+            }
+        }
         if let Some(thread) = self.thread.take() {
             assert!(matches!(thread.join(), Ok(Ok(()))), "fixture server failed");
         }
@@ -225,6 +319,11 @@ fn serve(mut stream: TcpStream, state: &Mutex<State>) -> Result<(), Failure> {
     let response = {
         let mut state = state.lock().map_err(|_| "fixture state poisoned")?;
         state.hits.push(path.clone());
+        state.active = state
+            .active
+            .checked_add(1)
+            .ok_or("active request count overflow")?;
+        state.max_active = state.max_active.max(state.active);
         if is_image {
             state.active_images = state
                 .active_images
@@ -240,21 +339,29 @@ fn serve(mut stream: TcpStream, state: &Mutex<State>) -> Result<(), Failure> {
             None => Response::new(404, "text/html", b"missing fixture route".to_vec()),
         }
     };
+    if let Some(gate) = &response.gate {
+        gate.wait()?;
+    }
     thread::sleep(response.delay);
     let header = format!(
         "HTTP/1.1 {} Fixture\r\nContent-Type: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
         response.status, response.mime, response.length
     );
+    let mut state = state.lock().map_err(|_| "fixture state poisoned")?;
     let _ = stream
         .write_all(header.as_bytes())
         .and_then(|()| stream.write_all(&response.body));
+    state.active = state
+        .active
+        .checked_sub(1)
+        .ok_or("active request count underflow")?;
     if is_image {
-        let mut state = state.lock().map_err(|_| "fixture state poisoned")?;
         state.active_images = state
             .active_images
             .checked_sub(1)
             .ok_or("active image count underflow")?;
     }
+    drop(state);
     Ok(())
 }
 
@@ -278,7 +385,7 @@ fn original_hub() -> Result<String, Failure> {
 }
 
 #[tokio::test]
-async fn complete_initial_and_refresh_skip_validate_artwork_and_show_plain_progress() {
+async fn complete_initial_and_refresh_skip_validate_artwork_and_log_downloads() {
     let temp = Temp::new().unwrap();
     let server = Server::fixture().unwrap();
     let source = server.source().unwrap();
@@ -306,7 +413,7 @@ async fn complete_initial_and_refresh_skip_validate_artwork_and_show_plain_progr
     assert_eq!(server.hits(INDEX_PATH).unwrap(), 2);
     let output = String::from_utf8(output).unwrap();
     assert!(output.contains("Downloading https://www.serebii.net/pokemon/nationalpokedex.shtml"));
-    assert!(output.contains("Artwork [########################] 4/4"));
+    assert!(!output.contains("[####"));
     assert!(output.contains("Complete: 1 species, 4 forms, 0 excluded illustrations"));
     assert!(!output.contains(['\x1b', '\r']));
 }
@@ -507,6 +614,201 @@ async fn transient_http_errors_are_retried_with_bounded_concurrency() {
     assert!(
         (2..=4).contains(&max),
         "observed {max} concurrent image requests"
+    );
+}
+
+#[tokio::test]
+async fn free_workers_start_the_fifth_species_and_artwork_without_waiting_for_the_first() {
+    for (held, fifth) in [
+        ("/pokemon/pokemon6", "/pokemon/pokemon10"),
+        ("/pokemon/art/006.png", "/pokemon/art/010.png"),
+    ] {
+        let temp = Temp::new().unwrap();
+        let server = Server::many_species().unwrap();
+        let gate = server.hold(held).unwrap();
+        let source = server.source().unwrap();
+        let store = temp.store().unwrap();
+        let mut progress = Vec::new();
+        let run = source.run(&store, false, &mut progress);
+        tokio::pin!(run);
+        let observed = tokio::select! {
+            result = &mut run => {
+                gate.release();
+                panic!("bootstrap finished before releasing {held}: {result:?}");
+            }
+            observed = tokio::time::timeout(Duration::from_secs(5), async {
+                while server.hits(fifth).unwrap() == 0 {
+                    tokio::time::sleep(Duration::from_millis(1)).await;
+                }
+            }) => observed,
+        };
+        gate.release();
+        let catalogue = run.await.unwrap();
+        assert!(observed.is_ok(), "{fifth} waited for held task {held}");
+        installed(&store, &catalogue).unwrap();
+        assert_eq!(catalogue.species.len(), 6);
+        for id in 6..=11 {
+            assert_eq!(server.hits(&format!("/pokemon/pokemon{id}")).unwrap(), 1);
+            assert_eq!(
+                server.hits(&format!("/pokemon/art/{id:03}.png")).unwrap(),
+                1
+            );
+        }
+        let max = server.state.lock().unwrap().max_active;
+        assert!((2..=4).contains(&max), "observed {max} concurrent requests");
+    }
+}
+
+#[test]
+fn concurrency_env_configures_workers_in_isolated_processes() {
+    for (value, expected) in [
+        (None, "4"),
+        (Some("1"), "1"),
+        (Some("2"), "2"),
+        (Some("8"), "6"),
+    ] {
+        let mut command = Command::new(env::current_exe().unwrap());
+        command
+            .args(["--exact", "configured_concurrency_child", "--nocapture"])
+            .env("POKINGTON_CONCURRENCY_TEST_EXPECTED", expected)
+            .env_remove("POKINGTON_CONCURRENCY");
+        if let Some(value) = value {
+            command.env("POKINGTON_CONCURRENCY", value);
+        }
+        let output = command.output().unwrap();
+        assert!(
+            output.status.success(),
+            "concurrency {value:?}: {}{}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
+}
+
+#[tokio::test]
+async fn configured_concurrency_child() {
+    let Ok(expected) = env::var("POKINGTON_CONCURRENCY_TEST_EXPECTED") else {
+        return;
+    };
+    let expected = expected.parse::<usize>().unwrap();
+    let temp = Temp::new().unwrap();
+    let server = Server::many_species().unwrap();
+    let gates: Vec<_> = (6..=11)
+        .map(|id| server.hold(&format!("/pokemon/pokemon{id}")).unwrap())
+        .collect();
+    let source = server.source().unwrap();
+    let store = temp.store().unwrap();
+    let mut progress = Vec::new();
+    let run = source.run(&store, false, &mut progress);
+    tokio::pin!(run);
+    let observed = tokio::select! {
+        result = &mut run => panic!("bootstrap finished with held species pages: {result:?}"),
+        observed = tokio::time::timeout(Duration::from_secs(5), async {
+            while server.hits("/pokemon/pokemon6").unwrap() == 0
+                || server.state.lock().unwrap().active != expected {
+                tokio::time::sleep(Duration::from_millis(1)).await;
+            }
+        }) => observed,
+    };
+    for gate in gates {
+        gate.release();
+    }
+    let catalogue = run.await.unwrap();
+    assert!(
+        observed.is_ok(),
+        "did not reach {expected} concurrent requests"
+    );
+    installed(&store, &catalogue).unwrap();
+    assert_eq!(server.state.lock().unwrap().max_active, expected);
+}
+
+#[test]
+fn invalid_concurrency_env_fails_before_creating_store_files() {
+    for value in [
+        "0",
+        "-1",
+        "1.5",
+        "",
+        "no",
+        "99999999999999999999999999999999999999",
+    ]
+    .map(OsString::from)
+    .into_iter()
+    .chain([OsString::from_vec(vec![0xff])])
+    {
+        let temp = Temp::new().unwrap();
+        let output = Command::new(env!("CARGO_BIN_EXE_pokington"))
+            .arg("bootstrap")
+            .env("HOME", &temp.0)
+            .env("XDG_DATA_HOME", temp.0.join("data"))
+            .env("POKINGTON_CONCURRENCY", &value)
+            .output()
+            .unwrap();
+        assert_eq!(output.status.code(), Some(1), "{value:?}");
+        assert!(
+            String::from_utf8_lossy(&output.stderr)
+                .contains("POKINGTON_CONCURRENCY must be a positive integer")
+        );
+        assert_eq!(output.stdout, b"");
+        assert_eq!(fs::read_dir(&temp.0).unwrap().count(), 0);
+    }
+}
+
+struct FailArtworkLog(Arc<AtomicBool>);
+
+impl Write for FailArtworkLog {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        if String::from_utf8_lossy(bytes).contains("/pokemon/art/") {
+            self.0.store(true, Ordering::Relaxed);
+            return Err(std::io::Error::other("simulated log failure"));
+        }
+        Ok(bytes.len())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+
+#[tokio::test]
+async fn coordinator_failure_stops_queued_work_and_drains_successful_transfers() {
+    let temp = Temp::new().unwrap();
+    let server = Server::many_species().unwrap();
+    let gates: Vec<_> = (6..=9)
+        .map(|id| server.hold(&format!("/pokemon/art/{id:03}.png")).unwrap())
+        .collect();
+    let failed = Arc::new(AtomicBool::new(false));
+    let mut progress = FailArtworkLog(failed.clone());
+    let source = server.source().unwrap();
+    let store = temp.store().unwrap();
+    let run = source.run(&store, false, &mut progress);
+    tokio::pin!(run);
+    let observed = tokio::select! {
+        result = &mut run => panic!("bootstrap finished before releasing transfers: {result:?}"),
+        observed = tokio::time::timeout(Duration::from_secs(5), async {
+            while !failed.load(Ordering::Relaxed) {
+                tokio::time::sleep(Duration::from_millis(1)).await;
+            }
+        }) => observed,
+    };
+    for gate in gates {
+        gate.release();
+    }
+    assert!(observed.is_ok());
+    let error = run.await.unwrap_err();
+    assert!(error.to_string().contains("simulated log failure"));
+    assert_eq!(server.hits("/pokemon/art/010.png").unwrap(), 0);
+    assert_eq!(server.hits("/pokemon/art/011.png").unwrap(), 0);
+    let saved = fs::read_dir(store.root().join("artwork")).unwrap().count();
+    assert!((1..=4).contains(&saved));
+    assert_eq!(server.image_hits().unwrap(), saved);
+    assert!(store.load_active().unwrap().is_none());
+    let catalogue = source.run(&store, false, &mut Vec::new()).await.unwrap();
+    installed(&store, &catalogue).unwrap();
+    assert_eq!(
+        server.image_hits().unwrap(),
+        6,
+        "saved transfers must be reused"
     );
 }
 
@@ -802,7 +1104,7 @@ async fn choose_first_run_completes_bootstrap_with_names_only_on_stdout() {
     assert_eq!(stdout, b"Charizard\n");
     let progress = String::from_utf8(stderr).unwrap();
     assert!(progress.contains("Downloading"));
-    assert!(progress.contains("Artwork [########################] 4/4"));
+    assert!(progress.contains("Complete: 1 species, 4 forms"));
     let catalogue = store
         .load_active()
         .unwrap()
