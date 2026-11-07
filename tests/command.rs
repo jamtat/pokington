@@ -14,6 +14,7 @@ use pokington::{
     command::{self, CommandError, Runtime},
     serebii,
     store::Store,
+    terminal::Terminal,
 };
 use rand::{SeedableRng, rngs::StdRng};
 
@@ -23,13 +24,18 @@ static NEXT: AtomicUsize = AtomicUsize::new(0);
 struct Temp(PathBuf);
 impl Temp {
     fn new() -> Result<Self, Failure> {
-        let path = std::env::temp_dir().join(format!(
-            "pokington-command-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&path)?;
-        Ok(Self(path))
+        loop {
+            let path = std::env::temp_dir().join(format!(
+                "pokington-command-{}-{}",
+                std::process::id(),
+                NEXT.fetch_add(1, Ordering::Relaxed)
+            ));
+            match fs::create_dir(&path) {
+                Ok(()) => return Ok(Self(path)),
+                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => (),
+                Err(error) => return Err(error.into()),
+            }
+        }
     }
     fn store(&self) -> Result<Store, Failure> {
         Ok(Store::at(self.0.join("data"))?)
@@ -110,7 +116,12 @@ async fn invoke(store: &Store, args: Vec<OsString>) -> Result<(u8, String, Strin
     let mut stderr = Vec::new();
     let code = command::run(
         args,
-        || Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(23)).with_bootstrap(source)),
+        || {
+            // The injected output buffers represent redirected streams, even under a TTY.
+            Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(23))
+                .with_terminal(Terminal::default())
+                .with_bootstrap(source))
+        },
         &mut stdout,
         &mut stderr,
     )
@@ -492,14 +503,14 @@ async fn terminal_context_selects_blocks_and_limits_automatic_color_depth() {
         let code = command::run(
             ["pokington", "art", "Mew", "--width", "4"],
             || {
-                Ok(
-                    Runtime::new(store.clone(), StdRng::seed_from_u64(1)).with_terminal(Terminal {
+                Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(1))
+                    .with_terminal(Terminal {
                         geometry: Geometry::default(),
                         is_terminal: true,
                         unicode,
                         depth,
-                    }),
-                )
+                    })
+                    .with_picker(ratatui_image::picker::Picker::halfblocks()))
             },
             &mut stdout,
             &mut stderr,

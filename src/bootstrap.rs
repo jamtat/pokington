@@ -66,6 +66,7 @@ enum Content {
 pub struct Bootstrap {
     client: wreq::Client,
     origin: String,
+    concurrency: Option<NonZeroUsize>,
 }
 
 impl Bootstrap {
@@ -91,7 +92,15 @@ impl Bootstrap {
         Self {
             client,
             origin: origin.trim_end_matches('/').to_owned(),
+            concurrency: None,
         }
+    }
+
+    /// Override the worker count; otherwise `POKINGTON_CONCURRENCY` supplies it.
+    #[must_use]
+    pub const fn with_concurrency(mut self, concurrency: NonZeroUsize) -> Self {
+        self.concurrency = Some(concurrency);
+        self
     }
 
     /// The caller supplies stderr (or a capture in tests); this method never writes stdout.
@@ -105,7 +114,10 @@ impl Bootstrap {
         force: bool,
         progress: &mut impl Write,
     ) -> Result<Catalogue, BootstrapError> {
-        let concurrency = concurrency(std::env::var_os("POKINGTON_CONCURRENCY").as_deref())?;
+        let concurrency = match self.concurrency {
+            Some(value) => value.get(),
+            None => concurrency(std::env::var_os("POKINGTON_CONCURRENCY").as_deref())?,
+        };
         let mut discovery = Discovery {
             writer: store.try_writer()?,
             store,

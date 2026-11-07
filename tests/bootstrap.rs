@@ -8,6 +8,7 @@ use std::{
     fs,
     io::{Read, Write},
     net::{TcpListener, TcpStream},
+    num::NonZeroUsize,
     os::unix::ffi::OsStringExt,
     path::PathBuf,
     process::Command,
@@ -16,7 +17,7 @@ use std::{
         atomic::{AtomicBool, AtomicUsize, Ordering},
     },
     thread,
-    time::{Duration, Instant},
+    time::Duration,
 };
 
 use pokington::{
@@ -36,13 +37,18 @@ type Failure = Box<dyn Error + Send + Sync>;
 struct Temp(PathBuf);
 impl Temp {
     fn new() -> Result<Self, Failure> {
-        let path = env::temp_dir().join(format!(
-            "pokington-bootstrap-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&path)?;
-        Ok(Self(path))
+        loop {
+            let path = env::temp_dir().join(format!(
+                "pokington-bootstrap-{}-{}",
+                std::process::id(),
+                NEXT.fetch_add(1, Ordering::Relaxed)
+            ));
+            match fs::create_dir(&path) {
+                Ok(()) => return Ok(Self(path)),
+                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => (),
+                Err(error) => return Err(error.into()),
+            }
+        }
     }
     fn store(&self) -> Result<Store, Failure> {
         Ok(Store::at(self.0.clone())?)
@@ -60,7 +66,6 @@ struct Response {
     mime: String,
     body: Vec<u8>,
     length: usize,
-    delay: Duration,
     gate: Option<Arc<Gate>>,
 }
 impl Response {
@@ -70,7 +75,6 @@ impl Response {
             mime: mime.into(),
             length: body.len(),
             body,
-            delay: Duration::ZERO,
             gate: None,
         }
     }
@@ -203,6 +207,11 @@ impl Server {
         Ok(server)
     }
     fn source(&self) -> Result<Bootstrap, Failure> {
+        Ok(self
+            .source_from_env()?
+            .with_concurrency(NonZeroUsize::new(4).ok_or("fixture concurrency must be positive")?))
+    }
+    fn source_from_env(&self) -> Result<Bootstrap, Failure> {
         Ok(Bootstrap::with_http(
             http_client_builder().https_only(false).build()?,
             &self.origin,
@@ -342,7 +351,6 @@ fn serve(mut stream: TcpStream, state: &Mutex<State>) -> Result<(), Failure> {
     if let Some(gate) = &response.gate {
         gate.wait()?;
     }
-    thread::sleep(response.delay);
     let header = format!(
         "HTTP/1.1 {} Fixture\r\nContent-Type: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
         response.status, response.mime, response.length
@@ -585,36 +593,46 @@ async fn refresh_discovers_new_species_from_the_extended_source_index() {
 async fn transient_http_errors_are_retried_with_bounded_concurrency() {
     let temp = Temp::new().unwrap();
     let server = Server::fixture().unwrap();
-    let mut slow = Response::png().unwrap();
-    slow.delay = Duration::from_millis(40);
-    for image in IMAGES {
-        server
-            .route(&format!("/pokemon/art/{image}"), vec![slow.clone()])
-            .unwrap();
-    }
     server
         .route(
             "/pokemon/art/006.png",
             vec![
                 Response::new(429, "text/html", b"busy".to_vec()),
                 Response::new(500, "text/html", b"busy".to_vec()),
-                slow,
+                Response::png().unwrap(),
             ],
         )
         .unwrap();
-    let catalogue = server
-        .source()
-        .unwrap()
-        .run(&temp.store().unwrap(), false, &mut Vec::new())
-        .await
-        .unwrap();
-    installed(&temp.store().unwrap(), &catalogue).unwrap();
+    let gates: Vec<_> = IMAGES
+        .into_iter()
+        .map(|image| server.hold(&format!("/pokemon/art/{image}")).unwrap())
+        .collect();
+    let source = server.source().unwrap();
+    let store = temp.store().unwrap();
+    let mut progress = Vec::new();
+    let run = source.run(&store, false, &mut progress);
+    tokio::pin!(run);
+    let observed = tokio::select! {
+        result = &mut run => panic!("bootstrap finished with held images: {result:?}"),
+        observed = tokio::time::timeout(Duration::from_secs(5), async {
+            while server.hits("/pokemon/art/006.png").unwrap() != 3
+                || server.state.lock().unwrap().active_images != 4 {
+                tokio::time::sleep(Duration::from_millis(1)).await;
+            }
+        }) => observed,
+    };
+    for gate in gates {
+        gate.release();
+    }
+    let catalogue = run.await.unwrap();
+    assert!(
+        observed.is_ok(),
+        "did not reach four concurrent image requests"
+    );
+    installed(&store, &catalogue).unwrap();
     assert_eq!(server.hits("/pokemon/art/006.png").unwrap(), 3);
     let max = server.state.lock().unwrap().max_images;
-    assert!(
-        (2..=4).contains(&max),
-        "observed {max} concurrent image requests"
-    );
+    assert_eq!(max, 4);
 }
 
 #[tokio::test]
@@ -696,7 +714,7 @@ async fn configured_concurrency_child() {
     let gates: Vec<_> = (6..=11)
         .map(|id| server.hold(&format!("/pokemon/pokemon{id}")).unwrap())
         .collect();
-    let source = server.source().unwrap();
+    let source = server.source_from_env().unwrap();
     let store = temp.store().unwrap();
     let mut progress = Vec::new();
     let run = source.run(&store, false, &mut progress);
@@ -1000,13 +1018,11 @@ async fn unresolved_forms_follow_an_older_actual_link_until_types_are_supported(
 async fn cancellation_during_transfers_keeps_only_complete_resumable_images() {
     let temp = Temp::new().unwrap();
     let server = Server::fixture().unwrap();
-    for image in IMAGES.into_iter().skip(1) {
-        let mut slow = Response::png().unwrap();
-        slow.delay = Duration::from_secs(2);
-        server
-            .route(&format!("/pokemon/art/{image}"), vec![slow])
-            .unwrap();
-    }
+    let gates: Vec<_> = IMAGES
+        .into_iter()
+        .skip(1)
+        .map(|image| server.hold(&format!("/pokemon/art/{image}")).unwrap())
+        .collect();
     let source = server.source().unwrap();
     let mut output = Vec::new();
     let store = temp.store().unwrap();
@@ -1015,7 +1031,11 @@ async fn cancellation_during_transfers_keeps_only_complete_resumable_images() {
         tokio::pin!(run);
         let wait_for_image = async {
             loop {
-                if fs::read_dir(temp.0.join("artwork")).is_ok_and(|entries| entries.count() == 1) {
+                if fs::read_dir(temp.0.join("artwork")).is_ok_and(|entries| {
+                    entries
+                        .flatten()
+                        .any(|entry| entry.path().extension().is_some_and(|ext| ext == "png"))
+                }) {
                     break;
                 }
                 tokio::time::sleep(Duration::from_millis(5)).await;
@@ -1029,6 +1049,9 @@ async fn cancellation_during_transfers_keeps_only_complete_resumable_images() {
     }
     assert!(temp.store().unwrap().load_active().unwrap().is_none());
     assert_eq!(fs::read_dir(temp.0.join("artwork")).unwrap().count(), 1);
+    for gate in gates {
+        gate.release();
+    }
     for image in IMAGES.into_iter().skip(1) {
         server
             .route(
@@ -1061,23 +1084,27 @@ async fn request_timeout_is_bounded_and_leaves_the_active_catalogue_usable() {
         .run(&temp.store().unwrap(), false, &mut Vec::new())
         .await
         .unwrap();
-    let mut slow = Response::png().unwrap();
-    slow.delay = Duration::from_millis(800);
-    server.route("/pokemon/art/006.png", vec![slow]).unwrap();
+    let gate = server.hold("/pokemon/art/006.png").unwrap();
     let client = http_client_builder()
         .https_only(false)
-        .timeout(Duration::from_millis(200))
+        .timeout(Duration::from_secs(1))
         .build()
         .unwrap();
-    let source = Bootstrap::with_http(client, &server.origin);
-    let started = Instant::now();
-    assert!(
-        source
-            .run(&temp.store().unwrap(), true, &mut Vec::new())
-            .await
-            .is_err()
-    );
-    assert!(started.elapsed() < Duration::from_secs(3));
+    let source = Bootstrap::with_http(client, &server.origin)
+        .with_concurrency(NonZeroUsize::new(4).unwrap());
+    let result = tokio::time::timeout(
+        Duration::from_secs(10),
+        source.run(&temp.store().unwrap(), true, &mut Vec::new()),
+    )
+    .await;
+    gate.release();
+    let error = result
+        .expect("request retries exceeded the deadline")
+        .unwrap_err();
+    assert!(matches!(
+        error,
+        pokington::bootstrap::BootstrapError::Http { .. }
+    ));
     assert_eq!(server.hits("/pokemon/art/006.png").unwrap(), 4);
     installed(&temp.store().unwrap(), &old).unwrap();
 }
