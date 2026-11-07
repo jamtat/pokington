@@ -1,0 +1,38 @@
+{
+  "evidence": "actual user-run Ghostty attempt02 capture; visual confirmation still pending",
+  "capture_sha256": "39a00f2515772fc1c0602a3ac20645c72bb20c91270bb4c94d6cf7bc36e31741",
+  "capture_bytes": 81004,
+  "kitty_chunks": 20,
+  "rgba_format": 32,
+  "quiet_all_chunks": true,
+  "crop": [
+    10,
+    10,
+    131,
+    97
+  ],
+  "payload": [
+    136,
+    111
+  ],
+  "cell_pixels": [
+    17,
+    37
+  ],
+  "placement_cells": [
+    8,
+    3
+  ],
+  "exact_visible_rgba_and_transparent_padding": true,
+  "method": "Decoded every captured base64 chunk; compared all RGBA bytes against ImageMagick-decoded calibration PNG crop plus zero-alpha right/bottom padding; checked canvas equals placement cells times uniquely inferred cell pixels",
+  "success_report": "native_emitted=true, result=ok, termios unchanged",
+  "fault_report": "injected after 30 forwarded bytes; all nine cleanup bytes forwarded/flushed, native_emitted=false, termios unchanged",
+  "visual_confirmation": "confirmed by explicit user y after attempt02",
+  "initial_visual_confirmation": "pending explicit user answer; copied placeholder text is inconclusive",
+  "user_visual_result": {
+    "question": "Did you see the four-colour rectangle in Ghostty, and did it stay visible with typing working normally afterward?",
+    "reply": "y",
+    "recorded_utc": "2026-11-07T02:45:24Z",
+    "scope": "actual image appearance, inline persistence, normal prompt/input after success and injected mid-write recovery; no commit or computer-control permission"
+  }
+}

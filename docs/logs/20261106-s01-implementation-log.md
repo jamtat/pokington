@@ -5,9 +5,9 @@ Plan: [Implementation plan](../20261106-implementation-plan.md). Index: [Impleme
 ## Run 01 — Furfrou (B01), S01.T01 and S01.T02
 
 - Preparation recorded at: 2026-11-06T22:25:32Z (clock observation; implementation has not started).
-- Run status: open; S01.T01 work, checks and reviews are complete against selected Serebii illustrations and D29–D32. Q17 approves its final local commit; S01.T02 remains the next task under Q01. Preparation proposals below are historical; Q01 records their approval and subsequent Q entries record changes.
-- Closed at:
-- Closure reason:
+- Run status: closed by the final S01.T02 commit identified below, effective only when Git succeeds. Both B01 tasks, required evidence/checks/reviews and scoped local commits are complete in that final commit; no publication or next-stage grant. If Git fails, the run remains open. Preparation proposals below are historical; Q01 records their approval and subsequent Q entries record changes.
+- Closed at: the final S01.T02 commit's Git-recorded committer timestamp (ISO 8601 UTC; exact subject below). Closure prepared from the actual 2026-11-07T03:01:58Z clock observation; the observed Git outcome/time is reported after commit without a recursive bookkeeping commit.
+- Closure reason: selected B01/S01 scope completed on local main; stop before S02 as required. Q19 authorises automatic final local commit, not publication or the next stage.
 - Originating invocation (exact): “Use jamtat-work to take the next implementation batch. Ask me any clarifying questions up front before starting the batch. If assistance is required use jamtat-summon”
 - Proposed scope: S01.T01, then S01.T02; stop at S01 boundary. No task implementation is authorised yet.
 - Branch: existing local `main`, authorised by D21; verified one commit ahead of `origin/main`. No branch change or publication.
@@ -234,10 +234,11 @@ Question (exact):
 ## S01.T00 — Stage timing and exit evidence
 
 - Start: 2026-11-06T22:27:38Z
-- Finish:
+- Finish: 2026-11-07T03:01:58Z (stage work/check/review and final commit preparation; effective completion requires successful final S01.T02 commit).
 - Canonical run: Run 01 above.
 - Exit criteria: both feasibility gates, required checks, both task reviews and approved per-task commits; S01.T02 correctness includes stage integration.
 - Initial outcome (historical; superseded by Q13–Q16 and dated continuation entries): S01.T01 incomplete after source investigations; source choice and coverage policy pending Q09/Q10. No task review or commit passed; S01.T02 not started.
+- Outcome at 2026-11-07T02:10:10Z (historical): source gate complete in `fac6f5e`; native inline/original-pixel rendering gate and combined stage acceptance remain incomplete. No S02 continuation authorised.
 
 ## S01.T01 — Slowpoke: complete source discovery
 
@@ -362,3 +363,152 @@ Initial task record (historical; subsequent dated entries and the Run 01 status 
 - Pre-commit correction recorded at 2026-11-07T02:07:14Z: the earlier unstaged `git diff --check` did not include untracked fixtures. The staged check exposed CRLF/trailing whitespace in 36 reduced HTML fixtures. Normalized their line endings/trailing whitespace, preserving raw source captures and parser code; all 33 tests passed again. Task Finish above now includes this cleanup rather than the earlier planned 02:05:35Z finish. The approved 116-file membership is unchanged.
 - Git staging required sandbox escalation for `.git/index.lock`; the automatic approval review accepted the authorised staging retry. This was not a user approval rejection. Commit remains the one approved Q17 local operation; no publication.
 - Final whitespace cleanup recorded at 2026-11-07T02:08:25Z: also normalized leading indentation in 43 reduced HTML fixtures after the staged check exposed space-before-tab indentation. All 33 tests, formatting and locked all-target Clippy passed again. Raw source caches, parser/runtime code, catalogue output and approved file membership are unchanged. Finish above includes this final fixture-only cleanup.
+
+### S01.T01 commit and goal result — 2026-11-07T02:09:13Z
+
+- Approved final local commit succeeded with normal Git hook behavior: `fac6f5e source: S01.T01 discover Serebii illustration catalogue`. Staged whitespace check passed for exactly the approved 116 files. Working tree was clean immediately after commit; no push, PR or manual CI.
+- S01.T01 goal marked `complete` after successful Git verification (tool update Unix `1794017353`). Its original official-source wording was superseded by the explicit D25/D28–D32 contract and scoped user answers recorded above. No token budget. Historical tracked usage had stopped while the prior source goal was blocked; no wall-clock duration is inferred from that frozen counter.
+- S01.T01 is complete. Remaining B01 task: S01.T02; S01 stage exit remains incomplete until that task's evidence/reviews/approved commit pass.
+
+## S01.T02 — Poliwag: prove inline native graphics and original sizing
+
+- Start: 2026-11-07T02:10:10Z
+- Finish: 2026-11-07T03:01:58Z (work/checks/reviews and automatic final commit preparation; effective completion requires successful Git commit).
+- Canonical run: Run 01 Q01. Implementation: one fresh `gpt-6-astra` `high` agent, sequential after S01.T01 final commit. New task goal created under D19/Q01; thread `01a1b2f6-c8eb-77f0-b7e8-0fd3bf9f3ec4`, created Unix `1794017410`, active, no token budget.
+- Goal objective: prove inline `ratatui-image`, safe bounded capability detection, terminal restoration, cropped native `original` 1:1 pixel dimensions, deterministic failure/fallback tests and actual user-observed Ghostty evidence; pass required checks, Q01 correctness review including combined S01 exit evidence, separate simplification review, and approved final task commit. No publication or stage crossing.
+- Constraints: summon and computer/browser/native-app control remain revoked. Prepare a concrete manual Ghostty command for the user after implementation/checks; never infer real native display from `TERM`, a tool PTY, a mock protocol peer or a half-block fallback. Do not open/control Ghostty, consume user input or write to another user terminal.
+- Correctness review: existing Q01 exact grant, one fresh `gpt-6.1-sol` `xhigh`, native rendering/safety/sizing and combined source/rendering stage exit; not launched.
+- Simplification review: existing Q01 exact grant, one separate fresh `gpt-6.1-sol` `xhigh`; not launched.
+- Commit: separate exact title/file table and explicit approval required. No commit proposal yet. S01/B01 boundary remains a pause before S02.
+- Implementation agent: `/root/s01_t02_implementation`, fresh `gpt-6-astra` `high`, `fork_turns=none`, under Q01. Root retains goal/permission/tracking ownership; no review or sub-delegation by the implementer.
+
+### S01.T02 engineering approach — 2026-11-07T02:15:58Z
+
+- Avoid stdio capability-response queries: reading replies shares the terminal input queue and cannot preserve arbitrary concurrent keystrokes without reinjection. Use ioctl-only cell/window measurements, conservative paired terminal identity hints and no mux; bare `TERM` is insufficient. No stdin reads, input injection, termios changes or alternate-screen use. Unknown identity/metrics yields a safe auto fallback decision or explicit-image error. Hints are not actual display evidence; user-observed Ghostty validation remains required.
+- Upstream inspection found that Kitty virtual placement scales to its cell grid even when the pixel payload is unchanged. The prototype uses transparent right/bottom padding to whole-cell dimensions, then the `ratatui-image` Kitty encoder. Tests must prove unchanged cropped visible RGBA pixels and payload dimensions equal to placement cells multiplied by measured cell pixels. This preserves D15's native 1:1 pixels without resampling.
+- These are bounded S01.T02 implementation choices within the accepted detection/sizing contract, not new product CLI requirements. No new source fetching, app control, visual-pass claim or publication.
+
+### S01.T02 automated readiness — 2026-11-07T02:24:18Z
+
+- Reusable native prototype, executable probe, PNG allocation bounds, native payload capture and JSON reporting are ready. `cargo fmt --check`, `cargo test --locked` (41 integration tests: eight native/PTY and 33 source), `cargo clippy --locked --all-targets -- -D warnings`, and diff checks pass. Existing btls linker-path warnings remain. [Evidence and manual command](../20261107-inline-native-image-evidence.md).
+- Native tests decode the actual Kitty multi-chunk RGBA transmission and compare unchanged cropped pixels plus transparent padding at four cell sizes. They cover overflow/alpha/limits, redirected/unavailable/unknown/mux contexts, pending input preservation, unchanged termios, absence of query output, mid-write cleanup and permanently broken output reporting. Own-PTY results are not actual native-display acceptance.
+- Root requested strengthening the manual error case: `--fail-before-write` could not prove partial-stream recovery. The probe/test-only fault adapter now flushes a prefix inside the first Kitty APC, fails once, then permits CAN/ST/SGR/newline cleanup. The actual manual fault path is covered by the own-PTY tests. Reports distinguish native emission from visual confirmation and include injection/forwarded byte counts/cleanup status.
+- Actual Ghostty visual, persistence and recovery evidence remains required before the approved correctness/stage-integration review. No T02 review launched, commit proposed, source re-fetch or computer control performed.
+
+### Q18 — Actual Ghostty visual and recovery validation
+
+- Prepared at 2026-11-07T02:24:18Z. Manual command is the exact current block in [the evidence document](../20261107-inline-native-image-evidence.md#manual-ghostty-validation): run the built probe in a normal Ghostty shell outside tmux/screen/SSH; first native original-size calibration with JSON/payload capture, then `--fail-mid-write` with error JSON, and compare `stty -g` before/after.
+- Expected summary: `success=0 expected_failure=1 terminal_settings=unchanged`. A small four-colour native rectangle with thin white border and central black/white pixel stripes remains inline; prompt/cursor/typing behave normally after both runs. Metadata must come from actual `/private/tmp/pokington-inline-ghostty.json` and `/private/tmp/pokington-inline-ghostty-error.json`, not a tool PTY. Raw payload is `/private/tmp/pokington-inline-ghostty.bin`.
+- Question: run the prepared block and confirm whether the image remains inline, the summary matches, and the prompt/input recover normally. Reply `y` or `n` with any diagnostic if it fails. This is visual/recovery evidence only; no review, commit, publication or computer-control permission is requested or inferred.
+- User response/result (exact): pending. Native-display acceptance, task completion and S01 stage exit remain incomplete.
+
+### Q18 external-evidence audit — 2026-11-07T02:26:11Z
+
+- Previous goal turn made concrete progress: prototype, 41 tests/checks, actual partial-write fault coverage and reviewable manual instructions completed. It ended at the actual Ghostty evidence prerequisite.
+- First automatic continuation revalidated the expected success/error JSON reports and binary capture; all were absent. No user visual answer, live rendering process or test handle is available to poll. This is a missing manual result, not a verified process wait or an automated test failure.
+- No equivalent replacement evidence is permitted: own-PTY/hint tests cannot establish real native display, and computer control/summon remain revoked. Correctness/stage-integration review stays pending its manual evidence prerequisite. Goal remains active at this audit; blocked threshold is not yet satisfied.
+
+### Q18 blocked audit — 2026-11-07T02:27:46Z
+
+- Previous automatic continuation was no progress toward the remaining native-display gate: reports were absent and no user visual reply was received. It was not a verified process wait; no live handle existed.
+- Second automatic continuation revalidated all three expected artifacts and the actual S01.T02 goal. Both JSON reports and the binary capture remain absent; goal was active, created Unix `1794017410`. No manual answer or live rendering process is available.
+- The same external prerequisite has now persisted across three consecutive goal turns: the original implementation/manual-request turn and two automatic continuations. Automated implementation/checks are complete; reviews/stage acceptance require the missing manual evidence, and no further scoped action can supply it without user input or prohibited computer control. Blocked threshold satisfied.
+- Mark S01.T02 goal `blocked` pending the Q18 Ghostty run and actual visual/recovery answer. Run 01 remains open; T02/S01 remain incomplete, reviews unlaunched, commit approval not requested. Existing unrevoked Q01 grants remain within their scope. No polling continuation, new source work, summon, publication or stage crossing.
+
+### Q18 actual Ghostty failure and resumed implementation — 2026-11-07T02:33:42Z
+
+- User supplied actual command output: both probe runs reported `native image unavailable: terminal ioctl did not provide exact nonzero cell/pixel metrics`; final summary was `success=1 expected_failure=1 terminal_settings=unchanged`. This is a failed native-display attempt, not approval or a positive visual result.
+- Preserved actual reports: [first run](20261107-inline-ghostty-attempt01.json), [error run](20261107-inline-ghostty-attempt01-error.json). Ghostty 1.4.0, macOS, matching paired hints, terminal stdin/stdout, no mux/remote. `TIOCGWINSZ`: 105 columns, 59 rows, viewport 1801×2196 pixels. Zero query/input bytes, no screen/cursor/termios changes, native output not emitted; both before/after termios comparisons are true.
+- Diagnosis: the prototype's exact viewport-divisibility requirement rejects this real Ghostty window. Cell size cannot simply be claimed from rounded division without proving the viewport/padding contract. Existing tests covered ideal whole-cell viewport metrics and did not establish this actual case.
+- User evidence resumes authorised S01.T02 implementation. Existing Astra implementer assigned a bounded source-backed measurement/unscaled-placement fix and regression for the observed case. Preserve no-input/no-query/no-control contract and exact pixel sizing; no guessed metrics or weakened acceptance. No new review, commit, publication or source-data work.
+- The goal tool retains its historical `blocked` status; the agent cannot reset it to active through `update_goal`. Work proceeds on the same unfinished task under the new user evidence; no duplicate goal. This resumed turn makes progress from actual evidence, not another repetition of the earlier missing-report blocker.
+
+### Q18 viewport correction and attempt 02 — 2026-11-07T02:38:44Z
+
+- Pinned Ghostty 1.4.0 source establishes that grid and ioctl use the same padding-subtracted viewport, while grid counts truncate viewport divided by integer physical cell size. Root inspected cached upstream `renderer/size.zig` and fetched pinned `Termio.resize`/`Exec.Subprocess.resize`; the latter exports saturating u16 viewport/grid fields. [Source references and proof](../20261107-inline-native-image-evidence.md#ghostty-140-viewport-correction--2026-11-07).
+- Implemented a unique integer inverse only for the verified Ghostty 1.4.0 profile: `[floor(P/(n+1))+1, floor(P/n)]`, accepting only equal bounds. One-cell/clamped/saturated, impossible and ambiguous cases reject; fractional viewports from unverified versions remain unsupported. This replaces the overly strict divisibility rule without guessing, rounding, reading input or changing the placement implementation.
+- Exact observed regression proves 17×37 cells, bounds [17,17]/[37,37], viewport remainders 16×13 and a 136×111 payload for the 131×97 visible crop. Tests decode and compare every visible/padded pixel. All 42 tests, formatting, locked all-target Clippy and whitespace checks pass. Existing native linker target/search-path warnings are recorded; no suppression or portability claim.
+- Updated JSON includes inference method, bounds and remainders. Original failed reports remain intact. Fresh manual evidence paths are `/private/tmp/pokington-inline-ghostty-attempt02.json`, `/private/tmp/pokington-inline-ghostty-attempt02-error.json` and `/private/tmp/pokington-inline-ghostty-attempt02.bin`; the current manual block in the evidence document uses these names and the same success/partial-write recovery checks.
+- Ask the user to rerun the corrected block and confirm the native image, inline persistence, normal typing/prompt and expected summary. Native visual/recovery acceptance remains pending; no T02 review or commit yet. This is the first resumed goal turn after the failed measurement evidence and made concrete implementation/test progress. No new permission grant is inferred.
+
+### Q18 attempt 02 actual emission and recovery — 2026-11-07T02:42:56Z
+
+- User pasted placeholder glyph rows, both report paths, expected injected error, and `success=0 expected_failure=1 terminal_settings=unchanged`. This confirms process statuses, not an explicit visual answer; copied Unicode placeholders can accompany a native image and do not establish what was displayed.
+- Preserved actual [success report](20261107-inline-ghostty-attempt02.json) and [error report](20261107-inline-ghostty-attempt02-error.json). Both report Ghostty 1.4.0 with the actual 105×59/1801×2196 viewport, uniquely inferred 17×37 cells and unchanged termios. Successful frame was emitted; the fault run injected after 30 forwarded bytes, then forwarded/flushed all nine cleanup bytes and retained `native_emitted=false`.
+- Root decoded all 20 Kitty chunks from the actual 81,004-byte capture, checked q=2/chunk termination and raw RGBA format, and compared every pixel against the ImageMagick-decoded 151×117 calibration PNG's 131×97 crop plus transparent padding. The 136×111 payload equals 8×3 placement cells times 17×37 physical pixels; no resampling. Capture SHA-256 `39a00f2515772fc1c0602a3ac20645c72bb20c91270bb4c94d6cf7bc36e31741`. [Validation](20261107-inline-ghostty-attempt02-payload-validation.json).
+- Remaining question: did the four-colour native rectangle actually appear and remain visible, with prompt/typing normal, or were only characters visible? Request an explicit `y`/`n` visual result; do not repeat the command or infer success from report/glyph text. Actual display acceptance and T02 reviews/commit remain pending. This turn made progress by validating new real capture/recovery evidence; no new scope or permission.
+
+### Q18 explicit visual confirmation — 2026-11-07T02:45:24Z
+
+- Question (exact): “The reports confirm correct pixel data and successful cleanup. Did you see the four-colour rectangle in Ghostty, and did it stay visible with typing working normally afterward? Reply y or n.”
+- User response (exact): “y”. Recorded at 2026-11-07T02:45:24Z (record time; exact answer time unavailable).
+- Interpretation: actual Ghostty 1.4.0 native calibration image appeared, persisted inline, and prompt/typing recovered normally after the success and injected partial-write runs. Together with the preserved actual metrics, exact captured RGBA/placement comparison and recovery report, this satisfies the planned manual rendering evidence. Raw probe reports retain their original pending-human fields; the separate root validation record carries the explicit user result.
+- No commit, publication, computer control, new review or expanded implementation permission is inferred from this visual answer. Q01's two specific T02 review grants remain valid and unused.
+
+### S01.T02 correctness/stage-integration review launch — 2026-11-07T02:45:24Z
+
+- Implementation and required automated checks pass (42 tests); Q18 now supplies actual Ghostty native display, 1:1 payload/placement dimensions, persistence and success/partial-write recovery evidence. S01.T01 source gate is committed in `fac6f5e`, with 1,025 species/1,427 canonical illustrated forms, source/type proofs and resolved reviews.
+- Authority: Q01's exact third review grant. Launch one fresh `gpt-6.1-sol` `xhigh` correctness reviewer, findings-only, covering T02 protocol/detection/input safety, cropping/native original pixel geometry, limits/cleanup/fallbacks/tests and the combined S01 source/rendering exit evidence. Source work is unchanged; no renewed provider research or duplicate complete source crawl is requested.
+- Code is frozen for review. No edits, agents, goals, publication, UI control or further reviews by the reviewer. Separate Q01 simplification review follows after correctness findings are resolved; concrete commit approval remains separate, with S01 boundary pause after completion.
+- Reviewer: `/root/s01_t02_correctness`, fresh `gpt-6.1-sol` `xhigh`, `fork_turns=none`; completed with the one finding below and no other blockers.
+
+### S01.T02 correctness/stage-integration findings — 2026-11-07
+
+- Approved findings-only reviewer completed the pass. Nine native tests pass; committed source evidence and actual Ghostty capture/user confirmation support the combined feasibility gate, subject to the finding below and remaining review/commit requirements. No other correctness blocker found; no live user-terminal access or repo edits.
+- N1 (P2), accepted: missing/unverified Ghostty version bypasses the proven metric inverse through generic exact division. On an owned PTY, 105×2 cells and 1785×100 viewport pixels are accepted as 17×50 when version is empty or `1.4.1`; the same Ghostty model permits actual 17×37 cells, and the verified `1.4.0` inverse correctly rejects the ambiguous height interval [34,50]. A divisible viewport is insufficient proof of physical cell size.
+- Resolution required: native selection must require a verified measurement profile; missing/unverified Ghostty versions must safely fall back/error. Add the exact missing/unverified-version regressions, retain current verified 1.4.0 native path and actual manual evidence, then run affected/required checks. No new review grant, commit or stage crossing. Separate Q01 simplification remains unused.
+
+### S01.T02 correctness resolution and simplification launch — 2026-11-07T02:54:02Z
+
+- N1 resolved: native detection requires the source-verified Ghostty 1.4.0 measurement profile before any inference. Missing/unverified Ghostty versions and unverified Kitty-application hints return `UnverifiedMeasurementProfile`; auto safely chooses text fallback and img errors. Kitty graphics remain the actual protocol in verified Ghostty. No generic-divisibility route can claim unproven exact metrics.
+- Exact divisible-ambiguous regressions cover absent/1.4.1/unknown versions and Kitty hints, auto/img outcomes, zero queries, preserved input and unchanged termios. Positive actual 1.4.0 viewport still yields the same 17×37 cells and payload geometry. All 43 tests (10 native, 33 source), formatting, locked all-target Clippy and whitespace checks pass.
+- Verified rendering/cleanup code is byte-unchanged. A newly encoded frame equals the actual user-observed capture after normalizing only random image identity; all 60,384 RGBA bytes match SHA-256 `7c5393c3f712ec81aaa65ae02cd71e77743fd977df7d4cc6b8ebcf58a399d4c6`. [Comparison](20261107-inline-n1-frame-comparison.json). No repeat user run needed or claimed.
+- Root inspected the profile guard and comparison; the sole correctness finding is resolved. The completed independent review found no other blocker and supports combined S01 feasibility evidence subject to remaining review/commit gates. No additional correctness pass performed or implied.
+- Authority: Q01's exact fourth review grant. Launch one separate fresh `gpt-6.1-sol` `xhigh` simplification/Rust reviewer, findings-only, focused on T02 renderer/detection/probe/fault helpers/tests with behavior, proven profiles, pixel identity and cleanup preserved. No further correctness/stage review, edits, subagents, goals, publication or source re-fetch.
+- Simplification reviewer: `/root/s01_t02_simplification`, fresh `gpt-6.1-sol` `xhigh`, `fork_turns=none`; completed with no blockers and two optional suggestions below. Q19 subsequently authorises the automatic final commit; S01 boundary stop remains required.
+
+### S01.T02 simplification findings and disposition — 2026-11-07T02:56:47Z
+
+- The approved fresh findings-only simplification review completed with no blockers and two optional suggestions; no edits, redundant tests or additional review performed by the reviewer.
+- S1 accepted: successful native detection always has both measurement intervals, so replace `Option<[u16; 2]>` with `[u16; 2]` and remove `Some` wrappers. Preserve successful JSON serialization and validate with detection/report comparison.
+- S2 accepted: move calibration generation from the reusable rendering library into shared probe/test support, preserving every RGBA byte and removing the calibration-only public API/import. Validate existing native tests and calibration bytes against the actual user-run PNG.
+- Delegate only these behavior-preserving changes, required checks and exact report/payload comparisons to the existing implementer. No additional reviews, source work, user rerun or product behavior changes.
+
+### Q19 — Autocommit instruction for the remaining batch task
+
+- User instruction (exact): “just autocommit when done”. Recorded at 2026-11-07T02:56:47Z (record time; exact answer time unavailable).
+- Interpretation: authorise the final local S01.T02 commit, including S01/B01 exit tracking and normal hooks, automatically after the remaining accepted cleanups/checks pass. This supersedes Q01's later separate commit-approval question for this remaining task. Present its exact title and short file/change table before Git, without another consent question.
+- Scope stays current Run 01/B01 on local `main`; no standing future-batch commit grant, push, PR, manual CI, merge, next-stage implementation or computer-control/summon permission is inferred. Stage boundary pause remains after S01 completion.
+- No commit yet; implementation/review/check and full evidence gates still apply. Final task/goal/stage completion requires successful Git commit.
+
+### S01.T02 final validation and S01 exit — 2026-11-07T03:01:58Z
+
+- Both accepted simplifications are complete: measurement intervals are non-optional arrays on successful detection; calibration generation is shared probe/test support rather than reusable library API. Successful detection JSON and calibration PNG bytes remain identical to the user-observed artifacts. The complete native frame matches after normalizing only random image identity; all RGBA pixels/geometry/cleanup are unchanged. [Comparison](20261107-inline-simplification-comparison.json).
+- All 43 tests (10 native/PTY and 33 source), formatting, locked all-target Clippy and tracked/untracked whitespace checks pass. Existing btls search-path/macOS target linker warnings remain disclosed. No source fetch, new visual run, protocol queries, input reads, app control or additional review occurred.
+
+| S01 exit requirement | Authoritative outcome |
+| --- | --- |
+| Complete dynamic source discovery | S01.T01 `fac6f5e`: 1,025 species, 1,427 canonical illustrated forms, 11 explicit exclusions; full source/type/PNG evidence and exact alias/failure checks |
+| Inline native protocol and original sizing | Actual Ghostty 1.4.0: 17×37 physical cells, 131×97 visible crop, 136×111 payload at 8×3 cells; captured RGBA equality and explicit user visual `y` |
+| Input/terminal safety and error recovery | No reads/queries/mode/screen/cursor changes; own-PTY and actual partial-write cleanup evidence; normal prompt/typing confirmed |
+| Correctness and stage integration | Both task correctness reviews completed; extra Q16 source follow-up completed; all source findings and T02 N1 resolved with source proof/regressions |
+| Separate simplification per task | Two separate fresh approved reviews completed; accepted suggestions applied and output equivalence verified |
+| Required checks | Final 43-test suite, formatting, locked all-target Clippy and whitespace checks pass |
+| Task commits and scope boundary | S01.T01 `fac6f5e`; final S01.T02 commit prepared under Q19 below; stage completes only when it succeeds; no S02 work/publication |
+
+- Root completion audit finds all remaining task/stage requirements satisfied except the immediate approved Git operation. The existing task goal is marked complete only after Git success; historical blocked accounting is not treated as unfinished external evidence after Q18.
+
+### S01.T02 automatic final commit
+
+- Authority: Q19 exact autocommit instruction; no further approval question required. Subject shown to user: `render: S01.T02 prove inline native original sizing`.
+- Exact task file set: 19 files in `/private/tmp/pokington-s01-t02-commit-files.json`, revalidated at 2026-11-07T03:01:58Z. File/change table was shown before staging:
+
+| Files | Changes |
+| --- | --- |
+| `Cargo.toml`, `Cargo.lock` | Native image and terminal dependencies |
+| `src/lib.rs`, `src/inline_image.rs` | Verified-profile detection, exact pixel sizing and safe inline output |
+| `examples/inline_image_probe.rs`, `examples/support/{calibration,write_fault}.rs` | Probe, calibration and fault-injection helpers |
+| `tests/inline_image.rs` | Protocol, pixel geometry, profile and terminal-safety regressions |
+| Task `docs/*.md`, `docs/logs/*.json`, canonical stage log | Actual success/failure/visual evidence, reviews, permission and S01 completion tracking |
+
+- Run normal Git hooks; no separate pre-commit invocation or publication. This final commit includes completion tracking and closes selected B01 scope once successful. Its own hash/time is reported from Git afterwards, not recursively inserted into itself. If Git fails, task/goal/stage remain incomplete and Run 01 open until the scoped final commit succeeds.

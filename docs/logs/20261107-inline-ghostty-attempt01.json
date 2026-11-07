@@ -1,0 +1,31 @@
+{
+  "alternate_screen_entered": false,
+  "cursor_hidden": false,
+  "detection_microseconds": 33,
+  "hints": {
+    "kitty_window": false,
+    "multiplexed": false,
+    "program": "ghostty",
+    "remote": false,
+    "term": "xterm-ghostty",
+    "version": "1.4.0"
+  },
+  "input_bytes_read": 0,
+  "ioctl_window": {
+    "columns": 105,
+    "pixel_height": 2196,
+    "pixel_width": 1801,
+    "rows": 59
+  },
+  "mode": "Img",
+  "native_emitted": false,
+  "output_state": "not written",
+  "platform": "macos",
+  "query_bytes": 0,
+  "result": "native image unavailable: terminal ioctl did not provide exact nonzero cell/pixel metrics; use --mode auto, blocks, or ascii",
+  "stdin_is_terminal": true,
+  "stdout_is_terminal": true,
+  "termios_changed_by_probe": false,
+  "termios_equal_before_after": true,
+  "visual_confirmation": "pending user observation"
+}

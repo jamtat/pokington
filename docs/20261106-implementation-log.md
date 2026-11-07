@@ -8,7 +8,7 @@ Keep task scope and status in the plan. Keep actual work, goals, evidence and pe
 
 ## Stage logs
 
-[S01 canonical Run 01](logs/20261106-s01-implementation-log.md): Furfrou (B01), approved S01.T01 then S01.T02 on local `main`. S01.T01 integrates selected Serebii illustrations under D28–D32; earlier provider investigations remain evidence. Q01 authorises four exact reviews across the two tasks; Q16 adds one targeted S01.T01 correctness follow-up. Correctness findings and simplification suggestions are resolved; full 1,025-species/1,427-form replay and 33 tests pass. Q17 approves its final local commit with completion tracking. S01.T02 is next after successful commit and task-goal closure. Summon and computer/browser control are revoked. No later stage log exists.
+[S01 canonical Run 01](logs/20261106-s01-implementation-log.md): Furfrou (B01), completed by S01.T02's final local commit under Q19. S01.T01 is `fac6f5e`; its source gate has 1,025 species/1,427 canonical illustrated forms. S01.T02 has actual Ghostty native pixel/visual/recovery confirmation, resolved correctness/stage review and separate simplification; final 43 tests/checks pass. Run closure is effective when the final task commit succeeds; Git's committer timestamp records the actual closure time without recursive bookkeeping commits. Stop before Vivillon (B02/S02). Summon/computer control remain revoked; no publication or later-stage grant.
 
 Use the batch Pokémon names in scope recommendations and run records: Furfrou (B01), Vivillon (B02), Greedent (B03), and Dustox (B04). Retain batch/stage/task IDs for stable evidence links.
 

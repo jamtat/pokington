@@ -1,0 +1,10 @@
+{
+  "positive_detection_json_equal": true,
+  "calibration_png_bytes_equal": true,
+  "calibration_png_sha256": "988a56d30a3651de2994623217c83801c291e3ea755e5e3b66277ff39926d062",
+  "payload_rgba_bytes": 60384,
+  "payload_rgba_sha256": "7c5393c3f712ec81aaa65ae02cd71e77743fd977df7d4cc6b8ebcf58a399d4c6",
+  "normalized_frame_equal": true,
+  "normalized_frame_sha256": "17c46f9342187eb985aee684a825c381a8e4b4e48cad2b14baa001ae0de5ab70",
+  "normalization": "only one random image ID header, three image RGB foreground colours and three image high-byte combining marks"
+}

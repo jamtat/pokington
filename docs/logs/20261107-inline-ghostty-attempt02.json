@@ -1,0 +1,74 @@
+{
+  "alternate_screen_entered": false,
+  "cursor_hidden": false,
+  "detection_microseconds": 22,
+  "frame": {
+    "crop": {
+      "height": 97,
+      "left": 10,
+      "source_height": 117,
+      "source_width": 151,
+      "top": 10,
+      "width": 131
+    },
+    "encoded_bytes": 81004,
+    "image_columns": 8,
+    "image_rows": 3,
+    "payload_height": 111,
+    "payload_width": 136,
+    "printed_columns": 8,
+    "scaling": "none; one source pixel per protocol screen pixel"
+  },
+  "hints": {
+    "kitty_window": false,
+    "multiplexed": false,
+    "program": "ghostty",
+    "remote": false,
+    "term": "xterm-ghostty",
+    "version": "1.4.0"
+  },
+  "image": "generated 151x117 calibration PNG; visible crop 131x97",
+  "input_bytes_read": 0,
+  "ioctl_window": {
+    "columns": 105,
+    "pixel_height": 2196,
+    "pixel_width": 1801,
+    "rows": 59
+  },
+  "mode": "Img",
+  "native_emitted": true,
+  "output_state": "inline write completed and styles reset",
+  "platform": "macos",
+  "query_bytes": 0,
+  "result": "ok",
+  "selection": {
+    "Native": {
+      "cell_height_interval": [
+        37,
+        37
+      ],
+      "cell_measurement": "Ghostty 1.4.0: unique integer solution to grid = floor(viewport / cell), after padding",
+      "cell_width_interval": [
+        17,
+        17
+      ],
+      "identity_hint": "Ghostty",
+      "metrics": {
+        "cell_height": 37,
+        "cell_width": 17,
+        "columns": 105,
+        "pixel_height": 2196,
+        "pixel_width": 1801,
+        "rows": 59
+      },
+      "protocol": "Kitty Unicode placeholders (ratatui-image 11.1.0)",
+      "viewport_remainder_height": 13,
+      "viewport_remainder_width": 16
+    }
+  },
+  "stdin_is_terminal": true,
+  "stdout_is_terminal": true,
+  "termios_changed_by_probe": false,
+  "termios_equal_before_after": true,
+  "visual_confirmation": "pending user observation"
+}

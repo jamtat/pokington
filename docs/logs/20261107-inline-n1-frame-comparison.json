@@ -1,0 +1,10 @@
+{
+  "captured_manual_frame": "/private/tmp/pokington-inline-ghostty-attempt02.bin",
+  "post_n1_frame": "/private/tmp/pokington-inline-n1-verified-frame.bin",
+  "payload_rgba_bytes": 60384,
+  "payload_rgba_sha256": "7c5393c3f712ec81aaa65ae02cd71e77743fd977df7d4cc6b8ebcf58a399d4c6",
+  "normalized_frame_sha256": "17c46f9342187eb985aee684a825c381a8e4b4e48cad2b14baa001ae0de5ab70",
+  "normalized_frame_equal": true,
+  "normalization": "only one random image ID header, three image RGB foreground colours and three image high-byte combining marks",
+  "renderer_and_cleanup_source_unchanged": true
+}
