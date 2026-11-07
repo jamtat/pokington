@@ -81,7 +81,7 @@ impl PortalIndex {
             .len()
     }
 
-    pub fn bounds(&self) -> (u32, u32) {
+    pub const fn bounds(&self) -> (u32, u32) {
         (self.search_items.min_id, self.search_items.max_id)
     }
 
@@ -159,7 +159,10 @@ impl PortalIndex {
         }
         // Bounds come from the source, not a compiled Pokémon count. Compare counts
         // after range validation to avoid allocating an attacker-controlled range.
-        if u64::try_from(originals.len()).ok() != Some(u64::from(max) - u64::from(min) + 1) {
+        let expected = u64::from(max)
+            .checked_sub(u64::from(min))
+            .and_then(|span| span.checked_add(1));
+        if u64::try_from(originals.len()).ok() != expected {
             return Err(fail(
                 "partial index: missing original species within source bounds",
             ));
@@ -214,7 +217,8 @@ pub fn parse_portal_index(html: &str) -> Result<PortalIndex, SourceError> {
         return Err(SourceError("truncated HTML document".into()));
     }
     let document = Html::parse_document(html);
-    let html_selector = Selector::parse("html").expect("constant selector");
+    let html_selector = Selector::parse("html")
+        .map_err(|error| SourceError(format!("invalid HTML selector: {error}")))?;
     let language = document
         .select(&html_selector)
         .next()
@@ -225,7 +229,8 @@ pub fn parse_portal_index(html: &str) -> Result<PortalIndex, SourceError> {
             "not an observed English portal document".into(),
         ));
     }
-    let scripts = Selector::parse("script").expect("constant selector");
+    let scripts = Selector::parse("script")
+        .map_err(|error| SourceError(format!("invalid script selector: {error}")))?;
     let mut flight = String::new();
     for script in document.select(&scripts) {
         let text = script.inner_html();
@@ -257,7 +262,10 @@ pub fn parse_portal_index(html: &str) -> Result<PortalIndex, SourceError> {
             candidates.len()
         )));
     }
-    let index: PortalIndex = serde_json::from_value(candidates.pop().expect("one candidate"))
+    let candidate = candidates
+        .pop()
+        .ok_or_else(|| SourceError("missing index".into()))?;
+    let index: PortalIndex = serde_json::from_value(candidate)
         .map_err(|error| SourceError(format!("invalid index fields: {error}")))?;
     index.validate()?;
     Ok(index)
@@ -266,7 +274,7 @@ pub fn parse_portal_index(html: &str) -> Result<PortalIndex, SourceError> {
 fn find_indices(value: Value, indices: &mut Vec<Value>) {
     match value {
         Value::Object(object) if object.contains_key("initialPokemons") => {
-            indices.push(Value::Object(object))
+            indices.push(Value::Object(object));
         }
         Value::Object(object) => {
             for value in object.into_values() {

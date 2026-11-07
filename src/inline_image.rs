@@ -29,6 +29,7 @@ pub struct TerminalHints {
 }
 
 impl TerminalHints {
+    #[must_use]
     pub fn from_env() -> Self {
         let value = |key| env::var(key).unwrap_or_default();
         Self {
@@ -93,6 +94,10 @@ impl fmt::Display for Unavailable {
 
 /// Constant-count local metadata calls only. Never writes query escapes, waits for responses,
 /// reads either descriptor, changes termios, or opens `/dev/tty`.
+///
+/// # Errors
+///
+/// Returns the reason detection could not verify a supported terminal and exact cell metrics.
 pub fn detect(
     input: &impl AsFd,
     output: &impl AsFd,
@@ -145,14 +150,22 @@ pub fn detect(
         ghostty_140_cell(pixel_width, columns).ok_or(Unavailable::MissingPixelMetrics)?;
     let cell_height =
         ghostty_140_cell(pixel_height, rows).ok_or(Unavailable::MissingPixelMetrics)?;
+    let viewport_remainder_width = columns
+        .checked_mul(cell_width)
+        .and_then(|used| pixel_width.checked_sub(used))
+        .ok_or(Unavailable::MissingPixelMetrics)?;
+    let viewport_remainder_height = rows
+        .checked_mul(cell_height)
+        .and_then(|used| pixel_height.checked_sub(used))
+        .ok_or(Unavailable::MissingPixelMetrics)?;
     Ok(NativeTerminal {
         identity_hint,
         protocol: "Kitty Unicode placeholders (ratatui-image 11.1.0)",
         cell_measurement: "Ghostty 1.4.0: unique integer solution to grid = floor(viewport / cell), after padding",
         cell_width_interval: [cell_width, cell_width],
         cell_height_interval: [cell_height, cell_height],
-        viewport_remainder_width: pixel_width - columns * cell_width,
-        viewport_remainder_height: pixel_height - rows * cell_height,
+        viewport_remainder_width,
+        viewport_remainder_height,
         metrics: Metrics {
             columns,
             rows,
@@ -172,9 +185,11 @@ fn ghostty_140_cell(pixels: u16, cells: u16) -> Option<u16> {
     }
     let pixels = u32::from(pixels);
     let cells = u32::from(cells);
-    let smallest = pixels / (cells + 1) + 1;
-    let largest = pixels / cells;
-    (smallest == largest && largest != 0).then_some(largest as u16)
+    let smallest = pixels.checked_div(cells.checked_add(1)?)?.checked_add(1)?;
+    let largest = pixels.checked_div(cells)?;
+    (smallest == largest && largest != 0)
+        .then(|| u16::try_from(largest).ok())
+        .flatten()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -199,6 +214,10 @@ pub enum Selection {
 }
 
 /// Text renderer selection only; production block/ASCII artwork is S04 work.
+///
+/// # Errors
+///
+/// Returns an unsupported error when image mode is requested but detection failed.
 pub fn select(
     mode: Mode,
     detection: Result<NativeTerminal, Unavailable>,
@@ -232,6 +251,10 @@ pub struct Crop {
 }
 
 /// Include every nonzero alpha pixel, including partially transparent edge pixels.
+///
+/// # Errors
+///
+/// Returns invalid data when the image is fully transparent or dimensions cannot be represented.
 pub fn crop_visible(image: &RgbaImage) -> io::Result<(RgbaImage, Crop)> {
     let (mut left, mut top) = image.dimensions();
     let (mut right, mut bottom) = (0, 0);
@@ -239,8 +262,12 @@ pub fn crop_visible(image: &RgbaImage) -> io::Result<(RgbaImage, Crop)> {
         if pixel[3] != 0 {
             left = left.min(x);
             top = top.min(y);
-            right = right.max(x + 1);
-            bottom = bottom.max(y + 1);
+            right = right.max(x.checked_add(1).ok_or_else(|| {
+                io::Error::new(io::ErrorKind::InvalidData, "image width overflow")
+            })?);
+            bottom = bottom.max(y.checked_add(1).ok_or_else(|| {
+                io::Error::new(io::ErrorKind::InvalidData, "image height overflow")
+            })?);
         }
     }
     if right == 0 || bottom == 0 {
@@ -254,8 +281,12 @@ pub fn crop_visible(image: &RgbaImage) -> io::Result<(RgbaImage, Crop)> {
         source_height: image.height(),
         left,
         top,
-        width: right - left,
-        height: bottom - top,
+        width: right.checked_sub(left).ok_or_else(|| {
+            io::Error::new(io::ErrorKind::InvalidData, "invalid image crop width")
+        })?,
+        height: bottom.checked_sub(top).ok_or_else(|| {
+            io::Error::new(io::ErrorKind::InvalidData, "invalid image crop height")
+        })?,
     };
     Ok((
         image::imageops::crop_imm(image, left, top, crop.width, crop.height).to_image(),
@@ -285,6 +316,10 @@ impl NativeFrame {
     /// Pad the crop to full cells without resampling: Kitty virtual placement fits into a
     /// rounded cell grid even without `c`/`r` fields. Equal payload/grid pixels prevent scaling.
     /// Oversized images are clipped at the right edge, never resized to terminal width.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error for empty/transparent input, unsupported dimensions, or image encoding failures.
     pub fn original(image: &RgbaImage, metrics: Metrics) -> io::Result<Self> {
         if metrics.cell_width == 0 || metrics.cell_height == 0 || metrics.columns == 0 {
             return Err(io::Error::new(
@@ -303,10 +338,20 @@ impl NativeFrame {
                 "image exceeds ratatui-image's 297-cell Kitty placeholder limit",
             ));
         }
-        let size = Size::new(columns as u16, rows as u16);
-        let payload_width = columns * u32::from(metrics.cell_width);
-        let payload_height = rows * u32::from(metrics.cell_height);
-        if u64::from(payload_width) * u64::from(payload_height) > 16 * 1024 * 1024 {
+        let size = Size::new(
+            u16::try_from(columns).map_err(io::Error::other)?,
+            u16::try_from(rows).map_err(io::Error::other)?,
+        );
+        let payload_width = columns
+            .checked_mul(u32::from(metrics.cell_width))
+            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "image width overflow"))?;
+        let payload_height = rows
+            .checked_mul(u32::from(metrics.cell_height))
+            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "image height overflow"))?;
+        let payload_area = u64::from(payload_width)
+            .checked_mul(u64::from(payload_height))
+            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "image area overflow"))?;
+        if payload_area > 16 * 1024 * 1024 {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 "padded native image exceeds the 16-megapixel prototype limit",
@@ -333,7 +378,7 @@ impl NativeFrame {
                     "ratatui-image did not emit a native Kitty cell",
                 ));
             };
-            write!(encoded, "\x1b[38;2;{r};{g};{b}m").expect("String writing cannot fail");
+            let _ = write!(encoded, "\x1b[38;2;{r};{g};{b}m");
             for x in 0..area.width {
                 encoded.push_str(buffer[(x, y)].symbol());
             }
@@ -355,6 +400,7 @@ impl NativeFrame {
         })
     }
 
+    #[must_use]
     pub fn bytes(&self) -> &[u8] {
         &self.bytes
     }
@@ -362,6 +408,10 @@ impl NativeFrame {
     /// Writes only inline graphics/text. No cursor hiding, screen switching or termios changes.
     /// If a write is interrupted mid-escape, make a best-effort cancellation/reset. A permanently
     /// broken writer cannot accept cleanup; return that limitation with the original failure.
+    ///
+    /// # Errors
+    ///
+    /// Returns the write or flush error, including a cleanup failure when both operations fail.
     pub fn write_to(&self, output: &mut impl Write) -> io::Result<()> {
         let mut guard = OutputGuard {
             output,
@@ -395,9 +445,11 @@ impl NativeFrame {
 // through std's independently seeded hash builder, avoiding another RNG dependency.
 fn fresh_image_id() -> u32 {
     use std::hash::{BuildHasher, Hasher};
-    let id = std::collections::hash_map::RandomState::new()
+    let hash = std::collections::hash_map::RandomState::new()
         .build_hasher()
-        .finish() as u32;
+        .finish();
+    let [byte_0, byte_1, byte_2, byte_3, ..] = hash.to_le_bytes();
+    let id = u32::from_le_bytes([byte_0, byte_1, byte_2, byte_3]);
     id.max(1)
 }
 

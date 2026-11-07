@@ -9,7 +9,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         return Err("usage: fetch_official URL OUTPUT".into());
     }
     let client = http_client()?;
-    let response = client.get(&args[0]).send().await?;
+    let response = client
+        .get(args.first().ok_or("missing URL")?)
+        .send()
+        .await?;
     let status = response.status();
     println!("{} {}", response.status(), response.uri());
     let content_type = response
@@ -20,7 +23,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .to_owned();
     let body = response.bytes().await?;
     println!("{}; {} bytes", content_type, body.len());
-    fs::write(&args[1], body)?;
+    fs::write(args.get(1).ok_or("missing output path")?, body)?;
     if !status.is_success() {
         return Err(format!("HTTP {status}; response body preserved").into());
     }

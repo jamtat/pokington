@@ -10,6 +10,11 @@ impl fmt::Display for SourceError {
 }
 impl std::error::Error for SourceError {}
 
+/// Build the configured HTTP client.
+///
+/// # Errors
+///
+/// Returns the client builder's error when the configured profile cannot be built.
 pub fn http_client() -> Result<wreq::Client, wreq::Error> {
     http_client_builder().build()
 }

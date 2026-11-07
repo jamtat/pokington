@@ -93,6 +93,10 @@ pub enum DataPlatform {
 }
 
 /// Explicit environment inputs keep directory tests independent of the real user environment.
+///
+/// # Errors
+///
+/// Returns an error when the required home directory is missing or is not absolute.
 pub fn application_data_dir(
     platform: DataPlatform,
     home: Option<&Path>,
@@ -118,6 +122,10 @@ pub struct Store {
 
 impl Store {
     /// No filesystem writes occur until `try_writer`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the root is not an absolute path.
     pub fn at(root: PathBuf) -> Result<Self, StoreError> {
         if !root.is_absolute() {
             return Err(StoreError::DataDirectory(
@@ -127,6 +135,11 @@ impl Store {
         Ok(Self { root })
     }
 
+    /// Resolve and construct the platform's application data store.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the platform is unsupported or the required home directory is invalid.
     pub fn platform() -> Result<Self, StoreError> {
         let platform = if cfg!(target_os = "macos") {
             DataPlatform::MacOs
@@ -144,11 +157,16 @@ impl Store {
         )?)
     }
 
+    #[must_use]
     pub fn root(&self) -> &Path {
         &self.root
     }
 
     /// Validate metadata only; rendering validates the selected PNG, not every image on `choose`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the installed catalogue cannot be safely read or validated.
     pub fn load_active(&self) -> Result<Option<Catalogue>, StoreError> {
         let installed = self.root.join("installed");
         let path = installed.join("catalogue.json");
@@ -175,6 +193,11 @@ impl Store {
         })
     }
 
+    /// Read one artwork file after validating its path and file type.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the store path or artwork file is missing, unsafe, or unreadable.
     pub fn read_artwork(&self, reference: &ArtworkRef) -> Result<Vec<u8>, StoreError> {
         let result = self.artwork_bytes(reference);
         result.map_err(|error| StoreError::RepairRequired {
@@ -183,11 +206,16 @@ impl Store {
         })
     }
 
+    /// Acquire the exclusive bootstrap writer lock and create the artwork directory if needed.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the store cannot be prepared or another writer holds the lock.
     pub fn try_writer(&self) -> Result<Writer, StoreError> {
         fs::create_dir_all(&self.root).map_err(|e| at(&self.root, e))?;
         self.check_root()?;
         let lock_path = self.root.join("writer.lock");
-        let lock = regular_options()
+        let lock = regular_options()?
             .read(true)
             .write(true)
             .create(true)
@@ -237,13 +265,16 @@ pub struct Checkpoint {
 }
 
 impl Checkpoint {
-    pub fn catalogue(&self) -> &Catalogue {
+    #[must_use]
+    pub const fn catalogue(&self) -> &Catalogue {
         &self.catalogue
     }
-    pub fn force(&self) -> bool {
+    #[must_use]
+    pub const fn force(&self) -> bool {
         self.force
     }
-    pub fn completed(&self) -> &BTreeSet<ArtworkRef> {
+    #[must_use]
+    pub const fn completed(&self) -> &BTreeSet<ArtworkRef> {
         &self.completed
     }
 
@@ -267,6 +298,10 @@ pub struct Writer {
 
 impl Writer {
     /// Resume only an identical source discovery and force policy; other refreshes get fresh slots.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when source records, checkpoint data, or existing artwork cannot be validated or stored.
     pub fn prepare(
         &mut self,
         index: &serebii::Index,
@@ -310,7 +345,7 @@ impl Writer {
                 }
                 Ok(_) => {
                     // A damaged immutable slot is abandoned, including when also referenced by active.
-                    form.local_artwork = fresh_artwork_ref();
+                    form.local_artwork = fresh_artwork_ref()?;
                 }
                 Err(StoreError::Io { source, .. }) if source.kind() == io::ErrorKind::NotFound => {}
                 Err(error) => return Err(error),
@@ -321,6 +356,11 @@ impl Writer {
         self.checkpoint()
     }
 
+    /// Return the prepared checkpoint.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error before `prepare` has initialized a refresh.
     pub fn checkpoint(&self) -> Result<&Checkpoint, StoreError> {
         self.pending
             .as_ref()
@@ -328,6 +368,10 @@ impl Writer {
     }
 
     /// Non-force bootstrap can reuse matching validated active artwork. Force must write fresh files.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the active catalogue is invalid, refresh is forced, or storage fails.
     pub fn reuse_active(&mut self, active: &Catalogue) -> Result<usize, StoreError> {
         active.validate()?;
         let mut pending = self.checkpoint()?.clone();
@@ -341,7 +385,7 @@ impl Writer {
             .iter()
             .flat_map(|s| s.forms.iter().map(move |f| ((s.id, f.key.as_str()), f)))
             .collect();
-        let mut reused = 0;
+        let mut reused = 0_usize;
         for species in &mut pending.catalogue.species {
             for form in &mut species.forms {
                 if pending.completed.contains(&form.local_artwork) {
@@ -355,7 +399,7 @@ impl Writer {
                         Ok(bytes) if validate_png(&bytes).is_ok() => {
                             form.local_artwork = previous.local_artwork.clone();
                             pending.completed.insert(form.local_artwork.clone());
-                            reused += 1;
+                            reused = reused.saturating_add(1);
                         }
                         Ok(_) => (),
                         Err(StoreError::Io { source, .. })
@@ -372,6 +416,10 @@ impl Writer {
     }
 
     /// Validate before completing an immutable slot. Never overwrite an existing artwork file.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the reference is outside the checkpoint, the PNG is invalid, or storage fails.
     pub fn write_artwork(
         &mut self,
         reference: &ArtworkRef,
@@ -402,7 +450,7 @@ impl Writer {
         sync_directory(&directory)?;
         self.pending
             .as_mut()
-            .expect("checkpoint checked above")
+            .ok_or_else(|| StoreError::InvalidCheckpoint("prepare a refresh first".into()))?
             .completed
             .insert(reference.clone());
         Ok(())
@@ -410,6 +458,10 @@ impl Writer {
 
     /// The installed directory / catalogue JSON rename is the commit point. Errors after it may mean publication succeeded;
     /// a retry is safe. No active image or previous catalogue's artwork is ever removed.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when artwork is incomplete or invalid, or when metadata publication fails.
     pub fn publish(&mut self) -> Result<Catalogue, StoreError> {
         let pending = self.checkpoint()?;
         pending.validate()?;
@@ -455,6 +507,10 @@ impl Writer {
     }
 
     /// Explicit repair of an unreadable checkpoint; retain all immutable files and active data.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the checkpoint cannot be removed or the directory cannot be synchronized.
     pub fn discard_pending(&mut self) -> Result<(), StoreError> {
         let path = self.store.root.join("pending.json");
         match fs::remove_file(&path) {
@@ -474,18 +530,21 @@ fn fresh_id() -> String {
         RandomState::new().build_hasher().finish()
     )
 }
-fn fresh_artwork_ref() -> ArtworkRef {
-    ArtworkRef::new(format!("artwork/{}-1.png", fresh_id())).expect("generated artwork reference")
+fn fresh_artwork_ref() -> Result<ArtworkRef, CatalogueError> {
+    ArtworkRef::new(format!("artwork/{}-1.png", fresh_id()))
 }
 
-fn regular_options() -> OpenOptions {
+fn regular_options() -> Result<OpenOptions, StoreError> {
     let mut options = OpenOptions::new();
-    options.custom_flags(rustix::fs::OFlags::NOFOLLOW.bits() as i32);
-    options
+    let nofollow = i32::try_from(rustix::fs::OFlags::NOFOLLOW.bits()).map_err(|_| {
+        StoreError::DataDirectory("NOFOLLOW file flag is outside the platform flag range".into())
+    })?;
+    options.custom_flags(nofollow);
+    Ok(options)
 }
 
 fn read_regular(path: &Path, limit: u64) -> Result<Vec<u8>, StoreError> {
-    let file = regular_options()
+    let file = regular_options()?
         .read(true)
         .open(path)
         .map_err(|e| at(path, e))?;
@@ -493,10 +552,11 @@ fn read_regular(path: &Path, limit: u64) -> Result<Vec<u8>, StoreError> {
         return Err(at(path, io::Error::other("not a regular file")));
     }
     let mut bytes = Vec::new();
-    file.take(limit + 1)
+    let read_limit = limit.saturating_add(1);
+    file.take(read_limit)
         .read_to_end(&mut bytes)
         .map_err(|e| at(path, e))?;
-    if bytes.len() as u64 > limit {
+    if u64::try_from(bytes.len()).unwrap_or(u64::MAX) > limit {
         return Err(at(path, io::Error::other("file exceeds size limit")));
     }
     Ok(bytes)
@@ -513,7 +573,12 @@ fn check_directory(path: &Path) -> Result<(), StoreError> {
 }
 fn ensure_directory(path: &Path) -> Result<(), StoreError> {
     match fs::create_dir(path) {
-        Ok(()) => sync_directory(path.parent().expect("data directory parent"))?,
+        Ok(()) => {
+            let parent = path
+                .parent()
+                .ok_or_else(|| at(path, io::Error::other("data directory has no parent")))?;
+            sync_directory(parent)?;
+        }
         Err(e) if e.kind() == io::ErrorKind::AlreadyExists => (),
         Err(e) => return Err(at(path, e)),
     }
@@ -534,9 +599,9 @@ impl Drop for Temporary {
 fn temporary_file(directory: &Path, label: &str) -> Result<(Temporary, File), StoreError> {
     loop {
         let path = directory.join(format!(".{label}-{}.tmp", fresh_id()));
-        match regular_options().write(true).create_new(true).open(&path) {
+        match regular_options()?.write(true).create_new(true).open(&path) {
             Ok(file) => return Ok((Temporary(path), file)),
-            Err(e) if e.kind() == io::ErrorKind::AlreadyExists => continue,
+            Err(e) if e.kind() == io::ErrorKind::AlreadyExists => (),
             Err(e) => return Err(at(&path, e)),
         }
     }
@@ -551,7 +616,9 @@ fn atomic_replace(
     path: &Path,
     write: impl FnOnce(&mut File) -> io::Result<()>,
 ) -> Result<(), StoreError> {
-    let directory = path.parent().expect("metadata parent");
+    let directory = path
+        .parent()
+        .ok_or_else(|| at(path, io::Error::other("metadata path has no parent")))?;
     let (temporary, mut file) = temporary_file(directory, "json")?;
     write(&mut file)
         .and_then(|()| file.sync_all())
@@ -562,8 +629,14 @@ fn atomic_replace(
 
 /// Full PNG checksum/frame/end validation, with bounded input and allocation. Match S01's
 /// visible, non-uniform illustration requirements; network status/MIME checks belong to bootstrap.
+///
+/// # Errors
+///
+/// Returns an error when the bytes are not a complete, non-blank static PNG within configured limits.
 pub fn validate_png(bytes: &[u8]) -> Result<(), String> {
-    if bytes.len() as u64 > MAX_PNG_BYTES || !bytes.starts_with(b"\x89PNG\r\n\x1a\n") {
+    if u64::try_from(bytes.len()).unwrap_or(u64::MAX) > MAX_PNG_BYTES
+        || !bytes.starts_with(b"\x89PNG\r\n\x1a\n")
+    {
         return Err("not a PNG within the input size limit".into());
     }
     let mut decoder = png::Decoder::new(io::Cursor::new(bytes));
@@ -584,7 +657,9 @@ pub fn validate_png(bytes: &[u8]) -> Result<(), String> {
     let info = reader.next_frame(&mut pixels).map_err(|e| e.to_string())?;
     reader.finish().map_err(|e| e.to_string())?;
     let samples = info.color_type.samples();
-    let pixels = &pixels[..info.buffer_size()];
+    let pixels = pixels
+        .get(..info.buffer_size())
+        .ok_or("PNG decoder returned an invalid pixel buffer length")?;
     let mut values = pixels.chunks_exact(samples);
     let first = values.next().ok_or("empty PNG")?;
     if values.all(|pixel| pixel == first) {
@@ -593,7 +668,9 @@ pub fn validate_png(bytes: &[u8]) -> Result<(), String> {
     if matches!(
         info.color_type,
         png::ColorType::Rgba | png::ColorType::GrayscaleAlpha
-    ) && pixels.chunks_exact(samples).all(|p| p[samples - 1] == 0)
+    ) && pixels
+        .chunks_exact(samples)
+        .all(|pixel| pixel.last() == Some(&0))
     {
         return Err("fully transparent PNG".into());
     }

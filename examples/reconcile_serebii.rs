@@ -20,8 +20,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             "usage: reconcile_serebii HUB_CACHE ENRICHMENT_CACHE [PNG_VALIDATION_JSON]".into(),
         );
     }
-    let dir = PathBuf::from(&args[0]);
-    let extra_dir = PathBuf::from(&args[1]);
+    let dir = PathBuf::from(args.first().ok_or("missing hub cache")?);
+    let extra_dir = PathBuf::from(args.get(1).ok_or("missing enrichment cache")?);
     let index = parse_index(&decode(&dir.join("index.html"))?)?;
     let requests: Vec<Request> =
         serde_json::from_slice(&fs::read(extra_dir.join("requests.json"))?)?;
@@ -54,12 +54,12 @@ fn main() -> Result<(), Box<dyn Error>> {
             Ok(species) => catalogue.push(species),
             Err(e) => errors.push(format!("{}: {e}", species.id)),
         }
-        if (catalogue.len() + errors.len()).is_multiple_of(100) {
-            eprintln!(
-                "replayed {} species; {} unresolved",
-                catalogue.len() + errors.len(),
-                errors.len()
-            );
+        let replayed = catalogue
+            .len()
+            .checked_add(errors.len())
+            .ok_or("species count overflow")?;
+        if replayed.is_multiple_of(100) {
+            eprintln!("replayed {} species; {} unresolved", replayed, errors.len());
         }
     }
     fs::write(
@@ -97,10 +97,12 @@ fn main() -> Result<(), Box<dyn Error>> {
                     && record["complete_decode"] == true
                     && record["uniform_blank"] == false
                     && record["visible_pixels"].as_u64().is_some_and(|n| n > 0)
-                    && record["http"]["status"] == 200
-                    && record["http"]["content_type"] == "image/png"
+                    && record.get("http").and_then(|http| http.get("status"))
+                        == Some(&serde_json::json!(200))
+                    && record.get("http").and_then(|http| http.get("content_type"))
+                        == Some(&serde_json::json!("image/png"))
             })
-            .filter_map(|record| record["http"]["url"].as_str().map(str::to_owned))
+            .filter_map(|record| record.get("http")?.get("url")?.as_str().map(str::to_owned))
             .collect();
         validate_artwork_references(&catalogue, &verified)?;
         println!("All selected illustration references have successful PNG byte validation");

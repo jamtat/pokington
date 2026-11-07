@@ -4,15 +4,19 @@ mod portal_source;
 use portal_source::parse_portal_index;
 use serde_json::{Value, json};
 
-fn fixture() -> Value {
-    serde_json::from_str(include_str!("fixtures/portal-charizard.json")).unwrap()
+fn fixture() -> Result<Value, serde_json::Error> {
+    serde_json::from_str(include_str!("fixtures/portal-charizard.json"))
 }
 
 fn document(value: &Value) -> String {
     let record = format!("a:[\"$\",\"$L1\",null,{value}]\n");
     // Deliberately split within the record, as the real Next.js response does.
-    let split = record.len() / 2;
-    let chunks = [&record[..split], &record[split..]];
+    let split = record
+        .char_indices()
+        .nth(record.chars().count() / 2)
+        .map_or(record.len(), |(index, _)| index);
+    let (first, second) = record.split_at(split);
+    let chunks: [&str; 2] = (first, second).into();
     format!(
         "<html lang=\"en-SG\"><body>{}</body></html>",
         chunks
@@ -23,7 +27,7 @@ fn document(value: &Value) -> String {
 
 #[test]
 fn discovers_source_counts_types_and_distinct_mega_keys() {
-    let index = parse_portal_index(&document(&fixture())).unwrap();
+    let index = parse_portal_index(&document(&fixture().unwrap())).unwrap();
     assert_eq!(index.species_count(), 1);
     assert_eq!(index.entries.len(), 4);
     assert_eq!(index.bounds(), (6, 6));
@@ -40,7 +44,7 @@ fn discovers_source_counts_types_and_distinct_mega_keys() {
 fn rejects_antibot_and_truncated_transport() {
     let antibot = "<html><body><iframe src=\"/_Incapsula_Resource\"></iframe></body></html>";
     assert!(parse_portal_index(antibot).is_err());
-    let html = document(&fixture());
+    let html = document(&fixture().unwrap());
     assert!(parse_portal_index(html.trim_end_matches("</html>")).is_err());
     assert!(
         parse_portal_index(
@@ -59,7 +63,7 @@ fn rejects_partial_duplicate_and_missing_references() {
             v["initialPokemons"].as_array_mut().unwrap().remove(0);
         }),
         ("missing species", |v| {
-            v["searchItems"]["pokemonMaxId"] = json!(7)
+            v["searchItems"]["pokemonMaxId"] = json!(7);
         }),
         ("duplicate id", |v| {
             let copy = v["initialPokemons"][0].clone();
@@ -72,13 +76,13 @@ fn rejects_partial_duplicate_and_missing_references() {
                 .remove("file_name");
         }),
         ("unsafe image", |v| {
-            v["initialPokemons"][0]["file_name"] = json!("/images/pokedex/../x.png")
+            v["initialPokemons"][0]["file_name"] = json!("/images/pokedex/../x.png");
         }),
         ("unknown type", |v| {
-            v["initialPokemons"][0]["pokemon_type_id"] = json!("unknown,flying")
+            v["initialPokemons"][0]["pokemon_type_id"] = json!("unknown,flying");
         }),
         ("mismatched type", |v| {
-            v["initialPokemons"][0]["pokemon_type_name"] = json!("Water,Flying")
+            v["initialPokemons"][0]["pokemon_type_name"] = json!("Water,Flying");
         }),
         ("missing bounds", |v| {
             v["searchItems"]
@@ -88,11 +92,11 @@ fn rejects_partial_duplicate_and_missing_references() {
         }),
         ("filtered index", |v| v["variant"] = json!("searchResult")),
         ("external image base", |v| {
-            v["imageBaseUrl"] = json!("https://example.com")
+            v["imageBaseUrl"] = json!("https://example.com");
         }),
     ];
     for (name, mutate) in cases {
-        let mut value = fixture();
+        let mut value = fixture().unwrap();
         mutate(&mut value);
         assert!(parse_portal_index(&document(&value)).is_err(), "{name}");
     }
@@ -100,7 +104,7 @@ fn rejects_partial_duplicate_and_missing_references() {
 
 #[test]
 fn rejects_duplicate_descriptive_keys_without_inventing_suffixes() {
-    let mut value = fixture();
+    let mut value = fixture().unwrap();
     value["initialPokemons"][1]["pokemon_sub_name"] = json!("Paldean Form");
     value["initialPokemons"][2]["pokemon_sub_name"] = json!(" paldean   form ");
     let index = parse_portal_index(&document(&value)).unwrap();
@@ -115,5 +119,7 @@ fn rejects_duplicate_descriptive_keys_without_inventing_suffixes() {
 
 #[test]
 fn rejects_duplicate_index_payloads() {
-    assert!(parse_portal_index(&document(&json!([fixture(), fixture()]))).is_err());
+    assert!(
+        parse_portal_index(&document(&json!([fixture().unwrap(), fixture().unwrap()]))).is_err()
+    );
 }

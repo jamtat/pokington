@@ -33,7 +33,7 @@ fn hints() -> TerminalHints {
     }
 }
 
-fn metrics() -> Metrics {
+const fn metrics() -> Metrics {
     Metrics {
         columns: 80,
         rows: 24,
@@ -44,18 +44,18 @@ fn metrics() -> Metrics {
     }
 }
 
-fn pty(size: Winsize) -> OpenptyResult {
-    let pty = openpty(Some(&size), None).unwrap();
+fn pty(size: Winsize) -> Result<OpenptyResult, nix::errno::Errno> {
+    let pty = openpty(Some(&size), None)?;
     // This is our own test PTY. Suppress input echo and output newline translation so
     // assertions can distinguish queries from terminal echo, and inspect exact bytes.
-    let mut state = termios::tcgetattr(&pty.slave).unwrap();
+    let mut state = termios::tcgetattr(&pty.slave)?;
     state.local_flags.remove(LocalFlags::ECHO);
     state.output_flags.remove(OutputFlags::OPOST);
-    termios::tcsetattr(&pty.slave, SetArg::TCSANOW, &state).unwrap();
-    pty
+    termios::tcsetattr(&pty.slave, SetArg::TCSANOW, &state)?;
+    Ok(pty)
 }
 
-fn size() -> Winsize {
+const fn size() -> Winsize {
     Winsize {
         ws_col: 80,
         ws_row: 24,
@@ -64,18 +64,19 @@ fn size() -> Winsize {
     }
 }
 
-fn nonblocking(fd: &impl AsFd) {
-    let flags = OFlag::from_bits_truncate(fcntl(fd, FcntlArg::F_GETFL).unwrap());
-    fcntl(fd, FcntlArg::F_SETFL(flags | OFlag::O_NONBLOCK)).unwrap();
+fn nonblocking(fd: &impl AsFd) -> Result<(), nix::errno::Errno> {
+    let flags = OFlag::from_bits_truncate(fcntl(fd, FcntlArg::F_GETFL)?);
+    fcntl(fd, FcntlArg::F_SETFL(flags | OFlag::O_NONBLOCK))?;
+    Ok(())
 }
 
 #[test]
 fn paired_hints_and_ioctl_are_bounded_without_queries_or_consuming_queued_input() {
-    let pty = pty(size());
+    let pty = pty(size()).unwrap();
     let mut master = File::from(pty.master);
     let mut slave = File::from(pty.slave);
-    nonblocking(&master);
-    nonblocking(&slave);
+    nonblocking(&master).unwrap();
+    nonblocking(&slave).unwrap();
     master.write_all(b"pending user input\n").unwrap();
     let before = termios::tcgetattr(&slave).unwrap();
     let started = Instant::now();
@@ -94,13 +95,13 @@ fn paired_hints_and_ioctl_are_bounded_without_queries_or_consuming_queued_input(
 
 #[test]
 fn unavailable_contexts_do_not_query_or_read_and_choose_explicit_error_or_safe_fallback() {
-    let pty = pty(size());
+    let other = pty(size()).unwrap();
+    let pty = pty(size()).unwrap();
     let mut master = File::from(pty.master);
     let mut slave = File::from(pty.slave);
-    let other = pty_for_other_terminal();
     let null = File::open("/dev/null").unwrap();
-    nonblocking(&master);
-    nonblocking(&slave);
+    nonblocking(&master).unwrap();
+    nonblocking(&slave).unwrap();
     master.write_all(b"untouched\n").unwrap();
     let before = termios::tcgetattr(&slave).unwrap();
     let checks = [
@@ -186,10 +187,6 @@ fn unavailable_contexts_do_not_query_or_read_and_choose_explicit_error_or_safe_f
     assert_eq!(&bytes[..10], b"untouched\n");
 }
 
-fn pty_for_other_terminal() -> OpenptyResult {
-    pty(size())
-}
-
 #[test]
 fn missing_metrics_fail_without_waiting_for_terminal_replies() {
     let cases = [
@@ -215,7 +212,7 @@ fn missing_metrics_fail_without_waiting_for_terminal_replies() {
         },
     ];
     for size in cases {
-        let pty = pty(size);
+        let pty = pty(size).unwrap();
         let started = Instant::now();
         assert_eq!(
             inline_image::detect(&pty.slave, &pty.slave, &hints()).unwrap_err(),
@@ -237,7 +234,7 @@ fn ghostty_140_observed_viewport_has_unique_cells_and_ambiguous_or_clamped_sizes
         ws_xpixel: 1801,
         ws_ypixel: 2196,
     };
-    let pty = pty(observed);
+    let pty = pty(observed).unwrap();
     let terminal = inline_image::detect(&pty.slave, &pty.slave, &hints).unwrap();
     assert_eq!(
         (terminal.metrics.cell_width, terminal.metrics.cell_height),
@@ -259,7 +256,7 @@ fn ghostty_140_observed_viewport_has_unique_cells_and_ambiguous_or_clamped_sizes
     );
     let image = calibration::calibration_image();
     let frame = NativeFrame::original(&image, terminal.metrics).unwrap();
-    let (header, payload) = transmitted_pixels(&frame);
+    let (header, payload) = transmitted_pixels(&frame).unwrap();
     assert_eq!((header["s"].as_str(), header["v"].as_str()), ("136", "111"));
     assert_eq!(
         (frame.report.image_columns, frame.report.image_rows),
@@ -326,11 +323,12 @@ fn unverified_profiles_cannot_turn_divisible_ambiguous_metrics_into_native_sizin
         ws_row: 2,
         ws_xpixel: 1785,
         ws_ypixel: 100,
-    });
+    })
+    .unwrap();
     let mut master = File::from(pty.master);
     let mut slave = File::from(pty.slave);
-    nonblocking(&master);
-    nonblocking(&slave);
+    nonblocking(&master).unwrap();
+    nonblocking(&slave).unwrap();
     master.write_all(b"preserved profile input\n").unwrap();
     let before = termios::tcgetattr(&slave).unwrap();
     for profile in [
@@ -380,36 +378,40 @@ fn unverified_profiles_cannot_turn_divisible_ambiguous_metrics_into_native_sizin
     assert_eq!(&bytes[..count], b"preserved profile input\n");
 }
 
-fn transmitted_pixels(frame: &NativeFrame) -> (BTreeMap<String, String>, Vec<u8>) {
-    let text = std::str::from_utf8(frame.bytes()).unwrap();
+fn transmitted_pixels(frame: &NativeFrame) -> Option<(BTreeMap<String, String>, Vec<u8>)> {
+    let text = std::str::from_utf8(frame.bytes()).ok()?;
     let mut first = None;
     let mut payload = Vec::new();
     let mut parts = text.split("\x1b_G").skip(1).peekable();
     while let Some(part) = parts.next() {
-        let (command, _) = part.split_once("\x1b\\").expect("terminated APC");
-        let (header, encoded) = command.split_once(';').unwrap();
+        let (command, _) = part.split_once("\x1b\\")?;
+        let (header, encoded) = command.split_once(';')?;
         let fields: BTreeMap<_, _> = header
             .split(',')
             .map(|f| {
-                let (key, value) = f.split_once('=').unwrap();
-                (key.to_owned(), value.to_owned())
+                f.split_once('=')
+                    .map(|(key, value)| (key.to_owned(), value.to_owned()))
             })
-            .collect();
-        assert_eq!(fields["q"], "2", "terminal must not send replies");
-        assert_eq!(fields["m"], if parts.peek().is_some() { "1" } else { "0" });
+            .collect::<Option<_>>()?;
+        assert_eq!(
+            fields.get("q").map(String::as_str),
+            Some("2"),
+            "terminal must not send replies"
+        );
+        assert_eq!(
+            fields.get("m").map(String::as_str),
+            Some(if parts.peek().is_some() { "1" } else { "0" })
+        );
         assert!(encoded.len() <= 4096);
         assert!(!fields.contains_key("c") && !fields.contains_key("r"));
         assert!(
             !fields.contains_key("o"),
             "compression must not require a capability probe"
         );
-        payload.extend(STANDARD.decode(encoded).unwrap());
+        payload.extend(STANDARD.decode(encoded).ok()?);
         first.get_or_insert(fields);
     }
-    (
-        first.expect("native Kitty transmission, not half blocks"),
-        payload,
-    )
+    (first?, payload).into()
 }
 
 #[test]
@@ -437,7 +439,7 @@ fn odd_crop_rgba_payload_matches_every_source_pixel_and_full_cell_placement_with
             ),
             (10, 10, 131, 97)
         );
-        let (header, raw) = transmitted_pixels(&frame);
+        let (header, raw) = transmitted_pixels(&frame).unwrap();
         assert_eq!(header["a"], "T");
         assert_eq!(header["U"], "1");
         assert_eq!(header["f"], "32");
@@ -453,7 +455,16 @@ fn odd_crop_rgba_payload_matches_every_source_pixel_and_full_cell_placement_with
             height,
             u32::from(frame.report.image_rows) * u32::from(cell_height)
         );
-        assert_eq!(raw.len(), width as usize * height as usize * 4);
+        let expected_len = usize::try_from(width)
+            .ok()
+            .and_then(|width| {
+                usize::try_from(height)
+                    .ok()
+                    .and_then(|height| width.checked_mul(height))
+            })
+            .and_then(|area| area.checked_mul(4))
+            .expect("decoded PNG dimensions fit in memory");
+        assert_eq!(raw.len(), expected_len);
         let decoded = RgbaImage::from_raw(width, height, raw).unwrap();
         for (x, y, pixel) in decoded.enumerate_pixels() {
             if x < 131 && y < 97 {
@@ -484,7 +495,7 @@ fn original_overflow_clips_placeholders_without_reducing_payload_or_scaling() {
         ),
         (17, 7, 5)
     );
-    let (header, _) = transmitted_pixels(&frame);
+    let (header, _) = transmitted_pixels(&frame).unwrap();
     assert_eq!((header["s"].as_str(), header["v"].as_str()), ("136", "112"));
     let text = std::str::from_utf8(frame.bytes()).unwrap();
     assert_eq!(text.matches('\u{10eeee}').count(), 5 * 7);
@@ -498,7 +509,7 @@ fn partial_alpha_is_preserved_and_transparent_or_unsupported_extents_fail_before
     image.put_pixel(2, 3, Rgba([17, 42, 99, 1]));
     image.put_pixel(4, 6, Rgba([200, 0, 9, 128]));
     let frame = NativeFrame::original(&image, metrics()).unwrap();
-    let (_, payload) = transmitted_pixels(&frame);
+    let (_, payload) = transmitted_pixels(&frame).unwrap();
     let decoded = RgbaImage::from_raw(8, 16, payload).unwrap();
     assert_eq!(decoded.get_pixel(0, 0), image.get_pixel(2, 3));
     assert_eq!(decoded.get_pixel(2, 3), image.get_pixel(4, 6));
@@ -532,11 +543,11 @@ fn success_and_partial_write_failure_preserve_pty_modes_input_and_restore_output
         Some(apc_fault),
         Some(frame.bytes().len() - 2),
     ] {
-        let pty = pty(size());
+        let pty = pty(size()).unwrap();
         let mut master = File::from(pty.master);
         let mut slave = File::from(pty.slave);
-        nonblocking(&master);
-        nonblocking(&slave);
+        nonblocking(&master).unwrap();
+        nonblocking(&slave).unwrap();
         master.write_all(b"next command\n").unwrap();
         let before = termios::tcgetattr(&slave).unwrap();
         inline_image::detect(&slave, &slave, &hints()).unwrap();

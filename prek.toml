@@ -1,0 +1,35 @@
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "cargo fmt"
+name = "cargo fmt"
+language = "system"
+entry = "cargo fmt --check"
+pass_filenames = false
+always_run = true
+
+[[repos.hooks]]
+id = "cargo check"
+name = "cargo check"
+language = "system"
+entry = "cargo check --all-targets --all-features --locked"
+pass_filenames = false
+always_run = true
+
+[[repos.hooks]]
+id = "cargo clippy"
+name = "cargo clippy"
+language = "system"
+entry = "cargo clippy --all-targets --all-features --locked -- -D warnings"
+pass_filenames = false
+always_run = true
+
+[[repos.hooks]]
+id = "cargo test"
+name = "cargo test"
+language = "system"
+entry = "cargo test --all-targets --all-features --locked"
+pass_filenames = false
+always_run = true

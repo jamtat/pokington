@@ -17,19 +17,25 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mut pixels = vec![0; size];
         let info = reader.next_frame(&mut pixels)?;
         reader.finish()?;
-        let alpha_stride = match info.color_type {
+        let alpha_stride: Option<usize> = match info.color_type {
             png::ColorType::Rgba => Some(4),
             png::ColorType::GrayscaleAlpha => Some(2),
             _ => None,
         };
-        let transparent = alpha_stride
-            .map(|stride| {
-                pixels[..info.buffer_size()]
-                    .chunks_exact(stride)
-                    .filter(|pixel| pixel[stride - 1] == 0)
-                    .count()
-            })
-            .unwrap_or(0);
+        let transparent = if let Some(stride) = alpha_stride {
+            let alpha_index = stride
+                .checked_sub(1)
+                .ok_or("PNG alpha stride must be nonzero")?;
+            let pixel_data = pixels
+                .get(..info.buffer_size())
+                .ok_or("PNG decoder returned a buffer larger than allocated")?;
+            pixel_data
+                .chunks_exact(stride)
+                .filter(|pixel| pixel.get(alpha_index) == Some(&0))
+                .count()
+        } else {
+            0
+        };
         println!(
             "{}: {} bytes; {}x{} {:?}; {} fully transparent pixels; CRC, Adler32, frame and stream-end checks passed",
             path.to_string_lossy(),

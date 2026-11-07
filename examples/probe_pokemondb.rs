@@ -6,8 +6,8 @@ use std::{collections::BTreeMap, error::Error, fs, path::PathBuf, time::Duration
 
 type ProbeResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
 
-fn select(css: &str) -> Selector {
-    Selector::parse(css).unwrap()
+fn select(css: &str) -> ProbeResult<Selector> {
+    Selector::parse(css).map_err(Into::into)
 }
 
 async fn fetch(client: &wreq::Client, url: &str, path: &PathBuf) -> ProbeResult<String> {
@@ -16,7 +16,11 @@ async fn fetch(client: &wreq::Client, url: &str, path: &PathBuf) -> ProbeResult<
     }
     tokio::time::sleep(Duration::from_millis(150)).await;
     let response = client.get(url).send().await?.error_for_status()?;
-    let content_type = response.headers().get("content-type").unwrap().to_str()?;
+    let content_type = response
+        .headers()
+        .get("content-type")
+        .ok_or("no content type")?
+        .to_str()?;
     if !content_type.starts_with("text/html") {
         return Err(format!("unexpected content type: {url}: {content_type}").into());
     }
@@ -34,8 +38,15 @@ async fn species(
     item: Value,
     home: bool,
 ) -> ProbeResult<Value> {
-    let path = item["path"].as_str().unwrap();
-    let slug = path.rsplit('/').next().unwrap();
+    let path = item
+        .get("path")
+        .and_then(Value::as_str)
+        .ok_or("species item has no path")?;
+    let slug = path
+        .rsplit('/')
+        .next()
+        .filter(|slug| !slug.is_empty())
+        .ok_or("species path has no slug")?;
     let detail = fetch(
         &client,
         &format!("https://pokemondb.net{path}"),
@@ -48,7 +59,7 @@ async fn species(
             "a[href^='/sprites/']"
         } else {
             "a[href^='/artwork/']"
-        }))
+        })?)
         .next()
         .and_then(|a| a.value().attr("href"))
         .map(str::to_owned)
@@ -69,15 +80,15 @@ async fn species(
     let doc = Html::parse_document(&gallery);
     let mut artwork = vec![];
     if home {
-        for cell in doc.select(&select(".sprites-table-card")) {
+        for cell in doc.select(&select(".sprites-table-card")?) {
             let Some(link) = cell
-                .select(&select("a[href*='/sprites/home/normal/']"))
+                .select(&select("a[href*='/sprites/home/normal/']")?)
                 .next()
             else {
                 continue;
             };
             let labels: Vec<_> = cell
-                .select(&select("small"))
+                .select(&select("small")?)
                 .map(|s| s.text().collect::<String>())
                 .collect();
             let form = if labels.is_empty() {
@@ -89,21 +100,22 @@ async fn species(
         }
         return Ok(json!({"species":item,"gallery":gallery_url,"artwork":artwork}));
     }
-    for cell in doc.select(&select("main .grid-col")) {
-        let Some(kind) = cell.select(&select("strong")).next() else {
+    for cell in doc.select(&select("main .grid-col")?) {
+        let Some(kind) = cell.select(&select("strong")?).next() else {
             continue;
         };
-        let Some(img) = cell.select(&select("img[src]")).next() else {
+        let Some(img) = cell.select(&select("img[src]")?).next() else {
             continue;
         };
         let url = cell
-            .select(&select("a[rel=lightbox]"))
+            .select(&select("a[rel=lightbox]")?)
             .next()
             .and_then(|a| a.value().attr("href"))
-            .unwrap_or_else(|| img.value().attr("src").unwrap());
+            .or_else(|| img.value().attr("src"))
+            .ok_or("artwork image has no source URL")?;
         artwork.push(json!({
             "kind":kind.text().collect::<String>().trim(),
-            "form":cell.select(&select("span.text-muted")).next().map(|s|s.text().collect::<String>()),
+            "form":cell.select(&select("span.text-muted")?).next().map(|s|s.text().collect::<String>()),
             "alt":img.value().attr("alt"),
             "url":url,
         }));
@@ -142,7 +154,7 @@ async fn png(client: wreq::Client, cache: PathBuf, url: String) -> ProbeResult<V
         if body.len() > 20_000_000 {
             return Err("image exceeds bound".into());
         }
-        fs::create_dir_all(path.parent().unwrap())?;
+        fs::create_dir_all(path.parent().ok_or("image cache path has no parent")?)?;
         fs::write(&path, &body)?;
         fs::write(&metadata_path, serde_json::to_vec(&metadata)?)?;
         body.to_vec()
@@ -168,25 +180,28 @@ async fn png(client: wreq::Client, cache: PathBuf, url: String) -> ProbeResult<V
         png::ColorType::GrayscaleAlpha => Some(2),
         _ => None,
     };
-    let transparent = stride
-        .map(|s| {
-            pixels[..info.buffer_size()]
-                .chunks_exact(s)
-                .filter(|p| p[s - 1] == 0)
-                .count()
-        })
-        .unwrap_or(0);
-    let total_pixels = info.width as usize * info.height as usize;
+    let decoded_pixels = pixels
+        .get(..info.buffer_size())
+        .ok_or("PNG decoder returned an invalid pixel buffer length")?;
+    let transparent = stride.map_or(0, |s| {
+        decoded_pixels
+            .chunks_exact(s)
+            .filter(|pixel| pixel.last() == Some(&0))
+            .count()
+    });
+    let total_pixels = usize::try_from(info.width)?
+        .checked_mul(usize::try_from(info.height)?)
+        .ok_or("image dimensions overflow")?;
     if transparent == total_pixels {
         return Err(format!("fully transparent image: {url}").into());
     }
-    let mut pixel_values = pixels[..info.buffer_size()].chunks_exact(info.color_type.samples());
+    let mut pixel_values = decoded_pixels.chunks_exact(info.color_type.samples());
     let first = pixel_values.next().ok_or("empty decoded image")?;
     if pixel_values.all(|pixel| pixel == first) {
         return Err(format!("uniform blank image: {url}").into());
     }
     Ok(
-        json!({"http":metadata,"path":path,"bytes":bytes.len(),"width":info.width,"height":info.height,"color":format!("{:?}",info.color_type),"transparent_pixels":transparent,"visible_pixels":total_pixels-transparent,"uniform_blank":false,"complete_decode":true}),
+        json!({"http":metadata,"path":path,"bytes":bytes.len(),"width":info.width,"height":info.height,"color":format!("{:?}",info.color_type),"transparent_pixels":transparent,"visible_pixels":total_pixels.saturating_sub(transparent),"uniform_blank":false,"complete_decode":true}),
     )
 }
 
@@ -201,66 +216,100 @@ async fn main() -> ProbeResult<()> {
     let client = http_client()?;
     let mode = std::env::args().nth(2).unwrap_or_default();
     if mode == "png" || mode == "png-list" {
-        let mut urls = std::collections::BTreeSet::new();
-        if mode == "png-list" {
-            let list = std::env::args()
-                .nth(3)
-                .ok_or("png-list requires a source-linked candidate JSON path")?;
-            let records: Vec<Value> = serde_json::from_slice(&fs::read(list)?)?;
-            for record in records {
-                urls.insert(
-                    record["url"]
-                        .as_str()
-                        .ok_or("candidate missing URL")?
-                        .to_owned(),
-                );
-            }
+        let list = if mode == "png-list" {
+            Some(
+                std::env::args()
+                    .nth(3)
+                    .ok_or("png-list requires a source-linked candidate JSON path")?,
+            )
         } else {
-            for name in ["coverage.json", "home-coverage.json"] {
-                let records: Vec<Value> = serde_json::from_slice(&fs::read(cache.join(name))?)?;
-                for row in records {
-                    for art in row["artwork"].as_array().into_iter().flatten() {
-                        let url = art["url"].as_str().unwrap();
-                        if url.ends_with(".png") {
-                            urls.insert(url.to_owned());
-                        }
+            None
+        };
+        return audit_pngs(&cache, &client, list.as_deref()).await;
+    }
+    audit_galleries(&cache, &client, mode == "home").await
+}
+
+async fn audit_pngs(
+    cache: &std::path::Path,
+    client: &wreq::Client,
+    list: Option<&str>,
+) -> ProbeResult<()> {
+    let mut urls = std::collections::BTreeSet::new();
+    if let Some(list) = list {
+        let records: Vec<Value> = serde_json::from_slice(&fs::read(list)?)?;
+        for record in records {
+            let url = record
+                .get("url")
+                .and_then(Value::as_str)
+                .ok_or("candidate missing URL")?;
+            urls.insert(url.to_owned());
+        }
+    } else {
+        for name in ["coverage.json", "home-coverage.json"] {
+            let records: Vec<Value> = serde_json::from_slice(&fs::read(cache.join(name))?)?;
+            for row in records {
+                for art in row
+                    .get("artwork")
+                    .and_then(Value::as_array)
+                    .into_iter()
+                    .flatten()
+                {
+                    let url = art
+                        .get("url")
+                        .and_then(Value::as_str)
+                        .ok_or("artwork missing URL")?;
+                    if url.to_ascii_lowercase().ends_with(".png") {
+                        urls.insert(url.to_owned());
                     }
                 }
             }
         }
-        eprintln!("source-linked PNGs: {}", urls.len());
-        let mut tasks = tokio::task::JoinSet::new();
-        let mut results = vec![];
-        for url in urls {
-            let c = client.clone();
-            let dir = cache.clone();
-            tasks.spawn(async move {
-                match png(c, dir, url.clone()).await {
-                    Ok(v) => v,
-                    Err(e) => json!({"url":url,"error":e.to_string()}),
-                }
-            });
-            if tasks.len() >= 3 {
-                results.push(tasks.join_next().await.unwrap()?);
-                if results.len() % 100 == 0 {
-                    eprintln!("PNGs checked: {}", results.len());
-                }
+    }
+    eprintln!("source-linked PNGs: {}", urls.len());
+    let mut tasks = tokio::task::JoinSet::new();
+    let mut results = vec![];
+    for url in urls {
+        let c = client.clone();
+        let dir = cache.to_owned();
+        tasks.spawn(async move {
+            match png(c, dir, url.clone()).await {
+                Ok(value) => value,
+                Err(error) => json!({"url":url,"error":error.to_string()}),
+            }
+        });
+        if tasks.len() >= 3 {
+            results.push(
+                tasks
+                    .join_next()
+                    .await
+                    .ok_or("task set unexpectedly empty")??,
+            );
+            if results.len().is_multiple_of(100) {
+                eprintln!("PNGs checked: {}", results.len());
             }
         }
-        while let Some(r) = tasks.join_next().await {
-            results.push(r?);
-        }
-        fs::write(
-            cache.join("png-validation.json"),
-            serde_json::to_vec_pretty(&results)?,
-        )?;
-        if results.iter().any(|result| result.get("error").is_some()) {
-            return Err("source image validation incomplete; see png-validation.json".into());
-        }
-        return Ok(());
     }
+    while let Some(result) = tasks.join_next().await {
+        results.push(result?);
+    }
+    fs::write(
+        cache.join("png-validation.json"),
+        serde_json::to_vec_pretty(&results)?,
+    )?;
+    if results.iter().any(|result| result.get("error").is_some()) {
+        return Err("source image validation incomplete; see png-validation.json".into());
+    }
+    Ok(())
+}
+
+async fn audit_galleries(
+    cache: &std::path::Path,
+    client: &wreq::Client,
+    home: bool,
+) -> ProbeResult<()> {
     let index = fetch(
-        &client,
+        client,
         "https://pokemondb.net/pokedex/all",
         &cache.join("all.html"),
     )
@@ -268,14 +317,14 @@ async fn main() -> ProbeResult<()> {
     let entries = {
         let doc = Html::parse_document(&index);
         let mut entries = BTreeMap::new();
-        for row in doc.select(&select("#pokedex tbody tr")) {
+        for row in doc.select(&select("#pokedex tbody tr")?) {
             let name = row
-                .select(&select("a.ent-name"))
+                .select(&select("a.ent-name")?)
                 .next()
                 .ok_or("missing species link")?;
             let path = name.value().attr("href").ok_or("missing detail path")?;
             let number = row
-                .select(&select(".infocard-cell-data"))
+                .select(&select(".infocard-cell-data")?)
                 .next()
                 .ok_or("missing number")?
                 .text()
@@ -294,10 +343,15 @@ async fn main() -> ProbeResult<()> {
     let mut tasks = tokio::task::JoinSet::new();
     let mut results = vec![];
     for item in entries.into_values() {
-        tasks.spawn(species(client.clone(), cache.clone(), item, mode == "home"));
+        tasks.spawn(species(client.clone(), cache.to_owned(), item, home));
         if tasks.len() >= 3 {
-            results.push(tasks.join_next().await.unwrap()??);
-            if results.len() % 50 == 0 {
+            results.push(
+                tasks
+                    .join_next()
+                    .await
+                    .ok_or("task set unexpectedly empty")???,
+            );
+            if results.len().is_multiple_of(50) {
                 eprintln!("galleries checked: {}", results.len());
             }
         }
@@ -305,9 +359,14 @@ async fn main() -> ProbeResult<()> {
     while let Some(result) = tasks.join_next().await {
         results.push(result??);
     }
-    results.sort_by_key(|r| r["species"]["id"].as_u64());
+    results.sort_by_key(|result| {
+        result
+            .get("species")
+            .and_then(|species| species.get("id"))
+            .and_then(Value::as_u64)
+    });
     fs::write(
-        cache.join(if mode == "home" {
+        cache.join(if home {
             "home-coverage.json"
         } else {
             "coverage.json"

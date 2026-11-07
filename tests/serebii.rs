@@ -35,7 +35,9 @@ fn partial_duplicate_malformed_and_challenge_indices_fail() {
                 "</table></body>",
                 &format!(
                     "{}</table></body>",
-                    &INDEX[INDEX.find("<tr>\n").unwrap()..INDEX.rfind("</table>").unwrap()]
+                    INDEX
+                        .get(INDEX.find("<tr>\n").unwrap()..INDEX.rfind("</table>").unwrap())
+                        .unwrap()
                 ),
             ),
         ),
@@ -68,14 +70,27 @@ fn hub_inventory_preserves_distinct_megas_and_source_breed_names() {
             .collect::<Vec<_>>(),
         ["gigantamax", "mega x", "mega y", "original"]
     );
-    assert_eq!(form(&catalogue, "mega x").types, ["fire", "dragon"]);
-    assert_eq!(form(&catalogue, "mega y").types, ["fire", "flying"]);
+    assert_eq!(
+        form(&catalogue, "mega x").unwrap().types,
+        ["fire", "dragon"]
+    );
+    assert_eq!(
+        form(&catalogue, "mega y").unwrap().types,
+        ["fire", "flying"]
+    );
     assert!(
         form(&catalogue, "gigantamax")
+            .unwrap()
             .artwork_url
             .ends_with("006-gi.png")
     );
-    assert_eq!(form(&catalogue, "gigantamax").artwork_references.len(), 2);
+    assert_eq!(
+        form(&catalogue, "gigantamax")
+            .unwrap()
+            .artwork_references
+            .len(),
+        2
+    );
     let tauros = parse_hub(TAUROS, &species(128, "Tauros")).unwrap();
     assert_eq!(tauros.artwork.len(), 4);
     assert_eq!(tauros.artwork[2].label, "Paldean Form Blaze Breed");
@@ -110,18 +125,27 @@ fn explicit_named_types_are_preserved_without_guessing_inheritance() {
     );
 }
 
-fn form<'a>(catalogue: &'a Species, key: &str) -> &'a pokington::serebii::Form {
+fn form<'a>(catalogue: &'a Species, key: &str) -> Result<&'a pokington::serebii::Form, String> {
     catalogue
         .forms
         .iter()
         .find(|f| f.key == key)
-        .unwrap_or_else(|| panic!("missing form {key}"))
+        .ok_or_else(|| format!("missing form {key}"))
 }
 
-fn enriched(id: u32, name: &str, hub_html: &str, game_html: &str) -> Species {
-    let hub = parse_hub(hub_html, &species(id, name)).unwrap();
-    let extra = parse_enrichment(&hub, &hub.game_links[0], game_html).unwrap();
-    reconcile(&hub, &[extra]).unwrap()
+fn enriched(
+    id: u32,
+    name: &str,
+    hub_html: &str,
+    game_html: &str,
+) -> Result<Species, pokington::source::SourceError> {
+    let hub = parse_hub(hub_html, &species(id, name))?;
+    let game_link = hub
+        .game_links
+        .first()
+        .ok_or_else(|| pokington::source::SourceError("missing game link".into()))?;
+    let extra = parse_enrichment(&hub, game_link, game_html)?;
+    reconcile(&hub, &[extra])
 }
 
 #[test]
@@ -131,13 +155,14 @@ fn linked_regional_panels_supply_ordered_types() {
         "Tauros",
         TAUROS,
         include_str!("fixtures/serebii-tauros-types.html"),
-    );
+    )
+    .unwrap();
     assert_eq!(
-        form(&tauros, "paldean blaze breed").types,
+        form(&tauros, "paldean blaze breed").unwrap().types,
         ["fighting", "fire"]
     );
     assert_eq!(
-        form(&tauros, "paldean aqua breed").types,
+        form(&tauros, "paldean aqua breed").unwrap().types,
         ["fighting", "water"]
     );
     let darmanitan = enriched(
@@ -145,12 +170,16 @@ fn linked_regional_panels_supply_ordered_types() {
         "Darmanitan",
         include_str!("fixtures/serebii-darmanitan.html"),
         include_str!("fixtures/serebii-darmanitan-types.html"),
-    );
+    )
+    .unwrap();
     assert_eq!(
-        form(&darmanitan, "galarian zen mode").types,
+        form(&darmanitan, "galarian zen mode").unwrap().types,
         ["ice", "fire"]
     );
-    assert_eq!(form(&darmanitan, "zen mode").types, ["fire", "psychic"]);
+    assert_eq!(
+        form(&darmanitan, "zen mode").unwrap().types,
+        ["fire", "psychic"]
+    );
 }
 
 #[test]
@@ -160,15 +189,25 @@ fn misleading_and_missing_image_labels_use_linked_exact_identifiers() {
         "Slowking",
         include_str!("fixtures/serebii-slowking.html"),
         include_str!("fixtures/serebii-slowking-types.html"),
+    )
+    .unwrap();
+    assert_eq!(
+        form(&slowking, "galarian").unwrap().types,
+        ["poison", "psychic"]
     );
-    assert_eq!(form(&slowking, "galarian").types, ["poison", "psychic"]);
-    assert!(!form(&slowking, "galarian").display_name.contains("Slowbro"));
+    assert!(
+        !form(&slowking, "galarian")
+            .unwrap()
+            .display_name
+            .contains("Slowbro")
+    );
     let tea = enriched(
         1012,
         "Poltchageist",
         include_str!("fixtures/serebii-poltchageist.html"),
         include_str!("fixtures/serebii-poltchageist-types.html"),
-    );
+    )
+    .unwrap();
     assert_eq!(tea.forms.len(), 1);
     let artisan = &tea.excluded_illustrations[0];
     assert_eq!(artisan.label, "Artisan Form");
@@ -192,7 +231,7 @@ fn arbitrary_unverified_selected_images_fail_instead_of_being_omitted() {
         .map(|f| f.artwork_url.clone())
         .collect();
     assert!(validate_artwork_references(&catalogue, &verified).is_ok());
-    verified.remove(&form(&catalogue[0], "mega").artwork_url);
+    verified.remove(&form(&catalogue[0], "mega").unwrap().artwork_url);
     assert!(validate_artwork_references(&catalogue, &verified).is_err());
     assert_eq!(catalogue[0].forms.len(), 2);
     assert!(validate_artwork_references(&catalogue, &BTreeSet::new()).is_err());
@@ -205,13 +244,24 @@ fn table_captions_and_explicit_tera_column_override_copied_alt_text() {
         "Ogerpon",
         include_str!("fixtures/serebii-ogerpon.html"),
         include_str!("fixtures/serebii-ogerpon-types.html"),
-    );
+    )
+    .unwrap();
     assert_eq!(ogerpon.forms.len(), 8);
-    assert_eq!(form(&ogerpon, "wellspring mask").types, ["grass", "water"]);
-    assert_eq!(form(&ogerpon, "cornerstone mask tera").types, ["rock"]);
-    assert_eq!(form(&ogerpon, "hearthflame mask tera").types, ["fire"]);
+    assert_eq!(
+        form(&ogerpon, "wellspring mask").unwrap().types,
+        ["grass", "water"]
+    );
+    assert_eq!(
+        form(&ogerpon, "cornerstone mask tera").unwrap().types,
+        ["rock"]
+    );
+    assert_eq!(
+        form(&ogerpon, "hearthflame mask tera").unwrap().types,
+        ["fire"]
+    );
     assert!(
         form(&ogerpon, "cornerstone mask tera")
+            .unwrap()
             .type_label
             .contains("Tera Type")
     );
@@ -224,10 +274,11 @@ fn two_gigantamax_styles_keep_distinct_descriptive_keys_and_portraits() {
         "Urshifu",
         include_str!("fixtures/serebii-urshifu.html"),
         include_str!("fixtures/serebii-urshifu-types.html"),
-    );
+    )
+    .unwrap();
     assert_eq!(urshifu.forms.len(), 4);
-    let single = form(&urshifu, "gigantamax single strike style");
-    let rapid = form(&urshifu, "gigantamax rapid strike style");
+    let single = form(&urshifu, "gigantamax single strike style").unwrap();
+    let rapid = form(&urshifu, "gigantamax rapid strike style").unwrap();
     assert_eq!(single.types, ["fighting", "dark"]);
     assert_eq!(rapid.types, ["fighting", "water"]);
     assert_ne!(single.artwork_url, rapid.artwork_url);
@@ -240,14 +291,18 @@ fn only_four_approved_untyped_devices_are_excluded_with_source_context() {
         "Rotom",
         include_str!("fixtures/serebii-rotom.html"),
         include_str!("fixtures/serebii-rotom-types.html"),
-    );
+    )
+    .unwrap();
     assert_eq!(rotom.excluded_illustrations.len(), 4);
     assert_eq!(rotom.forms.len(), 8);
     for excluded in &rotom.excluded_illustrations {
         assert!(excluded.source_context.contains("not usable as a Pok"));
     }
-    assert_eq!(form(&rotom, "dex").types, ["electric"]);
-    assert_eq!(form(&rotom, "stereo").types, ["electric", "normal"]);
+    assert_eq!(form(&rotom, "dex").unwrap().types, ["electric"]);
+    assert_eq!(
+        form(&rotom, "stereo").unwrap().types,
+        ["electric", "normal"]
+    );
     let mut hub = parse_hub(
         include_str!("fixtures/serebii-rotom.html"),
         &species(479, "Rotom"),
@@ -278,7 +333,7 @@ fn original_portraits_and_illustrated_only_scope_are_preserved() {
         let catalogue = reconcile(&hub, &[]).unwrap();
         assert_eq!(catalogue.forms.len(), count, "{name}");
         assert_eq!(
-            form(&catalogue, "original").artwork_url,
+            form(&catalogue, "original").unwrap().artwork_url,
             hub.original_artwork
         );
         assert!(
@@ -359,9 +414,10 @@ fn game_sprite_basenames_cannot_merge_burmy_plant_with_bare_original() {
         "Burmy",
         include_str!("fixtures/serebii-burmy.html"),
         include_str!("fixtures/serebii-burmy-types.html"),
-    );
+    )
+    .unwrap();
     assert_eq!(burmy.forms.len(), 4);
-    let original = form(&burmy, "original");
+    let original = form(&burmy, "original").unwrap();
     assert!(original.artwork_url.ends_with("/412.png"));
     assert!(
         !original
@@ -375,7 +431,7 @@ fn game_sprite_basenames_cannot_merge_burmy_plant_with_bare_original() {
             .iter()
             .any(|url| url.ends_with("412-p.png"))
     );
-    let plant = form(&burmy, "plant cloak");
+    let plant = form(&burmy, "plant cloak").unwrap();
     assert!(plant.artwork_url.ends_with("412-p.png"));
     assert_eq!(plant.types, ["bug"]);
 }
@@ -395,8 +451,14 @@ fn supported_absolute_and_protocol_relative_assets_preserve_forms_and_types() {
         let hub = parse_hub(&html, &species(149, "Dragonite")).unwrap();
         let catalogue = reconcile(&hub, &[]).unwrap();
         assert_eq!(catalogue.forms.len(), 2);
-        assert_eq!(form(&catalogue, "original").types, ["dragon", "flying"]);
-        assert_eq!(form(&catalogue, "mega").types, ["dragon", "flying"]);
+        assert_eq!(
+            form(&catalogue, "original").unwrap().types,
+            ["dragon", "flying"]
+        );
+        assert_eq!(
+            form(&catalogue, "mega").unwrap().types,
+            ["dragon", "flying"]
+        );
     }
     let foreign = DRAGONITE.replace(
         "src=\"/pokemon/art/149-m.png",
@@ -409,11 +471,11 @@ fn supported_absolute_and_protocol_relative_assets_preserve_forms_and_types() {
 fn different_deoxys_slots_cannot_merge_even_when_their_types_match() {
     let html = include_str!("fixtures/serebii-deoxys.html");
     let game = include_str!("fixtures/serebii-deoxys-types.html");
-    let baseline = enriched(386, "Deoxys", html, game);
+    let baseline = enriched(386, "Deoxys", html, game).unwrap();
     assert_eq!(baseline.forms.len(), 4);
     assert_eq!(
-        form(&baseline, "attack").types,
-        form(&baseline, "defense").types
+        form(&baseline, "attack").unwrap().types,
+        form(&baseline, "defense").unwrap().types
     );
     let changed = html.replace("Defense Forme", "Attack Forme");
     let hub = parse_hub(&changed, &species(386, "Deoxys")).unwrap();
@@ -463,10 +525,12 @@ fn older_linked_game_layout_names_and_types_spiky_eared_pichu() {
         "Pichu",
         include_str!("fixtures/serebii-pichu.html"),
         include_str!("fixtures/serebii-pichu-types.html"),
-    );
-    assert_eq!(form(&pichu, "spiky eared").types, ["electric"]);
+    )
+    .unwrap();
+    assert_eq!(form(&pichu, "spiky eared").unwrap().types, ["electric"]);
     assert!(
         form(&pichu, "spiky eared")
+            .unwrap()
             .type_source
             .ends_with("/pokedex-dp/172.shtml")
     );
@@ -494,8 +558,11 @@ fn d32_excludes_only_five_exact_unsupported_references() {
     .unwrap();
     let pikachu = reconcile(&hub, &[sv, xy]).unwrap();
     assert_eq!(pikachu.excluded_illustrations.len(), 3);
-    assert_eq!(form(&pikachu, "belle").types, ["electric"]);
-    assert_eq!(form(&pikachu, "original").artwork_url, hub.original_artwork);
+    assert_eq!(form(&pikachu, "belle").unwrap().types, ["electric"]);
+    assert_eq!(
+        form(&pikachu, "original").unwrap().artwork_url,
+        hub.original_artwork
+    );
     for excluded in &pikachu.excluded_illustrations {
         assert_eq!(
             excluded.reason,
@@ -505,10 +572,15 @@ fn d32_excludes_only_five_exact_unsupported_references() {
     }
     let html = include_str!("fixtures/serebii-zygarde.html");
     let game = include_str!("fixtures/serebii-zygarde-types.html");
-    let zygarde = enriched(718, "Zygarde", html, game);
+    let zygarde = enriched(718, "Zygarde", html, game).unwrap();
     assert_eq!(zygarde.excluded_illustrations.len(), 2);
-    assert_eq!(form(&zygarde, "10%").types, ["dragon", "ground"]);
-    assert!(form(&zygarde, "original").artwork_url.ends_with("/718.png"));
+    assert_eq!(form(&zygarde, "10%").unwrap().types, ["dragon", "ground"]);
+    assert!(
+        form(&zygarde, "original")
+            .unwrap()
+            .artwork_url
+            .ends_with("/718.png")
+    );
     let changed = html
         .replace("718-cell.png", "718-unknown.png")
         .replace("data-key=\"718-cell\"", "data-key=\"718-unknown\"");
@@ -571,7 +643,7 @@ fn reviewed_original_aliases_require_exact_source_identity() {
         assert!(extra.named_forms.contains(&form_key(label, name)));
         let result = reconcile(&hub, std::slice::from_ref(&extra)).unwrap();
         assert_eq!(result.forms.len(), 1, "{name}");
-        let original = form(&result, "original");
+        let original = form(&result, "original").unwrap();
         assert_eq!(original.artwork_url, hub.original_artwork);
         assert_eq!(original.artwork_references.len(), 2);
         assert!(

@@ -90,68 +90,21 @@ fn run() -> Result<(), Box<dyn Error>> {
         "termios_changed_by_probe": false, "alternate_screen_entered": false,
         "cursor_hidden": false, "visual_confirmation": "pending user observation",
         "mode": mode });
-    let result = (|| -> Result<(), Box<dyn Error>> {
-        let selection = selection?;
-        report["selection"] = serde_json::to_value(&selection)?;
-        match selection {
-            Selection::Fallback { renderer, reason } => {
-                // Intentionally only demonstrate the decision. S04 implements actual text art.
-                println!("fallback={renderer:?}: {reason} (text artwork is outside this probe)");
-                Ok(())
-            }
-            Selection::Native(terminal) => {
-                let image = if let Some(path) = &options.image {
-                    report["image"] = json!(path);
-                    let mut reader = ImageReader::open(path)?;
-                    reader.set_format(ImageFormat::Png);
-                    let mut limits = image::Limits::default();
-                    limits.max_image_width = Some(4096);
-                    limits.max_image_height = Some(4096);
-                    limits.max_alloc = Some(64 * 1024 * 1024);
-                    reader.limits(limits);
-                    reader.decode()?.to_rgba8()
-                } else {
-                    let mut png = Cursor::new(Vec::new());
-                    DynamicImage::ImageRgba8(calibration::calibration_image())
-                        .write_to(&mut png, ImageFormat::Png)?;
-                    if let Some(path) = &options.fixture {
-                        fs::write(path, png.get_ref())?;
-                    }
-                    report["image"] =
-                        json!("generated 151x117 calibration PNG; visible crop 131x97");
-                    image::load_from_memory_with_format(png.get_ref(), ImageFormat::Png)?.to_rgba8()
-                };
-                let frame = NativeFrame::original(&image, terminal.metrics)?;
-                report["frame"] = serde_json::to_value(&frame.report)?;
-                if let Some(path) = &options.payload {
-                    fs::write(path, frame.bytes())?;
-                }
-                let output = if options.fail_mid_write {
-                    let mut writer =
-                        write_fault::FailOnce::inside_first_apc(stdout.lock(), frame.bytes())?;
-                    let output = frame.write_to(&mut writer);
-                    report["write_fault"] = serde_json::to_value(writer.report())?;
-                    output
-                } else {
-                    frame.write_to(&mut stdout.lock())
-                };
-                report["output_state"] = json!(if output.is_ok() {
-                    "inline write completed and styles reset"
-                } else {
-                    "write failed; escape/style cleanup attempted; see result for any cleanup failure"
-                });
-                output?;
-                report["native_emitted"] = json!(true);
-                Ok(())
-            }
-        }
-    })();
+    let result = perform(selection, &options, &stdout, &mut report);
     let after = nix::sys::termios::tcgetattr(&stdin).ok();
-    report["termios_equal_before_after"] = json!(before.zip(after).map(|(a, b)| a == b));
-    report["result"] = json!(match &result {
-        Ok(()) => "ok".into(),
-        Err(error) => error.to_string(),
-    });
+    insert_report(
+        &mut report,
+        "termios_equal_before_after",
+        json!(before.zip(after).map(|(a, b)| a == b)),
+    )?;
+    insert_report(
+        &mut report,
+        "result",
+        json!(match &result {
+            Ok(()) => "ok".into(),
+            Err(error) => error.to_string(),
+        }),
+    )?;
     if let Some(path) = options.record {
         fs::write(&path, serde_json::to_vec_pretty(&report)?)?;
         eprintln!("Probe report: {}", path.display());
@@ -159,6 +112,90 @@ fn run() -> Result<(), Box<dyn Error>> {
         eprintln!("{}", serde_json::to_string_pretty(&report)?);
     }
     result
+}
+
+fn perform(
+    selection: Result<Selection, io::Error>,
+    options: &Options,
+    stdout: &io::Stdout,
+    report: &mut serde_json::Value,
+) -> Result<(), Box<dyn Error>> {
+    let selection = selection?;
+    insert_report(report, "selection", serde_json::to_value(&selection)?)?;
+    match selection {
+        Selection::Fallback { renderer, reason } => {
+            // Intentionally only demonstrate the decision. S04 implements actual text art.
+            println!("fallback={renderer:?}: {reason} (text artwork is outside this probe)");
+        }
+        Selection::Native(terminal) => {
+            let image = if let Some(path) = &options.image {
+                insert_report(report, "image", json!(path))?;
+                let mut reader = ImageReader::open(path)?;
+                reader.set_format(ImageFormat::Png);
+                let mut limits = image::Limits::default();
+                limits.max_image_width = Some(4096);
+                limits.max_image_height = Some(4096);
+                limits.max_alloc = Some(64 * 1024 * 1024);
+                reader.limits(limits);
+                reader.decode()?.to_rgba8()
+            } else {
+                let mut png = Cursor::new(Vec::new());
+                DynamicImage::ImageRgba8(calibration::calibration_image())
+                    .write_to(&mut png, ImageFormat::Png)?;
+                if let Some(path) = &options.fixture {
+                    fs::write(path, png.get_ref())?;
+                }
+                insert_report(
+                    report,
+                    "image",
+                    json!("generated 151x117 calibration PNG; visible crop 131x97"),
+                )?;
+                image::load_from_memory_with_format(png.get_ref(), ImageFormat::Png)?.to_rgba8()
+            };
+            let frame = NativeFrame::original(&image, terminal.metrics)?;
+            insert_report(report, "frame", serde_json::to_value(&frame.report)?)?;
+            if let Some(path) = &options.payload {
+                fs::write(path, frame.bytes())?;
+            }
+            let output = if options.fail_mid_write {
+                let mut writer =
+                    write_fault::FailOnce::inside_first_apc(stdout.lock(), frame.bytes())?;
+                let output = frame.write_to(&mut writer);
+                insert_report(
+                    report,
+                    "write_fault",
+                    serde_json::to_value(writer.report())?,
+                )?;
+                output
+            } else {
+                frame.write_to(&mut stdout.lock())
+            };
+            insert_report(
+                report,
+                "output_state",
+                json!(if output.is_ok() {
+                    "inline write completed and styles reset"
+                } else {
+                    "write failed; escape/style cleanup attempted; see result for any cleanup failure"
+                }),
+            )?;
+            output?;
+            insert_report(report, "native_emitted", json!(true))?;
+        }
+    }
+    Ok(())
+}
+
+fn insert_report(
+    report: &mut serde_json::Value,
+    key: &str,
+    value: serde_json::Value,
+) -> Result<(), Box<dyn Error>> {
+    report
+        .as_object_mut()
+        .ok_or("probe report is not a JSON object")?
+        .insert(key.to_owned(), value);
+    Ok(())
 }
 
 fn main() {

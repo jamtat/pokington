@@ -62,27 +62,37 @@ pub struct Bootstrap {
 }
 
 impl Bootstrap {
+    /// Create a bootstrap client using the canonical Serebii origin.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the HTTP client cannot be created.
     pub fn new() -> Result<Self, BootstrapError> {
         Ok(Self::with_http(
             source::http_client().map_err(|error| BootstrapError::Http {
                 url: ORIGIN.into(),
                 reason: error.to_string(),
             })?,
-            ORIGIN.into(),
+            ORIGIN,
         ))
     }
 
     /// Map canonical source paths onto an injected server, for deterministic HTTP fixtures.
     /// Stored URLs and source identities always remain the canonical HTTPS Serebii URLs.
-    pub fn with_http(client: wreq::Client, origin: String) -> Self {
+    #[must_use]
+    pub fn with_http(client: wreq::Client, origin: &str) -> Self {
         Self {
             client,
-            origin: origin.trim_end_matches('/').into(),
+            origin: origin.trim_end_matches('/').to_owned(),
         }
     }
 
     /// The caller supplies stderr (or a capture in tests); this method never writes stdout.
     /// Plain bar snapshots also work when stderr is redirected, without terminal controls.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if source requests, catalogue reconciliation, storage operations, or progress writes fail.
     pub async fn run(
         &self,
         store: &Store,
@@ -166,7 +176,7 @@ impl Bootstrap {
                 };
                 match saved {
                     Ok(()) => {
-                        done += 1;
+                        done = done.saturating_add(1);
                         progress.bar("Artwork", done, total)?;
                     }
                     Err(error) => {
@@ -179,16 +189,7 @@ impl Bootstrap {
             }
         }
         let catalogue = writer.publish()?;
-        progress.line(&format!(
-            "Complete: {} species, {} forms, {} excluded illustrations",
-            catalogue.species.len(),
-            catalogue.forms().count(),
-            catalogue
-                .species
-                .iter()
-                .map(|s| s.excluded_illustrations.len())
-                .sum::<usize>()
-        ))?;
+        report_complete(&mut progress, &catalogue)?;
         Ok(catalogue)
     }
 
@@ -217,7 +218,10 @@ impl Bootstrap {
                 Err(error) => reason = error,
             }
             if attempt < ATTEMPTS {
-                tokio::time::sleep(Duration::from_millis(100 * attempt as u64)).await;
+                let delay = u64::try_from(attempt)
+                    .unwrap_or(u64::MAX)
+                    .saturating_mul(100);
+                tokio::time::sleep(Duration::from_millis(delay)).await;
             }
         }
         Err(BootstrapError::Http {
@@ -292,11 +296,31 @@ impl<W: Write> Progress<'_, W> {
         self.line(&format!("Downloading {url}"))
     }
     fn bar(&mut self, label: &str, done: usize, total: usize) -> Result<(), BootstrapError> {
-        let filled = (24 * done).checked_div(total).unwrap_or(24);
+        let filled = 24_usize
+            .saturating_mul(done)
+            .checked_div(total)
+            .unwrap_or(24)
+            .min(24);
         self.line(&format!(
             "{label} [{}{}] {done}/{total}",
             "#".repeat(filled),
-            "-".repeat(24 - filled)
+            "-".repeat(24_usize.saturating_sub(filled))
         ))
     }
+}
+
+fn report_complete<W: Write>(
+    progress: &mut Progress<'_, W>,
+    catalogue: &Catalogue,
+) -> Result<(), BootstrapError> {
+    let excluded = catalogue
+        .species
+        .iter()
+        .map(|species| species.excluded_illustrations.len())
+        .sum::<usize>();
+    progress.line(&format!(
+        "Complete: {} species, {} forms, {excluded} excluded illustrations",
+        catalogue.species.len(),
+        catalogue.forms().count(),
+    ))
 }

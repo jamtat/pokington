@@ -37,10 +37,13 @@ async fn read(
 #[tokio::main]
 async fn main() -> Result<(), Failure> {
     let args: Vec<_> = std::env::args().skip(1).collect();
-    if args.is_empty() || args.len() > 2 || (args.len() == 2 && args[1] != "--offline") {
+    if args.is_empty()
+        || args.len() > 2
+        || (args.len() == 2 && args.get(1).map(String::as_str) != Some("--offline"))
+    {
         return Err("usage: discover_serebii DIRECTORY [--offline]".into());
     }
-    let dir = Path::new(&args[0]);
+    let dir = Path::new(args.first().ok_or("missing output directory")?);
     fs::create_dir_all(dir)?;
     let offline = args.len() == 2;
     let client = http_client()?;
@@ -79,7 +82,10 @@ async fn main() -> Result<(), Failure> {
                 Err(error) => errors.push(format!("{id}: {error}")),
             }
         }
-        let done = hubs.len() + errors.len();
+        let done = hubs
+            .len()
+            .checked_add(errors.len())
+            .ok_or("hub count overflow")?;
         if done % 100 == 0 || done == index.species.len() {
             println!(
                 "inspected {done}/{} hubs; {} parser failures",

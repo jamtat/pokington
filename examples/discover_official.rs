@@ -35,10 +35,13 @@ async fn read(
 #[tokio::main]
 async fn main() -> Result<(), Failure> {
     let args: Vec<_> = std::env::args().skip(1).collect();
-    if args.is_empty() || args.len() > 2 || (args.len() == 2 && args[1] != "--offline") {
+    if args.is_empty()
+        || args.len() > 2
+        || (args.len() == 2 && args.get(1).map(String::as_str) != Some("--offline"))
+    {
         return Err("usage: discover_official OUTPUT_DIRECTORY [--offline]".into());
     }
-    let dir = Path::new(&args[0]);
+    let dir = Path::new(args.first().ok_or("missing output directory")?);
     let offline = args.len() == 2;
     fs::create_dir_all(dir)?;
     let client = http_client()?;

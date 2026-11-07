@@ -21,3 +21,21 @@ rustix = { version = "0.38", features = ["termios", "stdio", "fs"] }
 [dev-dependencies]
 nix = { version = "0.31", features = ["term", "fs"] }
 base64 = "0.22"
+
+[lints.clippy]
+pedantic = { level = "deny", priority = -1 } # UM, ACTUALLY
+nursery = { level = "deny", priority = -1 }  # BETA LINTS
+# DENY PANICS
+unwrap_used = "deny"
+expect_used = "deny"
+indexing_slicing = "deny"
+arithmetic_side_effects = "deny"
+unreachable = "deny"
+unimplemented = "deny"
+unchecked_time_subtraction = "deny"
+todo = "deny"
+string_slice = "deny"
+panic_in_result_fn = "deny"
+panic = "deny"
+exit = "deny"
+as_conversions = "deny"

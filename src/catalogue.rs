@@ -57,6 +57,11 @@ pub enum PokemonType {
 pub struct ArtworkRef(String);
 
 impl ArtworkRef {
+    /// Construct a validated relative artwork path.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the value does not match the immutable artwork path format.
     pub fn new(value: String) -> Result<Self, CatalogueError> {
         let Some((generation, number)) = value
             .strip_prefix("artwork/")
@@ -79,6 +84,7 @@ impl ArtworkRef {
         Ok(Self(value))
     }
 
+    #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
     }
@@ -165,6 +171,10 @@ fn artwork_url(value: &str) -> bool {
 
 impl Catalogue {
     /// Preserve the reviewed source identities; do not normalize names or infer new aliases here.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when source records are incomplete, malformed, or fail catalogue validation.
     pub fn from_serebii(
         index: &serebii::Index,
         species: Vec<serebii::Species>,
@@ -198,13 +208,19 @@ impl Catalogue {
                     serde_json::from_value(serde_json::Value::String(kind.clone()))
                         .map_err(|_| invalid(format!("unknown Pokémon type: {kind}")))
                 };
-                ordinal += 1;
+                ordinal = ordinal
+                    .checked_add(1)
+                    .ok_or_else(|| invalid("too many forms to assign artwork references"))?;
+                let primary_type = form
+                    .types
+                    .first()
+                    .ok_or_else(|| invalid("form is missing its primary type"))?;
                 forms.push(Form {
                     key: form.key,
                     display_name: form.display_name,
                     source_id: form.source_id,
                     source_labels: form.source_labels,
-                    primary_type: parse_type(&form.types[0])?,
+                    primary_type: parse_type(primary_type)?,
                     secondary_type: form.types.get(1).map(parse_type).transpose()?,
                     artwork_url: form.artwork_url,
                     artwork_references: form.artwork_references,
@@ -237,6 +253,11 @@ impl Catalogue {
         Ok(catalogue)
     }
 
+    /// Parse, check the schema version, and validate a serialized catalogue.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error for malformed JSON, unsupported schema versions, or invalid catalogue data.
     pub fn from_json(bytes: &[u8]) -> Result<Self, CatalogueError> {
         #[derive(Deserialize)]
         struct Header {
@@ -251,6 +272,11 @@ impl Catalogue {
         Ok(catalogue)
     }
 
+    /// Check schema, source coverage, identities, and form metadata.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when any catalogue invariant is not satisfied.
     pub fn validate(&self) -> Result<(), CatalogueError> {
         if self.schema_version != SCHEMA_VERSION {
             return Err(CatalogueError::UnsupportedSchema(self.schema_version));
@@ -258,8 +284,10 @@ impl Catalogue {
         if self.source.index_url != serebii::INDEX_URL
             || self.source.min_id == 0
             || self.source.max_id < self.source.min_id
-            || self.species.len() as u64
-                != u64::from(self.source.max_id) - u64::from(self.source.min_id) + 1
+            || u64::try_from(self.species.len()).unwrap_or(u64::MAX)
+                != u64::from(self.source.max_id)
+                    .saturating_sub(u64::from(self.source.min_id))
+                    .saturating_add(1)
         {
             return Err(invalid("invalid or incomplete source index coverage"));
         }

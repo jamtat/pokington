@@ -16,7 +16,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     {
         return Err("usage: bootstrap_data ABSOLUTE_STORE [--force|--offline]".into());
     }
-    let store = Store::at(PathBuf::from(&args[0]))?;
+    let store_path = args.first().ok_or("missing store path")?;
+    let store = Store::at(PathBuf::from(store_path))?;
     if args.get(1).is_some_and(|arg| arg == "--offline") {
         let catalogue = store.load_active()?.ok_or("no installed catalogue")?;
         for form in catalogue.forms() {

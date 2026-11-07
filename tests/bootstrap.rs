@@ -2,7 +2,9 @@
 
 use std::{
     collections::{BTreeMap, VecDeque},
-    env, fs,
+    env,
+    error::Error,
+    fs,
     io::{Read, Write},
     net::{TcpListener, TcpStream},
     path::PathBuf,
@@ -26,25 +28,26 @@ const HUB: &str = include_str!("fixtures/serebii-charizard.html");
 const INDEX_PATH: &str = "/pokemon/nationalpokedex.shtml";
 const IMAGES: [&str; 4] = ["006.png", "006-mx.png", "006-my.png", "006-gi.png"];
 static NEXT: AtomicUsize = AtomicUsize::new(0);
+type Failure = Box<dyn Error + Send + Sync>;
 
 struct Temp(PathBuf);
 impl Temp {
-    fn new() -> Self {
+    fn new() -> Result<Self, Failure> {
         let path = env::temp_dir().join(format!(
             "pokington-bootstrap-{}-{}",
             std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
-        fs::create_dir(&path).unwrap();
-        Self(path)
+        fs::create_dir(&path)?;
+        Ok(Self(path))
     }
-    fn store(&self) -> Store {
-        Store::at(self.0.clone()).unwrap()
+    fn store(&self) -> Result<Store, Failure> {
+        Ok(Store::at(self.0.clone())?)
     }
 }
 impl Drop for Temp {
     fn drop(&mut self) {
-        fs::remove_dir_all(&self.0).unwrap();
+        let _ = fs::remove_dir_all(&self.0);
     }
 }
 
@@ -66,29 +69,27 @@ impl Response {
             delay: Duration::ZERO,
         }
     }
-    fn html(value: &str) -> Self {
-        Self::new(
+    fn html(value: &str) -> Result<Self, Failure> {
+        Ok(Self::new(
             200,
             "text/html; charset=iso-8859-1",
             value
                 .chars()
-                .map(|ch| u8::try_from(ch).expect("ISO-8859-1 fixture"))
-                .collect(),
-        )
+                .map(u8::try_from)
+                .collect::<Result<Vec<_>, _>>()?,
+        ))
     }
-    fn png() -> Self {
+    fn png() -> Result<Self, Failure> {
         let mut body = Vec::new();
         {
             let mut encoder = png::Encoder::new(&mut body, 2, 1);
             encoder.set_color(png::ColorType::Rgba);
             encoder.set_depth(png::BitDepth::Eight);
             encoder
-                .write_header()
-                .unwrap()
-                .write_image_data(&[255, 0, 0, 255, 0, 0, 0, 0])
-                .unwrap();
+                .write_header()?
+                .write_image_data(&[255, 0, 0, 255, 0, 0, 0, 0])?;
         }
-        Self::new(200, "image/png", body)
+        Ok(Self::new(200, "image/png", body))
     }
 }
 
@@ -103,19 +104,20 @@ struct Server {
     origin: String,
     state: Arc<Mutex<State>>,
     stop: Arc<AtomicBool>,
-    thread: Option<thread::JoinHandle<()>>,
+    thread: Option<thread::JoinHandle<Result<(), Failure>>>,
 }
 impl Server {
-    fn new() -> Self {
-        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-        listener.set_nonblocking(true).unwrap();
-        let origin = format!("http://{}", listener.local_addr().unwrap());
+    fn new() -> Result<Self, Failure> {
+        let listener = TcpListener::bind("127.0.0.1:0")?;
+        listener.set_nonblocking(true)?;
+        let origin = format!("http://{}", listener.local_addr()?);
         let state = Arc::new(Mutex::new(State::default()));
         let stop = Arc::new(AtomicBool::new(false));
         let worker_state = state.clone();
         let worker_stop = stop.clone();
-        let thread = thread::spawn(move || {
+        let thread = thread::spawn(move || -> Result<(), Failure> {
             let mut workers = Vec::new();
+            let mut listener_error = None;
             while !worker_stop.load(Ordering::Relaxed) {
                 match listener.accept() {
                     Ok((stream, _)) => {
@@ -123,95 +125,116 @@ impl Server {
                         workers.push(thread::spawn(move || serve(stream, &state)));
                     }
                     Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
-                        thread::sleep(Duration::from_millis(1))
+                        thread::sleep(Duration::from_millis(1));
                     }
-                    Err(error) => panic!("fixture listener: {error}"),
+                    Err(error) => {
+                        listener_error = Some(error);
+                        break;
+                    }
                 }
             }
             for worker in workers {
-                worker.join().unwrap();
+                worker.join().map_err(|_| "fixture worker panicked")??;
             }
+            if let Some(error) = listener_error {
+                return Err(error.into());
+            }
+            Ok(())
         });
-        Self {
+        Ok(Self {
             origin,
             state,
             stop,
             thread: Some(thread),
-        }
+        })
     }
-    fn route(&self, path: &str, responses: Vec<Response>) {
-        assert!(!responses.is_empty());
+    fn route(&self, path: &str, responses: Vec<Response>) -> Result<(), Failure> {
+        if responses.is_empty() {
+            return Err("missing fixture route responses".into());
+        }
         self.state
             .lock()
-            .unwrap()
+            .map_err(|_| "fixture state poisoned")?
             .routes
             .insert(path.into(), responses.into());
+        Ok(())
     }
-    fn fixture() -> Self {
-        let server = Self::new();
-        server.route(INDEX_PATH, vec![Response::html(INDEX)]);
-        server.route("/pokemon/charizard", vec![Response::html(HUB)]);
+    fn fixture() -> Result<Self, Failure> {
+        let server = Self::new()?;
+        server.route(INDEX_PATH, vec![Response::html(INDEX)?])?;
+        server.route("/pokemon/charizard", vec![Response::html(HUB)?])?;
         for image in IMAGES {
-            server.route(&format!("/pokemon/art/{image}"), vec![Response::png()]);
+            server.route(&format!("/pokemon/art/{image}"), vec![Response::png()?])?;
         }
-        server
+        Ok(server)
     }
-    fn source(&self) -> Bootstrap {
-        Bootstrap::with_http(
-            http_client_builder().https_only(false).build().unwrap(),
-            self.origin.clone(),
-        )
+    fn source(&self) -> Result<Bootstrap, Failure> {
+        Ok(Bootstrap::with_http(
+            http_client_builder().https_only(false).build()?,
+            &self.origin,
+        ))
     }
-    fn hits(&self, path: &str) -> usize {
-        self.state
+    fn hits(&self, path: &str) -> Result<usize, Failure> {
+        Ok(self
+            .state
             .lock()
-            .unwrap()
+            .map_err(|_| "fixture state poisoned")?
             .hits
             .iter()
             .filter(|hit| hit.as_str() == path)
-            .count()
+            .count())
     }
-    fn image_hits(&self) -> usize {
-        self.state
+    fn image_hits(&self) -> Result<usize, Failure> {
+        Ok(self
+            .state
             .lock()
-            .unwrap()
+            .map_err(|_| "fixture state poisoned")?
             .hits
             .iter()
             .filter(|hit| hit.starts_with("/pokemon/art/"))
-            .count()
+            .count())
     }
 }
 impl Drop for Server {
     fn drop(&mut self) {
         self.stop.store(true, Ordering::Relaxed);
-        self.thread.take().unwrap().join().unwrap();
+        if let Some(thread) = self.thread.take() {
+            assert!(matches!(thread.join(), Ok(Ok(()))), "fixture server failed");
+        }
     }
 }
-fn serve(mut stream: TcpStream, state: &Mutex<State>) {
-    stream
-        .set_read_timeout(Some(Duration::from_secs(2)))
-        .unwrap();
+fn serve(mut stream: TcpStream, state: &Mutex<State>) -> Result<(), Failure> {
+    stream.set_read_timeout(Some(Duration::from_secs(2)))?;
     let mut request = Vec::new();
     let mut bytes = [0; 1024];
     while !request.windows(4).any(|w| w == b"\r\n\r\n") {
         match stream.read(&mut bytes) {
-            Ok(0) | Err(_) => return,
-            Ok(n) => request.extend_from_slice(&bytes[..n]),
+            Ok(0) | Err(_) => return Ok(()),
+            Ok(n) => request.extend_from_slice(bytes.get(..n).ok_or("invalid read length")?),
         }
     }
-    let request = String::from_utf8(request).unwrap();
-    let path = request.split_whitespace().nth(1).unwrap().to_owned();
+    let request = String::from_utf8(request)?;
+    let path = request
+        .split_whitespace()
+        .nth(1)
+        .ok_or("missing request path")?
+        .to_owned();
     let is_image = path.starts_with("/pokemon/art/");
     let response = {
-        let mut state = state.lock().unwrap();
+        let mut state = state.lock().map_err(|_| "fixture state poisoned")?;
         state.hits.push(path.clone());
         if is_image {
-            state.active_images += 1;
+            state.active_images = state
+                .active_images
+                .checked_add(1)
+                .ok_or("active image count overflow")?;
             state.max_images = state.max_images.max(state.active_images);
         }
         match state.routes.get_mut(&path) {
-            Some(responses) if responses.len() > 1 => responses.pop_front().unwrap(),
-            Some(responses) => responses[0].clone(),
+            Some(responses) if responses.len() > 1 => {
+                responses.pop_front().ok_or("missing queued response")?
+            }
+            Some(responses) => responses.front().ok_or("missing response")?.clone(),
             None => Response::new(404, "text/html", b"missing fixture route".to_vec()),
         }
     };
@@ -224,46 +247,61 @@ fn serve(mut stream: TcpStream, state: &Mutex<State>) {
         .write_all(header.as_bytes())
         .and_then(|()| stream.write_all(&response.body));
     if is_image {
-        state.lock().unwrap().active_images -= 1;
+        let mut state = state.lock().map_err(|_| "fixture state poisoned")?;
+        state.active_images = state
+            .active_images
+            .checked_sub(1)
+            .ok_or("active image count underflow")?;
     }
+    Ok(())
 }
 
-fn installed(store: &Store, expected: &Catalogue) {
-    assert_eq!(store.load_active().unwrap().as_ref(), Some(expected));
+fn installed(store: &Store, expected: &Catalogue) -> Result<(), Failure> {
+    if store.load_active()?.as_ref() != Some(expected) {
+        return Err("installed catalogue mismatch".into());
+    }
     for form in expected.forms() {
-        validate_png(&store.read_artwork(&form.local_artwork).unwrap()).unwrap();
+        validate_png(&store.read_artwork(&form.local_artwork)?)?;
     }
+    Ok(())
 }
 
-fn original_hub() -> String {
-    let start = HUB.find("</table></div><table").unwrap();
-    format!(
-        "{}<div class=\"hubheader\"><a href=\"/pokedex-sv/charizard/\">Game database</a></div></body></html>",
-        &HUB[..start + "</table>".len()]
-    )
+fn original_hub() -> Result<String, Failure> {
+    let (prefix, _) = HUB
+        .split_once("</table></div><table")
+        .ok_or("missing form table")?;
+    Ok(format!(
+        "{prefix}</table><div class=\"hubheader\"><a href=\"/pokedex-sv/charizard/\">Game database</a></div></body></html>"
+    ))
 }
 
 #[tokio::test]
 async fn complete_initial_and_refresh_skip_validate_artwork_and_show_plain_progress() {
-    let temp = Temp::new();
-    let server = Server::fixture();
-    let source = server.source();
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
+    let source = server.source().unwrap();
     let mut output = Vec::new();
-    let catalogue = source.run(&temp.store(), false, &mut output).await.unwrap();
+    let catalogue = source
+        .run(&temp.store().unwrap(), false, &mut output)
+        .await
+        .unwrap();
     assert_eq!(catalogue.species.len(), 1);
     assert_eq!(catalogue.forms().count(), 4);
-    installed(&temp.store(), &catalogue);
+    installed(&temp.store().unwrap(), &catalogue).unwrap();
     assert!(!temp.0.join("pending.json").exists());
-    assert_eq!(server.image_hits(), 4);
+    assert_eq!(server.image_hits().unwrap(), 4);
     assert_eq!(
-        server.hits("/pokemon/art/006-g.png"),
+        server.hits("/pokemon/art/006-g.png").unwrap(),
         0,
         "unselected alias must not be guessed or fetched"
     );
-    let refreshed = source.run(&temp.store(), false, &mut output).await.unwrap();
+    let refreshed = source
+        .run(&temp.store().unwrap(), false, &mut output)
+        .await
+        .unwrap();
     assert_eq!(refreshed, catalogue);
-    assert_eq!(server.image_hits(), 4);
-    assert_eq!(server.hits(INDEX_PATH), 2);
+    assert_eq!(server.image_hits().unwrap(), 4);
+    assert_eq!(server.hits(INDEX_PATH).unwrap(), 2);
     let output = String::from_utf8(output).unwrap();
     assert!(output.contains("Downloading https://www.serebii.net/pokemon/nationalpokedex.shtml"));
     assert!(output.contains("Artwork [########################] 4/4"));
@@ -273,31 +311,35 @@ async fn complete_initial_and_refresh_skip_validate_artwork_and_show_plain_progr
 
 #[tokio::test]
 async fn failed_initial_reuses_completed_files_on_retry() {
-    let temp = Temp::new();
-    let server = Server::fixture();
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
     let missing = "/pokemon/art/006-my.png";
-    server.route(
-        missing,
-        vec![Response::new(503, "text/html", b"unavailable".to_vec())],
-    );
-    let source = server.source();
+    server
+        .route(
+            missing,
+            vec![Response::new(503, "text/html", b"unavailable".to_vec())],
+        )
+        .unwrap();
+    let source = server.source().unwrap();
     let error = source
-        .run(&temp.store(), false, &mut Vec::new())
+        .run(&temp.store().unwrap(), false, &mut Vec::new())
         .await
         .unwrap_err();
     assert!(error.to_string().contains("503"));
-    assert!(temp.store().load_active().unwrap().is_none());
+    assert!(temp.store().unwrap().load_active().unwrap().is_none());
     assert!(temp.0.join("pending.json").exists());
     assert_eq!(fs::read_dir(temp.0.join("artwork")).unwrap().count(), 3);
-    assert_eq!(server.hits(missing), 3);
-    server.route(missing, vec![Response::png()]);
+    assert_eq!(server.hits(missing).unwrap(), 3);
+    server
+        .route(missing, vec![Response::png().unwrap()])
+        .unwrap();
     let catalogue = source
-        .run(&temp.store(), false, &mut Vec::new())
+        .run(&temp.store().unwrap(), false, &mut Vec::new())
         .await
         .unwrap();
-    installed(&temp.store(), &catalogue);
+    installed(&temp.store().unwrap(), &catalogue).unwrap();
     assert_eq!(
-        server.image_hits(),
+        server.image_hits().unwrap(),
         7,
         "three complete images are not downloaded again"
     );
@@ -305,21 +347,25 @@ async fn failed_initial_reuses_completed_files_on_retry() {
 
 #[tokio::test]
 async fn force_failure_preserves_active_retry_resumes_and_next_force_is_fresh() {
-    let temp = Temp::new();
-    let server = Server::fixture();
-    let source = server.source();
-    let store = temp.store();
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
+    let source = server.source().unwrap();
+    let store = temp.store().unwrap();
     let original = source.run(&store, false, &mut Vec::new()).await.unwrap();
     let broken = "/pokemon/art/006.png";
-    server.route(
-        broken,
-        vec![Response::new(200, "image/png", b"broken PNG".to_vec())],
-    );
+    server
+        .route(
+            broken,
+            vec![Response::new(200, "image/png", b"broken PNG".to_vec())],
+        )
+        .unwrap();
     assert!(source.run(&store, true, &mut Vec::new()).await.is_err());
-    installed(&store, &original);
-    server.route(broken, vec![Response::png()]);
+    installed(&store, &original).unwrap();
+    server
+        .route(broken, vec![Response::png().unwrap()])
+        .unwrap();
     let replacement = source.run(&store, true, &mut Vec::new()).await.unwrap();
-    assert_eq!(server.image_hits(), 11);
+    assert_eq!(server.image_hits().unwrap(), 11);
     for (old, new) in original.forms().zip(replacement.forms()) {
         assert_ne!(old.local_artwork, new.local_artwork);
     }
@@ -328,25 +374,32 @@ async fn force_failure_preserves_active_retry_resumes_and_next_force_is_fresh() 
     }
     assert_eq!(store.load_active().unwrap(), Some(replacement.clone()));
     let fresh = source.run(&store, true, &mut Vec::new()).await.unwrap();
-    assert_eq!(server.image_hits(), 15);
+    assert_eq!(server.image_hits().unwrap(), 15);
     for (old, new) in replacement.forms().zip(fresh.forms()) {
         assert_ne!(old.local_artwork, new.local_artwork);
     }
-    installed(&store, &fresh);
+    installed(&store, &fresh).unwrap();
 }
 
 #[tokio::test]
 async fn refresh_discovers_new_forms_and_repairs_only_missing_or_corrupt_images() {
-    let temp = Temp::new();
-    let server = Server::fixture();
-    server.route("/pokemon/charizard", vec![Response::html(&original_hub())]);
-    let source = server.source();
-    let store = temp.store();
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
+    server
+        .route(
+            "/pokemon/charizard",
+            vec![Response::html(&original_hub().unwrap()).unwrap()],
+        )
+        .unwrap();
+    let source = server.source().unwrap();
+    let store = temp.store().unwrap();
     let first = source.run(&store, false, &mut Vec::new()).await.unwrap();
     assert_eq!(first.forms().count(), 1);
-    server.route("/pokemon/charizard", vec![Response::html(HUB)]);
+    server
+        .route("/pokemon/charizard", vec![Response::html(HUB).unwrap()])
+        .unwrap();
     let second = source.run(&store, false, &mut Vec::new()).await.unwrap();
-    assert_eq!(server.image_hits(), 4);
+    assert_eq!(server.image_hits().unwrap(), 4);
     assert_eq!(
         first.forms().next().unwrap().local_artwork,
         second
@@ -363,21 +416,28 @@ async fn refresh_discovers_new_forms_and_repairs_only_missing_or_corrupt_images(
     )
     .unwrap();
     let third = source.run(&store, false, &mut Vec::new()).await.unwrap();
-    assert_eq!(server.image_hits(), 6);
-    installed(&store, &third);
+    assert_eq!(server.image_hits().unwrap(), 6);
+    installed(&store, &third).unwrap();
 }
 
 #[tokio::test]
 async fn refresh_discovers_new_species_from_the_extended_source_index() {
-    let temp = Temp::new();
-    let server = Server::fixture();
-    server.route("/pokemon/charizard", vec![Response::html(&original_hub())]);
-    let source = server.source();
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
+    server
+        .route(
+            "/pokemon/charizard",
+            vec![Response::html(&original_hub().unwrap()).unwrap()],
+        )
+        .unwrap();
+    let source = server.source().unwrap();
     let first = source
-        .run(&temp.store(), false, &mut Vec::new())
+        .run(&temp.store().unwrap(), false, &mut Vec::new())
         .await
         .unwrap();
-    let row = &INDEX[INDEX.find("<tr>\n").unwrap()..INDEX.rfind("</table></body>").unwrap()];
+    let row = INDEX
+        .get(INDEX.find("<tr>\n").unwrap()..INDEX.rfind("</table></body>").unwrap())
+        .unwrap();
     let new_row = row
         .replace("#0006", "#0007")
         .replace("/pokemon/charizard", "/pokemon/squirtle")
@@ -386,49 +446,61 @@ async fn refresh_discovers_new_species_from_the_extended_source_index() {
         .replace("006-006", "006-007")
         .replace("</table></body>", &format!("{new_row}</table></body>"));
     let new_hub = original_hub()
+        .unwrap()
         .replace("#0006", "#0007")
         .replace("Charizard", "Squirtle")
         .replace("charizard", "squirtle")
         .replace("006.png", "007.png");
-    server.route(INDEX_PATH, vec![Response::html(&extended)]);
-    server.route("/pokemon/squirtle", vec![Response::html(&new_hub)]);
-    server.route("/pokemon/art/007.png", vec![Response::png()]);
+    server
+        .route(INDEX_PATH, vec![Response::html(&extended).unwrap()])
+        .unwrap();
+    server
+        .route("/pokemon/squirtle", vec![Response::html(&new_hub).unwrap()])
+        .unwrap();
+    server
+        .route("/pokemon/art/007.png", vec![Response::png().unwrap()])
+        .unwrap();
     let second = source
-        .run(&temp.store(), false, &mut Vec::new())
+        .run(&temp.store().unwrap(), false, &mut Vec::new())
         .await
         .unwrap();
     assert_eq!(second.source.max_id, 7);
     assert_eq!(second.species.len(), 2);
     assert_eq!(second.species[1].name, "Squirtle");
-    assert_eq!(server.image_hits(), 2);
+    assert_eq!(server.image_hits().unwrap(), 2);
     assert_eq!(first.species[0].forms, second.species[0].forms);
-    installed(&temp.store(), &second);
+    installed(&temp.store().unwrap(), &second).unwrap();
 }
 
 #[tokio::test]
 async fn transient_http_errors_are_retried_with_bounded_concurrency() {
-    let temp = Temp::new();
-    let server = Server::fixture();
-    let mut slow = Response::png();
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
+    let mut slow = Response::png().unwrap();
     slow.delay = Duration::from_millis(40);
     for image in IMAGES {
-        server.route(&format!("/pokemon/art/{image}"), vec![slow.clone()]);
+        server
+            .route(&format!("/pokemon/art/{image}"), vec![slow.clone()])
+            .unwrap();
     }
-    server.route(
-        "/pokemon/art/006.png",
-        vec![
-            Response::new(429, "text/html", b"busy".to_vec()),
-            Response::new(500, "text/html", b"busy".to_vec()),
-            slow,
-        ],
-    );
+    server
+        .route(
+            "/pokemon/art/006.png",
+            vec![
+                Response::new(429, "text/html", b"busy".to_vec()),
+                Response::new(500, "text/html", b"busy".to_vec()),
+                slow,
+            ],
+        )
+        .unwrap();
     let catalogue = server
         .source()
-        .run(&temp.store(), false, &mut Vec::new())
+        .unwrap()
+        .run(&temp.store().unwrap(), false, &mut Vec::new())
         .await
         .unwrap();
-    installed(&temp.store(), &catalogue);
-    assert_eq!(server.hits("/pokemon/art/006.png"), 3);
+    installed(&temp.store().unwrap(), &catalogue).unwrap();
+    assert_eq!(server.hits("/pokemon/art/006.png").unwrap(), 3);
     let max = server.state.lock().unwrap().max_images;
     assert!(
         (2..=4).contains(&max),
@@ -438,49 +510,59 @@ async fn transient_http_errors_are_retried_with_bounded_concurrency() {
 
 #[tokio::test]
 async fn bad_status_mime_empty_truncated_and_invalid_png_never_publish() {
-    let mut truncated = Response::png();
+    let mut truncated = Response::png().unwrap();
     truncated.length += 10;
-    let mut checksum = Response::png();
+    let mut checksum = Response::png().unwrap();
     checksum.body[50] ^= 0xff;
     for response in [
-        Response::new(404, "image/png", Response::png().body),
-        Response::new(200, "text/html", Response::png().body),
+        Response::new(404, "image/png", Response::png().unwrap().body),
+        Response::new(200, "text/html", Response::png().unwrap().body),
         Response::new(200, "image/png", Vec::new()),
         Response::new(200, "image/png", b"not PNG".to_vec()),
         truncated,
         checksum,
     ] {
-        let temp = Temp::new();
-        let server = Server::fixture();
-        server.route("/pokemon/charizard", vec![Response::html(&original_hub())]);
-        server.route("/pokemon/art/006.png", vec![response]);
+        let temp = Temp::new().unwrap();
+        let server = Server::fixture().unwrap();
+        server
+            .route(
+                "/pokemon/charizard",
+                vec![Response::html(&original_hub().unwrap()).unwrap()],
+            )
+            .unwrap();
+        server
+            .route("/pokemon/art/006.png", vec![response])
+            .unwrap();
         assert!(
             server
                 .source()
-                .run(&temp.store(), false, &mut Vec::new())
+                .unwrap()
+                .run(&temp.store().unwrap(), false, &mut Vec::new())
                 .await
                 .is_err()
         );
         // A broken connection can fail an attempt before the server receives its request.
-        assert!((1..=3).contains(&server.hits("/pokemon/art/006.png")));
-        assert!(temp.store().load_active().unwrap().is_none());
+        assert!((1..=3).contains(&server.hits("/pokemon/art/006.png").unwrap()));
+        assert!(temp.store().unwrap().load_active().unwrap().is_none());
         assert_eq!(fs::read_dir(temp.0.join("artwork")).unwrap().count(), 0);
     }
 }
 
 #[tokio::test]
 async fn discovery_drift_or_unresolved_forms_preserves_the_installed_dataset() {
-    let temp = Temp::new();
-    let server = Server::fixture();
-    let source = server.source();
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
+    let source = server.source().unwrap();
     let old = source
-        .run(&temp.store(), false, &mut Vec::new())
+        .run(&temp.store().unwrap(), false, &mut Vec::new())
         .await
         .unwrap();
-    server.route(
-        "/pokedex-sv/charizard/",
-        vec![Response::html(&original_hub())],
-    );
+    server
+        .route(
+            "/pokedex-sv/charizard/",
+            vec![Response::html(&original_hub().unwrap()).unwrap()],
+        )
+        .unwrap();
     for (index, hub) in [
         (INDEX.replace("006-006", "006-007"), HUB.to_owned()),
         (
@@ -496,56 +578,66 @@ async fn discovery_drift_or_unresolved_forms_preserves_the_installed_dataset() {
             HUB.replace("</body>", "<table class=\"dextable\"><tr><td class=\"fooevo\">Alternate Forms</td></tr><tr><td><img src=\"/pokemon/art/006-new.png\" alt=\"New Charizard\"></td></tr></table></body>"),
         ),
     ] {
-        server.route(INDEX_PATH, vec![Response::html(&index)]);
-        server.route("/pokemon/charizard", vec![Response::html(&hub)]);
+        server.route(INDEX_PATH, vec![Response::html(&index).unwrap()]).unwrap();
+        server.route("/pokemon/charizard", vec![Response::html(&hub).unwrap()]).unwrap();
         assert!(
             source
-                .run(&temp.store(), true, &mut Vec::new())
+                .run(&temp.store().unwrap(), true, &mut Vec::new())
                 .await
                 .is_err()
         );
-        installed(&temp.store(), &old);
+        installed(&temp.store().unwrap(), &old).unwrap();
     }
-    assert_eq!(server.image_hits(), 4);
+    assert_eq!(server.image_hits().unwrap(), 4);
 }
 
 #[tokio::test]
 async fn linked_type_evidence_is_discovered_without_guessing_artwork_urls() {
-    let temp = Temp::new();
-    let server = Server::new();
+    let temp = Temp::new().unwrap();
+    let server = Server::new().unwrap();
     let index = INDEX
         .replace("006-006", "128-128")
         .replace("#0006", "#0128")
         .replace("/pokemon/charizard", "/pokemon/tauros")
         .replace("Charizard", "Tauros");
-    server.route(INDEX_PATH, vec![Response::html(&index)]);
-    server.route(
-        "/pokemon/tauros",
-        vec![Response::html(include_str!("fixtures/serebii-tauros.html"))],
-    );
-    server.route(
-        "/pokedex-sv/tauros/",
-        vec![Response::html(include_str!(
-            "fixtures/serebii-tauros-types.html"
-        ))],
-    );
+    server
+        .route(INDEX_PATH, vec![Response::html(&index).unwrap()])
+        .unwrap();
+    server
+        .route(
+            "/pokemon/tauros",
+            vec![Response::html(include_str!("fixtures/serebii-tauros.html")).unwrap()],
+        )
+        .unwrap();
+    server
+        .route(
+            "/pokedex-sv/tauros/",
+            vec![Response::html(include_str!("fixtures/serebii-tauros-types.html")).unwrap()],
+        )
+        .unwrap();
     for image in ["128.png", "128-p.png", "128-b.png", "128-a.png"] {
-        server.route(&format!("/pokemon/art/{image}"), vec![Response::png()]);
+        server
+            .route(
+                &format!("/pokemon/art/{image}"),
+                vec![Response::png().unwrap()],
+            )
+            .unwrap();
     }
     let catalogue = server
         .source()
-        .run(&temp.store(), false, &mut Vec::new())
+        .unwrap()
+        .run(&temp.store().unwrap(), false, &mut Vec::new())
         .await
         .unwrap();
     assert_eq!(catalogue.forms().count(), 4);
-    assert_eq!(server.hits("/pokedex-sv/tauros/"), 1);
-    installed(&temp.store(), &catalogue);
+    assert_eq!(server.hits("/pokedex-sv/tauros/").unwrap(), 1);
+    installed(&temp.store().unwrap(), &catalogue).unwrap();
 }
 
 #[tokio::test]
 async fn unresolved_forms_follow_an_older_actual_link_until_types_are_supported() {
-    let temp = Temp::new();
-    let server = Server::new();
+    let temp = Temp::new().unwrap();
+    let server = Server::new().unwrap();
     let index = INDEX
         .replace("006-006", "172-172")
         .replace("#0006", "#0172")
@@ -557,41 +649,63 @@ async fn unresolved_forms_follow_an_older_actual_link_until_types_are_supported(
     );
     let older = include_str!("fixtures/serebii-pichu-types.html");
     let current = older.replace("<b>Spiky-eared</b>", "<b>Not illustrated</b>");
-    server.route(INDEX_PATH, vec![Response::html(&index)]);
-    server.route("/pokemon/pichu", vec![Response::html(&hub)]);
-    server.route("/pokedex-sv/pichu/", vec![Response::html(&current)]);
-    server.route("/pokedex-dp/172.shtml", vec![Response::html(older)]);
+    server
+        .route(INDEX_PATH, vec![Response::html(&index).unwrap()])
+        .unwrap();
+    server
+        .route("/pokemon/pichu", vec![Response::html(&hub).unwrap()])
+        .unwrap();
+    server
+        .route(
+            "/pokedex-sv/pichu/",
+            vec![Response::html(&current).unwrap()],
+        )
+        .unwrap();
+    server
+        .route(
+            "/pokedex-dp/172.shtml",
+            vec![Response::html(older).unwrap()],
+        )
+        .unwrap();
     for image in ["172.png", "172-s.png", "172-se.png"] {
-        server.route(&format!("/pokemon/art/{image}"), vec![Response::png()]);
+        server
+            .route(
+                &format!("/pokemon/art/{image}"),
+                vec![Response::png().unwrap()],
+            )
+            .unwrap();
     }
     let catalogue = server
         .source()
-        .run(&temp.store(), false, &mut Vec::new())
+        .unwrap()
+        .run(&temp.store().unwrap(), false, &mut Vec::new())
         .await
         .unwrap();
-    assert_eq!(server.hits("/pokedex-sv/pichu/"), 1);
-    assert_eq!(server.hits("/pokedex-dp/172.shtml"), 1);
+    assert_eq!(server.hits("/pokedex-sv/pichu/").unwrap(), 1);
+    assert_eq!(server.hits("/pokedex-dp/172.shtml").unwrap(), 1);
     assert_eq!(catalogue.forms().count(), 2);
     assert!(
         catalogue
             .forms()
             .any(|form| form.type_source.ends_with("/pokedex-dp/172.shtml"))
     );
-    installed(&temp.store(), &catalogue);
+    installed(&temp.store().unwrap(), &catalogue).unwrap();
 }
 
 #[tokio::test]
 async fn cancellation_during_transfers_keeps_only_complete_resumable_images() {
-    let temp = Temp::new();
-    let server = Server::fixture();
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
     for image in IMAGES.into_iter().skip(1) {
-        let mut slow = Response::png();
+        let mut slow = Response::png().unwrap();
         slow.delay = Duration::from_secs(2);
-        server.route(&format!("/pokemon/art/{image}"), vec![slow]);
+        server
+            .route(&format!("/pokemon/art/{image}"), vec![slow])
+            .unwrap();
     }
-    let source = server.source();
+    let source = server.source().unwrap();
     let mut output = Vec::new();
-    let store = temp.store();
+    let store = temp.store().unwrap();
     {
         let run = source.run(&store, false, &mut output);
         tokio::pin!(run);
@@ -609,46 +723,57 @@ async fn cancellation_during_transfers_keeps_only_complete_resumable_images() {
         }
         // Dropping the pending future cancels remaining transfers and releases the writer.
     }
-    assert!(temp.store().load_active().unwrap().is_none());
+    assert!(temp.store().unwrap().load_active().unwrap().is_none());
     assert_eq!(fs::read_dir(temp.0.join("artwork")).unwrap().count(), 1);
     for image in IMAGES.into_iter().skip(1) {
-        server.route(&format!("/pokemon/art/{image}"), vec![Response::png()]);
+        server
+            .route(
+                &format!("/pokemon/art/{image}"),
+                vec![Response::png().unwrap()],
+            )
+            .unwrap();
     }
     let catalogue = source
-        .run(&temp.store(), false, &mut Vec::new())
+        .run(&temp.store().unwrap(), false, &mut Vec::new())
         .await
         .unwrap();
-    assert_eq!(server.hits("/pokemon/art/006.png"), 1);
-    installed(&temp.store(), &catalogue);
+    assert_eq!(server.hits("/pokemon/art/006.png").unwrap(), 1);
+    installed(&temp.store().unwrap(), &catalogue).unwrap();
 }
 
 #[tokio::test]
 async fn request_timeout_is_bounded_and_leaves_the_active_catalogue_usable() {
-    let temp = Temp::new();
-    let server = Server::fixture();
-    server.route("/pokemon/charizard", vec![Response::html(&original_hub())]);
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
+    server
+        .route(
+            "/pokemon/charizard",
+            vec![Response::html(&original_hub().unwrap()).unwrap()],
+        )
+        .unwrap();
     let old = server
         .source()
-        .run(&temp.store(), false, &mut Vec::new())
+        .unwrap()
+        .run(&temp.store().unwrap(), false, &mut Vec::new())
         .await
         .unwrap();
-    let mut slow = Response::png();
+    let mut slow = Response::png().unwrap();
     slow.delay = Duration::from_millis(800);
-    server.route("/pokemon/art/006.png", vec![slow]);
+    server.route("/pokemon/art/006.png", vec![slow]).unwrap();
     let client = http_client_builder()
         .https_only(false)
         .timeout(Duration::from_millis(200))
         .build()
         .unwrap();
-    let source = Bootstrap::with_http(client, server.origin.clone());
+    let source = Bootstrap::with_http(client, &server.origin);
     let started = Instant::now();
     assert!(
         source
-            .run(&temp.store(), true, &mut Vec::new())
+            .run(&temp.store().unwrap(), true, &mut Vec::new())
             .await
             .is_err()
     );
     assert!(started.elapsed() < Duration::from_secs(3));
-    assert_eq!(server.hits("/pokemon/art/006.png"), 4);
-    installed(&temp.store(), &old);
+    assert_eq!(server.hits("/pokemon/art/006.png").unwrap(), 4);
+    installed(&temp.store().unwrap(), &old).unwrap();
 }

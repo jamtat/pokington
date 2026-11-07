@@ -16,15 +16,20 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
             "usage: inspect_artwork INDEX_HTML API_JSON SPECIES_ID DETAIL_HTML OUTPUT_DIR".into(),
         );
     }
-    let page = parse_index_page(&fs::read_to_string(&args[0])?)?;
-    let links = parse_species_links(&fs::read_to_string(&args[1])?, &page)?;
-    let id: u32 = args[2].parse()?;
+    let index_path = args.first().ok_or("missing index path")?;
+    let api_path = args.get(1).ok_or("missing API path")?;
+    let id_value = args.get(2).ok_or("missing species ID")?;
+    let detail_path = args.get(3).ok_or("missing detail path")?;
+    let output_path = args.get(4).ok_or("missing output directory")?;
+    let page = parse_index_page(&fs::read_to_string(index_path)?)?;
+    let links = parse_species_links(&fs::read_to_string(api_path)?, &page)?;
+    let id: u32 = id_value.parse()?;
     let link = links
         .iter()
         .find(|link| link.id == id)
         .ok_or("species absent from source index")?;
-    let species = parse_species_detail(&fs::read_to_string(&args[3])?, link)?;
-    let directory = Path::new(&args[4]);
+    let species = parse_species_detail(&fs::read_to_string(detail_path)?, link)?;
+    let directory = Path::new(output_path);
     fs::create_dir_all(directory)?;
     let client = http_client()?;
     for form in species.forms {

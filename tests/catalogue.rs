@@ -6,24 +6,22 @@ use serde_json::{Value, json};
 
 const GENERATION: &str = "0123456789abcdef0123456789abcdef";
 
-fn catalogue() -> Catalogue {
-    let index = serebii::parse_index(include_str!("fixtures/serebii-index.html")).unwrap();
+fn catalogue() -> Result<Catalogue, Box<dyn std::error::Error>> {
+    let index = serebii::parse_index(include_str!("fixtures/serebii-index.html"))?;
     let hub = serebii::parse_hub(
         include_str!("fixtures/serebii-charizard.html"),
-        &index.species[0],
-    )
-    .unwrap();
-    Catalogue::from_serebii(
-        &index,
-        vec![serebii::reconcile(&hub, &[]).unwrap()],
-        GENERATION,
-    )
-    .unwrap()
+        index
+            .species
+            .first()
+            .ok_or("fixture index has no species")?,
+    )?;
+    Catalogue::from_serebii(&index, vec![serebii::reconcile(&hub, &[])?], GENERATION)
+        .map_err(Into::into)
 }
 
 #[test]
 fn json_roundtrip_preserves_distinct_mega_types_and_alias_provenance() {
-    let catalogue = catalogue();
+    let catalogue = catalogue().unwrap();
     let encoded = serde_json::to_vec(&catalogue).unwrap();
     assert_eq!(Catalogue::from_json(&encoded).unwrap(), catalogue);
     let forms = &catalogue.species[0].forms;
@@ -35,8 +33,8 @@ fn json_roundtrip_preserves_distinct_mega_types_and_alias_provenance() {
     assert_ne!(x.local_artwork, y.local_artwork);
     let giant = forms.iter().find(|f| f.key == "gigantamax").unwrap();
     assert_eq!(giant.artwork_references.len(), 2);
-    assert!(!giant.source_labels.is_empty());
-    assert!(!giant.type_source.is_empty());
+    assert_ne!(giant.source_labels, Vec::<String>::new());
+    assert_ne!(giant.type_source, "");
     assert_eq!(catalogue.species[0].original_form, "original");
 }
 
@@ -101,7 +99,7 @@ fn unknown_schema_is_reported_before_deserializing_future_record_shapes() {
         Catalogue::from_json(br#"{"schema_version":99,"future":"shape"}"#).unwrap_err(),
         CatalogueError::UnsupportedSchema(99)
     );
-    let mut catalogue = catalogue();
+    let mut catalogue = catalogue().unwrap();
     catalogue.schema_version += 1;
     assert!(matches!(
         catalogue.validate(),
@@ -116,7 +114,7 @@ fn rejects_invalid_models_and_references_in_persisted_json() {
         ("empty species", |v| v["species"] = json!([])),
         ("incomplete bounds", |v| v["source"]["max_id"] = json!(7)),
         ("bad source", |v| {
-            v["source"]["index_url"] = json!("https://example.org")
+            v["source"]["index_url"] = json!("https://example.org");
         }),
         ("duplicate id", |v| {
             v["source"]["max_id"] = json!(7);
@@ -125,37 +123,37 @@ fn rejects_invalid_models_and_references_in_persisted_json() {
         }),
         ("empty name", |v| v["species"][0]["name"] = json!("")),
         ("missing original", |v| {
-            v["species"][0]["original_form"] = json!("mega x")
+            v["species"][0]["original_form"] = json!("mega x");
         }),
         ("duplicate form", |v| {
             let copy = v["species"][0]["forms"][0].clone();
             v["species"][0]["forms"].as_array_mut().unwrap().push(copy);
         }),
         ("noncanonical key", |v| {
-            v["species"][0]["forms"][0]["key"] = json!("MEGA  X")
+            v["species"][0]["forms"][0]["key"] = json!("MEGA  X");
         }),
         ("empty key", |v| {
-            v["species"][0]["forms"][0]["key"] = json!("")
+            v["species"][0]["forms"][0]["key"] = json!("");
         }),
         ("unknown type", |v| {
-            v["species"][0]["forms"][0]["primary_type"] = json!("unknown")
+            v["species"][0]["forms"][0]["primary_type"] = json!("unknown");
         }),
         ("duplicate types", |v| {
             let first = v["species"][0]["forms"][0]["primary_type"].clone();
             v["species"][0]["forms"][0]["secondary_type"] = first;
         }),
         ("missing artwork provenance", |v| {
-            v["species"][0]["forms"][0]["artwork_references"] = json!([])
+            v["species"][0]["forms"][0]["artwork_references"] = json!([]);
         }),
         ("unsafe local path", |v| {
-            v["species"][0]["forms"][0]["local_artwork"] = json!("../escape.png")
+            v["species"][0]["forms"][0]["local_artwork"] = json!("../escape.png");
         }),
         ("duplicate local ref", |v| {
             v["species"][0]["forms"][0]["local_artwork"] =
                 v["species"][0]["forms"][1]["local_artwork"].clone();
         }),
         ("foreign artwork", |v| {
-            v["species"][0]["forms"][0]["artwork_url"] = json!("https://example.org/a.png")
+            v["species"][0]["forms"][0]["artwork_url"] = json!("https://example.org/a.png");
         }),
         ("missing primary type", |v| {
             v["species"][0]["forms"][0]
@@ -165,7 +163,7 @@ fn rejects_invalid_models_and_references_in_persisted_json() {
         }),
         ("unknown fields", |v| v["unexpected"] = json!(true)),
     ];
-    let base = serde_json::to_value(catalogue()).unwrap();
+    let base = serde_json::to_value(catalogue().unwrap()).unwrap();
     for (name, mutate) in cases {
         let mut value = base.clone();
         mutate(&mut value);

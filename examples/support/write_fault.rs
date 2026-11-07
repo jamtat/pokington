@@ -22,7 +22,7 @@ pub struct FailOnce<W> {
 }
 
 impl<W: Write> FailOnce<W> {
-    pub fn after_bytes(inner: W, prefix_bytes: usize) -> Self {
+    pub const fn after_bytes(inner: W, prefix_bytes: usize) -> Self {
         Self {
             inner,
             prefix_bytes,
@@ -39,8 +39,13 @@ impl<W: Write> FailOnce<W> {
             .position(|bytes| bytes == b"\x1b_G")
             .ok_or_else(|| io::Error::other("no Kitty APC available for fault injection"))?;
         // End inside the first command header, before its semicolon/payload and terminator.
-        let prefix_bytes = apc + 3 + b"q=2,".len();
-        if frame.get(apc + 3..prefix_bytes) != Some(b"q=2,") {
+        let header_start = apc
+            .checked_add(3)
+            .ok_or_else(|| io::Error::other("Kitty APC offset overflow"))?;
+        let prefix_bytes = header_start
+            .checked_add(b"q=2,".len())
+            .ok_or_else(|| io::Error::other("Kitty APC prefix overflow"))?;
+        if frame.get(header_start..prefix_bytes) != Some(b"q=2,") {
             return Err(io::Error::other(
                 "unexpected Kitty APC header for fault injection",
             ));
@@ -69,16 +74,32 @@ impl<W: Write> Write for FailOnce<W> {
                 "injected failure inside native Kitty output",
             ));
         }
+        let remaining = self
+            .prefix_bytes
+            .checked_sub(self.forwarded)
+            .ok_or_else(|| {
+                io::Error::other("fault writer forwarded beyond the configured prefix")
+            })?;
         let len = if self.failed {
             bytes.len()
         } else {
-            bytes.len().min(self.prefix_bytes - self.forwarded)
+            bytes.len().min(remaining)
         };
-        let count = self.inner.write(&bytes[..len])?;
+        let to_write = bytes
+            .get(..len)
+            .ok_or_else(|| io::Error::other("fault writer slice out of bounds"))?;
+        let count = self.inner.write(to_write)?;
         if self.failed {
-            self.recovery.extend_from_slice(&bytes[..count]);
+            self.recovery.extend_from_slice(
+                bytes.get(..count).ok_or_else(|| {
+                    io::Error::other("inner writer returned an invalid byte count")
+                })?,
+            );
         } else {
-            self.forwarded += count;
+            self.forwarded = self
+                .forwarded
+                .checked_add(count)
+                .ok_or_else(|| io::Error::other("fault writer byte count overflow"))?;
         }
         Ok(count)
     }

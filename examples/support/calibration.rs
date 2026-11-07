@@ -5,8 +5,8 @@ use image::{Rgba, RgbaImage};
 /// A one-pixel white border surrounds coloured quadrants and central one-pixel stripes.
 pub fn calibration_image() -> RgbaImage {
     let mut image = RgbaImage::new(151, 117);
-    for y in 0..97 {
-        for x in 0..131 {
+    for y in 0_u32..97 {
+        for x in 0_u32..131 {
             let color = if x == 0 || y == 0 || x == 130 || y == 96 {
                 [255, 255, 255, 255]
             } else if (60..=70).contains(&x) {
@@ -23,7 +23,7 @@ pub fn calibration_image() -> RgbaImage {
                     (false, false) => [255, 255, 0, 255],
                 }
             };
-            image.put_pixel(x + 10, y + 10, Rgba(color));
+            image.put_pixel(x.saturating_add(10), y.saturating_add(10), Rgba(color));
         }
     }
     image
