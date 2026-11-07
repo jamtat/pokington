@@ -11,6 +11,11 @@ impl fmt::Display for SourceError {
 impl std::error::Error for SourceError {}
 
 pub fn http_client() -> Result<wreq::Client, wreq::Error> {
+    http_client_builder().build()
+}
+
+/// The same browser profile can be pointed at a local HTTP fixture by disabling HTTPS-only.
+pub fn http_client_builder() -> wreq::ClientBuilder {
     wreq::Client::builder()
         .emulation(
             wreq_util::Emulation::builder()
@@ -23,5 +28,4 @@ pub fn http_client() -> Result<wreq::Client, wreq::Error> {
         .https_only(true)
         .redirect(wreq::redirect::Policy::limited(5))
         .no_proxy()
-        .build()
 }

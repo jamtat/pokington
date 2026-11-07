@@ -5,9 +5,9 @@ Plan: [Implementation plan](../20261106-implementation-plan.md). Index: [Impleme
 ## Run 02 — Vivillon (B02), S02.T01 and S02.T02
 
 - Preparation recorded at: 2026-11-07T03:08:08Z.
-- Run status: open.
-- Closed at:
-- Closure reason:
+- Run status: closes on successful final S02.T02 commit below; remains open if that operation fails.
+- Closed at: actual committer timestamp of the final S02.T02 commit, reported from Git after success rather than estimated here.
+- Closure reason: selected Vivillon B02 work, checks, both task review pairs, real-source bootstrap/offline acceptance and final task commit complete; no publication requested. Stop at S02 boundary.
 - Originating invocation (exact): “Use jamtat-work to take the next implementation batch. Ask me any clarifying questions up front before starting the batch.”
 - Branch: existing local `main` in `/Users/ben/code/pokington`; verified clean at preparation. No branch/worktree creation or publication.
 - Prerequisites: S01 completed in `fac6f5e` and `cd81d4d`; source adapter and actual Ghostty evidence accepted. S02 requires isolated recovery evidence and a complete live-source bootstrap; these are not yet performed.
@@ -41,11 +41,11 @@ Question (exact):
 ## S02.T00 — Stage timing and exit evidence
 
 - Start: 2026-11-07T03:08:08Z.
-- Finish:
+- Finish: 2026-11-07T04:02:22Z (work, checks and both review pairs complete; final task commit immediately below).
 - Canonical run: Run 02 above.
 - Exit criteria: both tasks complete with recovery tests, real complete bootstrap, offline data-access evidence, correctness and separate simplification reviews, final explicitly approved task commits and stage integration in T02 correctness.
-- Evidence/review: pending.
-- Outcome: in progress; no S03 grant.
+- Evidence/review: T01 committed `a3416f0`; T02 final 76 tests/checks, real complete bootstrap and enforced offline proof, correctness/integrated-stage review with no blockers, separate simplification with no useful findings. Exact evidence below and in the machine summary.
+- Outcome: stage exit ready; final automatic S02.T02 commit completes the selected scope. No S03 grant.
 
 ### Q02 — Replace Astra reviews with Sol xhigh
 
@@ -176,3 +176,87 @@ Question (exact):
 - Exact 11-file set: Cargo.toml; src/catalogue.rs; src/store.rs; src/lib.rs; src/serebii.rs; tests/catalogue.rs; tests/store.rs; docs/20261106-design.md; docs/20261106-implementation-plan.md; docs/20261106-implementation-log.md; docs/logs/20261107-s02-implementation-log.md.
 - Implementation, final 64 tests/checks, review dispositions (N1 waived by Q03), both accepted simplifications and permission/plan reconciliation are complete. No code changes followed final checks. Finish above records actual completion readiness; task/goal completion requires the immediate commit to succeed.
 - Run normal hooks; fix failures within scope. Do not run hooks separately or publish. The commit's own hash is reported from Git afterwards and may be recorded by the subsequent task entry, without a recursive bookkeeping commit.
+
+### S02.T01 final commit result and goal closure
+
+- Commit succeeded: `a3416f02017c6b4f89023adac827f704d0bfd003`, `store: S02.T01 add recoverable catalogue storage`, actual committer time 2026-11-07T03:39:16Z. Eleven scoped files, normal Git operation completed; no separately invoked hooks and no publication. Working tree was clean after commit, main ahead of origin/main by one.
+- Goal marked complete at 2026-11-07T03:39:27Z after requirement/evidence/permission audit and successful commit. Tool reports 1,410 active seconds (about 24 minutes); no token budget was requested. Prior blocked status was the historical Q04 gate, resolved by Q05.
+
+## S02.T02 — Mr. Rime: full bootstrap and explicit refresh
+
+- Start: 2026-11-07T03:39:27Z.
+- Finish: 2026-11-07T04:02:22Z (implementation, checks, acceptance and reviews complete; final automatic commit immediately below).
+- Canonical run: Run 02 Q01–Q05; S02.T01 prerequisite committed as `a3416f0`.
+- Implementation: `/root/s02_t02_implementation`, approved fresh `gpt-6.1-sol` `xhigh`, `fork_turns=none`. Root owns goal/tracking/permissions/commits.
+- Goal: created Unix `1794022767`, same thread `01a1b3f7-ec89-7c33-b265-56b9879ebbb8`, active, no token budget. Exact objective:
+
+> Complete Pokington Vivillon B02 task S02.T02 — Mr. Rime on existing local main using docs/20261106-implementation-plan.md#s02-t02 and canonical Run02 Q01–Q05 in docs/logs/20261107-s02-implementation-log.md. Build the simplest complete bootstrap/explicit refresh using the proven Serebii parser/browser-profile wreq transport and S02.T01 store (a3416f0): source-derived complete metadata, bounded HTTP retries/concurrency, validated PNG downloads, retained completed files/resume, non-force skip/missing/new forms, fresh force replacement with active dataset preserved on failure, progress bar and download log on stderr and clean stdout. Use one approved gpt-6.1-sol xhigh implementation agent. Pass local HTTP fixture recovery/error/drift/stdout tests, one real-source complete bootstrap into isolated storage and installed-data access with networking unavailable; record real totals without constants. Run cargo fmt --check, cargo test --locked, cargo clippy --locked --all-targets -- -D warnings. Complete one approved fresh Sol xhigh correctness review covering T02 and integrated S02 storage/recovery/publication/source/output evidence, then a separate approved fresh Sol xhigh simplification/Rust review; disposition findings, apply scoped simplifications and validate. Keep implementation as simple as possible; named pipes/similar special files excluded by user. Update plan/log and show concrete subject/file table, then make final local S02.T02 commit under Q05 standing batch permission without another approval question. Complete only after task/stage evidence and commit pass. Stop at S02/B02 boundary; no choose/art or next batch, no publication/manual CI, extra reviews, UI/summon, infra/sudo or TOMORROW.md. No token budget requested.
+
+- Changes/evidence/checks: direct bounded browser-profile downloader, source-linked discovery/enrichment, existing store recovery/atomic publication, stderr bars/logs, isolated acceptance harness. Formatting, final 76 tests, locked all-target Clippy, diff checks and harness build pass. Real fresh 1,025-species/1,427-form bootstrap and all-selected-PNG validation with networking denied pass; exact records below. No runtime edits followed final checks.
+- Correctness review: `/root/s02_t02_correctness`, fresh Sol xhigh, `fork_turns=none`, findings-only T02 and integrated S02 storage/recovery/publication/source/stdout scope; complete, no blockers; details below.
+- Simplification review: `/root/s02_t02_simplification`, approved separate fresh Sol xhigh, `fork_turns=none`, findings-only T02 simplification/Rust scope; complete, no useful findings or new correctness blockers, no edits/tests/network. Direct batches, shared retry/validation and explicit failures already form a small design; extra abstraction would add indirection.
+- Commit: `bootstrap: S02.T02 add complete recoverable refresh`, automatic local task commit under Q05 after requirements/reviews pass; concrete proposal below. No publication.
+- Publication: excluded; stop at B02 boundary.
+
+### S02.T02 implementation mechanism — 2026-11-07
+
+- One direct bootstrap runner holds the existing Writer for discovery through publication. Fetch source index/hubs in bounded batches of four, reconcile hub evidence, and follow actual linked game pages only when required for missing form/type evidence. No extra durable state is introduced.
+- Existing S02.T01 prepare/reuse/write/publish operations own checkpoints, validated immutable PNGs and atomic dataset publication. Production requests retain the verified Chrome browser profile and HTTPS-only transport; injected loopback test clients map canonical source paths to local fixtures.
+- A focused `bootstrap_data STORE [--force|--offline]` example exercises the library. Keep main.rs/choose/art and general command dispatch in their later planned task. All progress/summaries go to stderr; stdout stays clean.
+- Root will orchestrate one fresh complete initial bootstrap into an isolated `/private/tmp` store after runtime checks pass. The offline path loads installed metadata and validates every selected image; `/usr/bin/sandbox-exec` is available to deny networking for that proof. Fresh source/asset downloads must not be replaced by historical S01 caches.
+
+### S02.T02 implementation checks and live attempt 1 — 2026-11-07T03:49:10Z
+
+- Runtime frozen after `cargo fmt --check`, `cargo test --locked` (76 tests: 64 existing and 12 new HTTP cases), `cargo clippy --locked --all-targets -- -D warnings`, `git diff --check`, and `cargo build --locked --example bootstrap_data` pass. Local HTTP fixtures require loopback-binding sandbox escalation; approved execution passed. Existing btls/zstd linker search/macOS-version warnings remain informational; no suppression or broader portability claim.
+- New HTTP tests cover full completion/refresh/skip, new species/forms, missing/corrupt repair, retained successful downloads, forced rollback/resume/fresh force, invalid status/MIME/PNG/body, source drift/linked type evidence, cancellation, bounded concurrency/retries/timeouts. Cancellation waits for an actually durable image, avoiding a fixed-delay assertion.
+- Code changes: src/bootstrap.rs; shared-profile builder in src/source.rs; exports in src/lib.rs; Tokio time feature; tests/bootstrap.rs; examples/bootstrap_data.rs. No main.rs/choose/art or new durable state.
+- Root verified the isolated store path did not exist, then launched the built runtime under network escalation: `/Users/ben/code/pokington/target/debug/examples/bootstrap_data /private/tmp/pokington-b02-live.mQwTZE/store > /private/tmp/pokington-b02-live.mQwTZE/attempt-1.stdout 2> /private/tmp/pokington-b02-live.mQwTZE/attempt-1.stderr`.
+- Actual start: 2026-11-07T03:49:10Z; live exec session `54497`. Initial tool returned a running handle, not a completion claim. No historical metadata/artwork cache was supplied. Root will poll this exact handle and preserve attempt logs.
+- Fresh-source completeness, offline proof and both T02 reviews remain pending this attempt's outcome.
+
+### S02.T02 complete live bootstrap and enforced offline access — 2026-11-07
+
+- Attempt 1 exited 0; completion observed 2026-11-07T03:54:52Z, about 5 minutes 42 seconds after the recorded start. Fresh source discovery and every selected artwork download completed without historical cache input. Actual result: 1,025 species, 1,427 illustrated forms, 11 approved exclusions. All 1,427 immutable file references exist (181,677,334 PNG bytes); no pending checkpoint remains. Stdout is exactly zero bytes.
+- Installed catalogue SHA-256: `5f671e32e60e1cf946b45fec04a3b3f4d2ad7162f26b1b7a8d358fc608c201dd`. Comparison with reviewed S01 data shows no added/removed forms or changed source identities, labels, illustration references or ordered types. Three Pikachu forms (Libre, Pop Star, Rock Star) use a different source-linked type-evidence page; exact old/new provenance is preserved in the summary for integrated review.
+- Offline command: `/usr/bin/sandbox-exec -p '(version 1)(allow default)(deny network*)' /Users/ben/code/pokington/target/debug/examples/bootstrap_data /private/tmp/pokington-b02-live.mQwTZE/store --offline`, with stdout/stderr captured separately in the live evidence directory. Exec session `95293` exited 0; completion observed 2026-11-07T03:55:41Z. The harness opened the installed metadata and fully validated every selected PNG with networking denied; stdout is exactly zero bytes.
+- A single localhost connection under the same network policy exited 1 with `Operation not permitted`, confirming actual enforcement. The initial silent probe was repeated once with verbose diagnostics; no network dependency is inferred from mere absence of activity.
+- [Machine summary](20261107-bootstrap-live-summary.json) records paths, commands/policy, observed timings, exit codes, counts, catalogue hash, zero stdout, completeness and exact provenance differences. Raw live/offline logs and actual dataset remain at `/private/tmp/pokington-b02-live.mQwTZE`; default user application data was not touched.
+- These are real bootstrap/offline results, distinct from local HTTP fixtures. Required T02 correctness/integrated S02 review and separate simplification remain pending; no stage completion or final commit yet.
+
+### S02.T02 correctness and integrated S02 review — 2026-11-07
+
+- Approved fresh Sol xhigh correctness review completed with no blockers for T02 or integrated stage acceptance. No edits, duplicate suite/crawl or PNG download. Reviewed discovery/enrichment, browser profile, limits/retries/validation, resume/refresh/force, cancellation, writer exclusion, atomic publication, progress/stdout, tests and actual evidence.
+- Independently confirmed live catalogue hash, 1,025 species, 1,427 unique present images, 181,677,334 image bytes, no pending state, zero live/offline stdout and unchanged canonical identities/types/labels/artwork references.
+- Specific provenance check used `source::http_client()` for one bounded retrieval of the actual linked GO page. It independently names Libre, Pop Star and Rock Star and has one shared Electric type panel, supporting all three changed provenance references. Artifacts: `/private/tmp/pokington-correctness-pznb27j2/{pikachu-go.html,enrichment.json,http.log}`. HTML SHA-256 `fb8188f620bf6333bcd351958d40be7a83d3d9652aa33246728e4759c965bc53`.
+- No source/behavior correction is required. Named pipes remain excluded; product command dispatch and physical Linux acceptance retain their later task boundaries. Launch only the already approved separate fresh Sol xhigh T02 simplification/Rust review; final commit remains automatic under Q05 after its disposition/validation.
+
+### S02 exit audit and final commit — 2026-11-07T04:02:22Z
+
+| Requirement | Evidence |
+| --- | --- |
+| Versioned catalogue, identities/types/provenance and safe references | T01 full reviewed-source conversion/roundtrip and schema/model/path tests; live T02 baseline comparison has unchanged canonical identities/ordered types |
+| Atomic publication, immutable artwork, writer exclusion and readable old dataset | T01 isolated write-failure, reader/writer and process-kill checks; T02 HTTP rollback/cancellation/force tests |
+| Complete first bootstrap, skip/repair/new data and resume/force | Twelve HTTP tests plus one fresh complete real bootstrap, all selected files present and validated, no pending state |
+| Browser profile, response validation and bounded network work | Shared verified Chrome profile; four concurrent requests, three attempts, 10s connect/30s request limits, bounded HTML/PNG bodies and MIME/status/full-PNG validation; fixture limits/errors checks |
+| Progress and clean stdout | Plain stderr bars/per-download logs; live and network-denied offline stdout both exactly zero bytes |
+| Real offline data access | OS-denied-network runtime opens installed metadata and fully validates all 1,427 images, exit 0; localhost probe confirms denial |
+| Correctness and stage integration | Both task correctness reviews complete; T01 N1 explicitly excluded by Q03; T02/integrated-stage review no blockers and independent asset/provenance proof |
+| Separate simplification per task | T01 two accepted reductions applied/validated; T02 no useful findings; all four specific reviewers fresh Sol xhigh under Q01/Q02 |
+| Final Rust checks | Formatting, 76 tests, locked all-target Clippy with warnings denied, whitespace checks and built acceptance harness pass |
+| Commits and scope | T01 `a3416f0`; T02 final local commit below under Q05, with normal hooks. No publication or S03 work |
+
+- Both review pairs and their dispositions are complete. T02 needed no changes after final checked runtime/live/offline proof, so no redundant test/crawl/review cycle. Actual macOS results do not claim physical Linux acceptance, which remains S04.
+- Subject shown before Git: `bootstrap: S02.T02 add complete recoverable refresh`.
+
+| Files | Changes |
+| --- | --- |
+| `Cargo.toml` | Tokio time for bounded retry backoff |
+| `src/bootstrap.rs` | Complete discovery/download/refresh orchestration using existing store |
+| `src/source.rs`, `src/lib.rs` | Shared browser-profile builder and bootstrap export |
+| `examples/bootstrap_data.rs` | Focused bootstrap and offline verification harness |
+| `tests/bootstrap.rs` | Twelve local HTTP recovery, source, validation and output cases |
+| `docs/20261106-implementation-plan.md`, `docs/20261106-implementation-log.md` | Task/stage completion and next-batch tracking |
+| `docs/logs/20261107-s02-implementation-log.md`, `docs/logs/20261107-bootstrap-live-summary.json` | Canonical permissions, checks, reviews, source/offline acceptance and run closure evidence |
+
+- Exact ten-file set above; all changes belong to S02.T02/tracking. Q05 authorises commit without another question, including normal hook fixes. Do not separately invoke hooks. If final Git fails, retain incomplete task/goal/run status and fix within scope; do not begin S03.
+- Final commit's actual hash/time is reported after Git and supplies this run's closure timestamp, avoiding a recursive bookkeeping commit. Mark T02 goal complete only after Git success and a final scope/worktree audit. Stop at B02 boundary; next suggested batch is Greedent B03/S03.T01.

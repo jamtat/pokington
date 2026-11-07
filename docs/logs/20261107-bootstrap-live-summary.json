@@ -1,0 +1,76 @@
+{
+  "recorded_utc": "2026-11-07T03:56:40.529841Z",
+  "live_started_utc": "2026-11-07T03:49:10Z",
+  "live_completion_observed_utc": "2026-11-07T03:54:52Z",
+  "offline_completion_observed_utc": "2026-11-07T03:55:41Z",
+  "store": "/private/tmp/pokington-b02-live.mQwTZE/store",
+  "fresh_empty_store": true,
+  "historical_cache_supplied": false,
+  "live_exit_code": 0,
+  "offline_exit_code": 0,
+  "live_stdout_bytes": 0,
+  "offline_stdout_bytes": 0,
+  "live_log": "/private/tmp/pokington-b02-live.mQwTZE/attempt-1.stderr",
+  "offline_log": "/private/tmp/pokington-b02-live.mQwTZE/offline.stderr",
+  "offline_network_policy": "(version 1)(allow default)(deny network*)",
+  "network_probe_exit_code": 1,
+  "network_probe_stderr": "nc: connectx to 127.0.0.1 port 9 (tcp) failed: Operation not permitted",
+  "source": {
+    "index_url": "https://www.serebii.net/pokemon/nationalpokedex.shtml",
+    "min_id": 1,
+    "max_id": 1025
+  },
+  "species": 1025,
+  "forms": 1427,
+  "exclusions": 11,
+  "unique_artwork_refs": 1427,
+  "missing_images": 0,
+  "all_selected_pngs_verified_offline": true,
+  "artwork_bytes": 181677334,
+  "pending_checkpoint_exists": false,
+  "catalogue_sha256": "5f671e32e60e1cf946b45fec04a3b3f4d2ad7162f26b1b7a8d358fc608c201dd",
+  "baseline_added": [],
+  "baseline_removed": [],
+  "baseline_identity_or_type_changes": [],
+  "type_provenance_changes": [
+    {
+      "species_id": 25,
+      "form": "libre",
+      "before": {
+        "type_source": "https://www.serebii.net/pokedex-xy/025.shtml",
+        "type_label": "Shared type panel for independently named form: libre"
+      },
+      "after": {
+        "type_source": "https://www.serebii.net/pokemongo/pokemon/025.shtml",
+        "type_label": "Shared type panel for independently named form: libre"
+      }
+    },
+    {
+      "species_id": 25,
+      "form": "pop star",
+      "before": {
+        "type_source": "https://www.serebii.net/pokedex-xy/025.shtml",
+        "type_label": "Shared type panel for independently named form: pop star"
+      },
+      "after": {
+        "type_source": "https://www.serebii.net/pokemongo/pokemon/025.shtml",
+        "type_label": "Shared type panel for independently named form: pop star"
+      }
+    },
+    {
+      "species_id": 25,
+      "form": "rock star",
+      "before": {
+        "type_source": "https://www.serebii.net/pokedex-xy/025.shtml",
+        "type_label": "Shared type panel for independently named form: rock star"
+      },
+      "after": {
+        "type_source": "https://www.serebii.net/pokemongo/pokemon/025.shtml",
+        "type_label": "Shared type panel for independently named form: rock star"
+      }
+    }
+  ],
+  "live_command": "/Users/ben/code/pokington/target/debug/examples/bootstrap_data /private/tmp/pokington-b02-live.mQwTZE/store",
+  "offline_command": "/usr/bin/sandbox-exec -p '(version 1)(allow default)(deny network*)' /Users/ben/code/pokington/target/debug/examples/bootstrap_data /private/tmp/pokington-b02-live.mQwTZE/store --offline",
+  "network_probe_command": "/usr/bin/sandbox-exec -p '(version 1)(allow default)(deny network*)' /usr/bin/nc -zv -w 1 127.0.0.1 9"
+}

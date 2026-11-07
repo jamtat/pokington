@@ -1,4 +1,6 @@
 //! Source-linked Serebii catalogue and recoverable local storage.
+#[cfg(unix)]
+pub mod bootstrap;
 pub mod catalogue;
 #[cfg(unix)]
 pub mod inline_image;

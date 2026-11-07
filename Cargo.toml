@@ -6,7 +6,7 @@ rust-version = "1.89"
 
 [dependencies]
 http-body-util = "0.1"
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
 wreq = { version = "=0.16.3", features = ["gzip", "brotli", "deflate", "zstd"] }
 wreq-util = { version = "=0.2.0", features = ["emulation-compression"] }
 scraper = "0.29"
