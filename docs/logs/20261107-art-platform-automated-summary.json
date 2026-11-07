@@ -1,0 +1,80 @@
+{
+  "observed_at": "2026-11-07T14:20:22Z",
+  "implementation": "ratatui-image Picker/new_protocol/Image; D33; reviewed inline/Sixel fixes",
+  "test_counts": {
+    "macos": 104,
+    "linux": 104
+  },
+  "linux_image": "rust:1-bookworm",
+  "linux_image_digest": "sha256:e6f2cff35d0f309acf8433b4f05878ed77092602c5065cc81801177da0bb3a9c",
+  "linux_environment": [
+    "Linux 7.2.12-orbstack-00394-gbecdd6130068 aarch64",
+    "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  ],
+  "source_snapshot_matches": true,
+  "source_sha256": {
+    "src/command.rs": "b2deac15b277f71f69c9682cc079907a89084374fa5896d0846197b6f0b11a88",
+    "src/terminal.rs": "4a61b7d42d7004eb57111e60b1df3bfb307a86ddd7dcf615612899a9068bdea0",
+    "src/lib.rs": "593ff9dea2056eb5130c448572253317da830206cea18665c625a2a6ef82aa93",
+    "src/store.rs": "f7a478947fa777f27c608ad63d8e5f575dfe8cbbe1d0f62a3f640ba172ea85a1",
+    "src/bootstrap.rs": "6ab83b4bd0cfc1ac27de6618f05c39220a67d4b3131d8b64c01330a2f21d569f",
+    "src/source.rs": "d209816ad1a81c629b8bfc7067c327bd9f36f426656c1e0988ae181fce7305c0",
+    "src/serebii.rs": "3a9a4640e131c0e88d23c31cb807fa8484d4e32184aa06b7033882ee8d7359a2",
+    "src/catalogue.rs": "10125459610c4c344d2762c634371ccdfec94b4f02e8ce11148c0aa1676e6afa",
+    "src/main.rs": "cb5d229524b5d8642d4f49c7f590befc10f8b673e05f484caced7329ab3e3152",
+    "src/art.rs": "4a4658ea4d336591100c73bdead8b98006b5ad57dbca3a63a68bd4f8fd4fd318",
+    "src/text_art.rs": "21f3b078fbec5daa8d6060fb20693592f9ed2a3438166bf4e4307f7d4e9a96e8",
+    "src/inline_image.rs": "1cad1fe62489aaa158b687867965d53cd067c64ce802b0c27e654b5889b0dd20",
+    "tests/command.rs": "bab75b009e5cc6a5c60653a465fc549637d98db9441952179eaef460f7ceea94",
+    "tests/official_source.rs": "1d4ff3da3e2243bd2060b2e8bd57b1ff656ab9bd1e1a8acd57df4c56d475cedf",
+    "tests/store.rs": "e7ed4b3238ea1c47c7b3290edff68ea69a0fe7568e51fdffd89c4b96fbdc8215",
+    "tests/bootstrap.rs": "d7d2587cef1a8e9b4b08a6cc8dc684af3eba73b6b18168acb809697fc09a2f14",
+    "tests/source.rs": "b350293cc536df1faeb9a6e5da028416a5a91ad7817680edc6039909e1418dbb",
+    "tests/serebii.rs": "cef85408abdb614c3da15001bcc0baefcc9354ff4c8a77cfa77c9c5a1b1a716c",
+    "tests/catalogue.rs": "8d018b042afc865627b67029cd7ece45d059262bc28c2f407d43f85601f48d99",
+    "tests/art.rs": "2fc71fdc2c083b992c1929c0cfb7fc94212416018e0a8c0775b31b3babb77079",
+    "tests/inline_image.rs": "cfff88156d2f93065e6f344fcf06ae45e1c1fdcedf46fb6af18824955cdc63b4",
+    "examples/art_acceptance.rs": "6a4ce58925b95d0bb36cc3b3fdfb6e2825abc81f0490b5b9edfcb1eedb130377",
+    "examples/command_data.rs": "0e9b3916a59328cde40beca6ca55a13a8453575305658fd9b6eb463fca728776",
+    "Cargo.toml": "22e97383172e43d0c940fc3544548ea912c96f977d0d551cd4743aa037bfe1c1",
+    "Cargo.lock": "0283fdc5727d833e2db8890cd05eaa47199b0b68a70bb7de596e7acf10c14f8f"
+  },
+  "includes_preexisting_choose_edits": true,
+  "logs": [
+    "/private/tmp/pokington-s04-t02-tests.txt",
+    "/private/tmp/pokington-s04-linux-picker-build.txt"
+  ],
+  "linux_runtime": {
+    "offline": {
+      "artifact": "/private/tmp/pokington-s04-linux-picker-offline.txt",
+      "stdout_bytes": 1651,
+      "stderr_bytes": 0,
+      "capability_query_bytes": 0,
+      "text_color_escapes": 0,
+      "network": "disabled; docker --network none",
+      "mounts": "read-only",
+      "native_visual_evidence": false
+    },
+    "unicode": {
+      "artifact": "/private/tmp/pokington-s04-linux-picker-unicode.txt",
+      "stdout_bytes": 1417,
+      "stderr_bytes": 0,
+      "capability_query_bytes": 47,
+      "text_color_escapes": 0,
+      "network": "disabled; docker --network none",
+      "mounts": "read-only",
+      "native_visual_evidence": false
+    },
+    "dumb": {
+      "artifact": "/private/tmp/pokington-s04-linux-picker-dumb.txt",
+      "stdout_bytes": 672,
+      "stderr_bytes": 0,
+      "capability_query_bytes": 0,
+      "text_color_escapes": 0,
+      "network": "disabled; docker --network none",
+      "mounts": "read-only",
+      "native_visual_evidence": false
+    }
+  },
+  "actual_native_visual_confirmation": "pending user observation; not replaced by PTY tests"
+}

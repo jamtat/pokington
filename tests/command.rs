@@ -596,3 +596,67 @@ fn runner_uses_reported_cell_proportions_without_querying_input() {
         assert!(!text.contains('\x1b'));
     }
 }
+
+#[tokio::test]
+async fn native_modes_use_library_protocol_and_explicit_text_bypasses_it() {
+    use pokington::terminal::Terminal;
+    use ratatui_image::picker::{Picker, ProtocolType};
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    install_artwork(&store).unwrap();
+    for protocol in [
+        ProtocolType::Kitty,
+        ProtocolType::Sixel,
+        ProtocolType::Iterm2,
+    ] {
+        for mode in ["auto", "img", "ascii", "blocks"] {
+            let mut picker = Picker::halfblocks();
+            picker.set_protocol_type(protocol);
+            let mut stdout = Vec::new();
+            let mut stderr = Vec::new();
+            let code = command::run(
+                [
+                    "pokington",
+                    "art",
+                    "Mew",
+                    "--mode",
+                    mode,
+                    "--width",
+                    "original",
+                    "--color",
+                    "never",
+                ],
+                || {
+                    Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(1))
+                        .with_terminal(Terminal {
+                            is_terminal: true,
+                            unicode: true,
+                            ..Terminal::default()
+                        })
+                        .with_picker(picker))
+                },
+                &mut stdout,
+                &mut stderr,
+            )
+            .await;
+            assert_eq!(code, 0);
+            assert_eq!(stderr, b"");
+            let text = String::from_utf8(stdout).unwrap();
+            if mode == "auto" || mode == "img" {
+                assert!(text.contains('\x1b'));
+                assert!(!text.contains("\x1b[?1049"));
+            } else {
+                assert!(!text.contains('\x1b'));
+            }
+        }
+    }
+    let (code, stdout, stderr) =
+        invoke(&store, args(&["pokington", "art", "Mew", "--mode", "img"]))
+            .await
+            .unwrap();
+    assert_eq!((code, stdout.as_str()), (1, ""));
+    assert!(
+        stderr.contains("terminal stdin and stdout")
+            && stderr.contains("--mode auto, blocks, or ascii")
+    );
+}

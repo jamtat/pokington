@@ -1,243 +1,54 @@
-//! S01 inline native-image feasibility. No event loop, input reads, or terminal mode changes.
-//!
-//! Detection uses only local ioctl metadata and conservative environment hints. Hints are not
-//! a graphics-protocol handshake or visual evidence. Unknown contexts must fall back or fail.
+//! Inline output using ratatui-image's capability detection and protocol encoders.
 
-use std::{env, fmt, fmt::Write as _, io, io::Write, os::fd::AsFd};
-
+use crate::art::{Geometry, Width};
 use image::{DynamicImage, RgbaImage};
 use ratatui::{
-    buffer::Buffer,
+    buffer::{Buffer, CellDiffOption},
     layout::{Rect, Size},
     style::Color,
     widgets::Widget,
 };
 use ratatui_image::{
-    Image,
-    protocol::{Protocol, kitty::Kitty},
+    Image, Resize,
+    picker::{Picker, ProtocolType, cap_parser::QueryStdioOptions},
+    protocol::Protocol,
 };
 use serde::Serialize;
+use std::{
+    fmt::Write as _,
+    io::{self, IsTerminal, Write},
+    time::Duration,
+};
 
-#[derive(Debug, Clone, Default, Serialize)]
-pub struct TerminalHints {
-    pub term: String,
-    pub program: String,
-    pub version: String,
-    pub kitty_window: bool,
-    pub multiplexed: bool,
-    pub remote: bool,
-}
-
-impl TerminalHints {
-    #[must_use]
-    pub fn from_env() -> Self {
-        let value = |key| env::var(key).unwrap_or_default();
-        Self {
-            term: value("TERM"),
-            program: value("TERM_PROGRAM"),
-            version: value("TERM_PROGRAM_VERSION"),
-            kitty_window: !value("KITTY_WINDOW_ID").is_empty(),
-            multiplexed: !value("TMUX").is_empty() || !value("STY").is_empty(),
-            remote: !value("SSH_CONNECTION").is_empty() || !value("SSH_TTY").is_empty(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub struct Metrics {
-    pub columns: u16,
-    pub rows: u16,
-    pub pixel_width: u16,
-    pub pixel_height: u16,
-    pub cell_width: u16,
-    pub cell_height: u16,
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub struct NativeTerminal {
-    pub identity_hint: &'static str,
-    pub protocol: &'static str,
-    pub cell_measurement: &'static str,
-    pub cell_width_interval: [u16; 2],
-    pub cell_height_interval: [u16; 2],
-    pub viewport_remainder_width: u16,
-    pub viewport_remainder_height: u16,
-    pub metrics: Metrics,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub enum Unavailable {
-    RedirectedOutput,
-    UnavailableInput,
-    DifferentTerminals,
-    MultiplexerOrRemote,
-    UnknownIdentity,
-    UnverifiedMeasurementProfile,
-    MissingPixelMetrics,
-}
-
-impl fmt::Display for Unavailable {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(match self {
-            Self::RedirectedOutput => "stdout is not a terminal",
-            Self::UnavailableInput => "stdin is not a terminal",
-            Self::DifferentTerminals => "stdin and stdout do not identify the same terminal",
-            Self::MultiplexerOrRemote => "multiplexer or remote context is not verified",
-            Self::UnknownIdentity => "no recognised paired terminal identity hints",
-            Self::UnverifiedMeasurementProfile => "terminal pixel measurement profile is unverified; this prototype supports Ghostty 1.4.0",
-            Self::MissingPixelMetrics => {
-                "terminal ioctl did not provide exact nonzero cell/pixel metrics"
-            }
-        })
-    }
-}
-
-/// Constant-count local metadata calls only. Never writes query escapes, waits for responses,
-/// reads either descriptor, changes termios, or opens `/dev/tty`.
+/// Query capabilities through ratatui-image only when both streams are the same terminal.
 ///
 /// # Errors
-///
-/// Returns the reason detection could not verify a supported terminal and exact cell metrics.
-pub fn detect(
-    input: &impl AsFd,
-    output: &impl AsFd,
-    hints: &TerminalHints,
-) -> Result<NativeTerminal, Unavailable> {
-    if !rustix::termios::isatty(output) {
-        return Err(Unavailable::RedirectedOutput);
-    }
-    if !rustix::termios::isatty(input) {
-        return Err(Unavailable::UnavailableInput);
-    }
-    let same_terminal = rustix::fs::fstat(input)
-        .ok()
-        .zip(rustix::fs::fstat(output).ok())
-        .is_some_and(|(a, b)| a.st_rdev == b.st_rdev && a.st_dev == b.st_dev);
-    if !same_terminal {
-        return Err(Unavailable::DifferentTerminals);
-    }
-    if hints.multiplexed
-        || hints.remote
-        || hints.term.starts_with("screen")
-        || hints.term.starts_with("tmux")
-    {
-        return Err(Unavailable::MultiplexerOrRemote);
-    }
-    let identity_hint = match (
-        hints.term.as_str(),
-        hints.program.as_str(),
-        hints.kitty_window,
-    ) {
-        ("xterm-ghostty", "ghostty", _) => "Ghostty",
-        ("xterm-kitty", "kitty" | "", true) => "Kitty",
-        _ => return Err(Unavailable::UnknownIdentity),
-    };
-    if identity_hint != "Ghostty" || hints.version != "1.4.0" {
-        return Err(Unavailable::UnverifiedMeasurementProfile);
-    }
-    let size =
-        rustix::termios::tcgetwinsize(output).map_err(|_| Unavailable::MissingPixelMetrics)?;
-    let (columns, rows, pixel_width, pixel_height) =
-        (size.ws_col, size.ws_row, size.ws_xpixel, size.ws_ypixel);
-    if columns == 0 || rows == 0 || pixel_width < columns || pixel_height < rows {
-        return Err(Unavailable::MissingPixelMetrics);
-    }
-    // Ghostty 1.4.0 exports the padding-subtracted viewport, including partial-cell
-    // leftovers. Its grid count is floor(viewport / integer cell pixels). Invert that
-    // relation only when there is exactly one possible integer cell dimension.
-    // See docs/20261107-inline-native-image-evidence.md for pinned upstream sources.
-    let cell_width =
-        ghostty_140_cell(pixel_width, columns).ok_or(Unavailable::MissingPixelMetrics)?;
-    let cell_height =
-        ghostty_140_cell(pixel_height, rows).ok_or(Unavailable::MissingPixelMetrics)?;
-    let viewport_remainder_width = columns
-        .checked_mul(cell_width)
-        .and_then(|used| pixel_width.checked_sub(used))
-        .ok_or(Unavailable::MissingPixelMetrics)?;
-    let viewport_remainder_height = rows
-        .checked_mul(cell_height)
-        .and_then(|used| pixel_height.checked_sub(used))
-        .ok_or(Unavailable::MissingPixelMetrics)?;
-    Ok(NativeTerminal {
-        identity_hint,
-        protocol: "Kitty Unicode placeholders (ratatui-image 11.1.0)",
-        cell_measurement: "Ghostty 1.4.0: unique integer solution to grid = floor(viewport / cell), after padding",
-        cell_width_interval: [cell_width, cell_width],
-        cell_height_interval: [cell_height, cell_height],
-        viewport_remainder_width,
-        viewport_remainder_height,
-        metrics: Metrics {
-            columns,
-            rows,
-            pixel_width,
-            pixel_height,
-            cell_width,
-            cell_height,
-        },
-    })
-}
-
-fn ghostty_140_cell(pixels: u16, cells: u16) -> Option<u16> {
-    // Ghostty clamps grid counts to at least one and ioctl fields to u16::MAX. Neither
-    // boundary allows inversion of the original dimensions, so reject it explicitly.
-    if cells <= 1 || cells == u16::MAX || pixels == u16::MAX {
-        return None;
-    }
-    let pixels = u32::from(pixels);
-    let cells = u32::from(cells);
-    let smallest = pixels.checked_div(cells.checked_add(1)?)?.checked_add(1)?;
-    let largest = pixels.checked_div(cells)?;
-    (smallest == largest && largest != 0)
-        .then(|| u16::try_from(largest).ok())
-        .flatten()
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub enum Mode {
-    Auto,
-    Img,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub enum Fallback {
-    Blocks,
-    Ascii,
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub enum Selection {
-    Native(NativeTerminal),
-    Fallback {
-        renderer: Fallback,
-        reason: Unavailable,
-    },
-}
-
-/// Text renderer selection only; production block/ASCII artwork is S04 work.
-///
-/// # Errors
-///
-/// Returns an unsupported error when image mode is requested but detection failed.
-pub fn select(
-    mode: Mode,
-    detection: Result<NativeTerminal, Unavailable>,
-    unicode_terminal: bool,
-) -> io::Result<Selection> {
-    match detection {
-        Ok(terminal) => Ok(Selection::Native(terminal)),
-        Err(reason) if mode == Mode::Auto => Ok(Selection::Fallback {
-            renderer: if unicode_terminal && reason != Unavailable::RedirectedOutput {
-                Fallback::Blocks
-            } else {
-                Fallback::Ascii
-            },
-            reason,
-        }),
-        Err(reason) => Err(io::Error::new(
+/// Returns unsupported for pipelines or missing terminal input, or a library/query error.
+pub fn query_picker() -> io::Result<Picker> {
+    let input = io::stdin();
+    let output = io::stdout();
+    if !input.is_terminal() || !output.is_terminal() {
+        return Err(io::Error::new(
             io::ErrorKind::Unsupported,
-            format!("native image unavailable: {reason}; use --mode auto, blocks, or ascii"),
-        )),
+            "native images require terminal stdin and stdout",
+        ));
     }
+    let a = rustix::fs::fstat(&input)?;
+    let b = rustix::fs::fstat(&output)?;
+    if a.st_rdev != b.st_rdev || a.st_dev != b.st_dev {
+        return Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "stdin and stdout are different terminals",
+        ));
+    }
+    let before = rustix::termios::tcgetattr(&input)?;
+    let result = Picker::from_query_stdio_with_options(QueryStdioOptions {
+        timeout: Duration::from_millis(500),
+        ..QueryStdioOptions::default()
+    });
+    // Also restore at the caller boundary when the library's query times out.
+    rustix::termios::tcsetattr(&input, rustix::termios::OptionalActions::Now, &before)?;
+    result.map_err(io::Error::other)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -296,103 +107,114 @@ pub fn crop_visible(image: &RgbaImage) -> io::Result<(RgbaImage, Crop)> {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct FrameReport {
-    pub crop: Crop,
+    pub protocol: String,
     pub payload_width: u32,
     pub payload_height: u32,
     pub image_columns: u16,
     pub image_rows: u16,
-    pub printed_columns: u16,
     pub encoded_bytes: usize,
-    pub scaling: &'static str,
 }
 
+#[derive(Debug)]
 pub struct NativeFrame {
     bytes: Vec<u8>,
     pub report: FrameReport,
 }
-
 impl NativeFrame {
-    /// Build using ratatui-image's raw Kitty protocol API, bypassing Picker/Resize entirely.
-    /// Pad the crop to full cells without resampling: Kitty virtual placement fits into a
-    /// rounded cell grid even without `c`/`r` fields. Equal payload/grid pixels prevent scaling.
-    /// Oversized images are clipped at the right edge, never resized to terminal width.
+    /// Let Picker create the protocol; serialize its widget cells as inline rows.
     ///
     /// # Errors
-    ///
-    /// Returns an error for empty/transparent input, unsupported dimensions, or image encoding failures.
-    pub fn original(image: &RgbaImage, metrics: Metrics) -> io::Result<Self> {
-        if metrics.cell_width == 0 || metrics.cell_height == 0 || metrics.columns == 0 {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "zero terminal cell dimensions",
-            ));
-        }
-        let (cropped, crop) = crop_visible(image)?;
-        let columns = crop.width.div_ceil(u32::from(metrics.cell_width));
-        let rows = crop.height.div_ceil(u32::from(metrics.cell_height));
-        // Upstream's fixed Unicode diacritic table has 297 entries per axis. Reject rather
-        // than let its internal min() silently omit unsupported rows/columns.
-        if columns > 297 || rows > 297 {
+    /// Returns unsupported when Picker selected text, or image/encoding/output-size errors.
+    pub fn render(
+        image: &RgbaImage,
+        width: Width,
+        geometry: Geometry,
+        picker: &Picker,
+    ) -> io::Result<Self> {
+        if picker.protocol_type() == ProtocolType::Halfblocks {
             return Err(io::Error::new(
                 io::ErrorKind::Unsupported,
-                "image exceeds ratatui-image's 297-cell Kitty placeholder limit",
+                "terminal has no detected image protocol; use --mode auto, blocks, or ascii",
             ));
         }
+        let font = picker.font_size();
+        let width = match width {
+            Width::Columns(columns) => {
+                Width::Columns(columns.checked_mul(u32::from(font.width)).ok_or_else(|| {
+                    io::Error::new(io::ErrorKind::InvalidInput, "native width overflow")
+                })?)
+            }
+            other => other,
+        };
+        let prepared = crate::art::prepare(
+            image,
+            width,
+            Geometry {
+                columns: geometry.columns.saturating_mul(u32::from(font.width)),
+                rows: geometry.rows.saturating_mul(u32::from(font.height)),
+                cell_width: 1,
+                cell_height: 1,
+            },
+            false,
+        )?;
         let size = Size::new(
-            u16::try_from(columns).map_err(io::Error::other)?,
-            u16::try_from(rows).map_err(io::Error::other)?,
-        );
-        let payload_width = columns
-            .checked_mul(u32::from(metrics.cell_width))
-            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "image width overflow"))?;
-        let payload_height = rows
-            .checked_mul(u32::from(metrics.cell_height))
-            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "image height overflow"))?;
-        let payload_area = u64::from(payload_width)
-            .checked_mul(u64::from(payload_height))
-            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "image area overflow"))?;
-        if payload_area > 16 * 1024 * 1024 {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "padded native image exceeds the 16-megapixel prototype limit",
-            ));
-        }
-        let mut padded = RgbaImage::new(payload_width, payload_height);
-        image::imageops::replace(&mut padded, &cropped, 0, 0);
-        let area = Rect::new(0, 0, size.width.min(metrics.columns), size.height);
-        let id = fresh_image_id();
-        let protocol = Protocol::Kitty(
-            Kitty::new(DynamicImage::ImageRgba8(padded), size, id, false, false)
+            u16::try_from(prepared.width().div_ceil(u32::from(font.width)))
+                .map_err(io::Error::other)?,
+            u16::try_from(prepared.height().div_ceil(u32::from(font.height)))
                 .map_err(io::Error::other)?,
         );
-        let mut buffer = Buffer::empty(area);
-        Image::new(&protocol)
-            .allow_clipping(true)
-            .render(area, &mut buffer);
-        let mut encoded = String::from("\r\x1b[0m");
-        for y in 0..area.height {
-            // Kitty uses foreground colour to select the image. Every cell on this row
-            // belongs to this image; emit style once, and reset before each newline.
-            let Color::Rgb(r, g, b) = buffer[(0, y)].fg else {
-                return Err(io::Error::other(
-                    "ratatui-image did not emit a native Kitty cell",
-                ));
-            };
-            let _ = write!(encoded, "\x1b[38;2;{r};{g};{b}m");
-            for x in 0..area.width {
-                encoded.push_str(buffer[(x, y)].symbol());
+        if picker.protocol_type() == ProtocolType::Kitty && (size.width > 297 || size.height > 297)
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::Unsupported,
+                "image exceeds ratatui-image's 297-cell Kitty placeholder limit; use blocks or ascii",
+            ));
+        }
+        let prepared = DynamicImage::ImageRgba8(prepared);
+        // Library crop/padding keeps original pixels exact and prevents cell rounding from scaling them.
+        let padded = Resize::Crop(None).resize(&prepared, font, size, None);
+        let protocol = picker
+            .new_protocol(padded, size, Resize::Crop(None))
+            .map_err(io::Error::other)?;
+        let reserved = size
+            .height
+            .min(u16::try_from(geometry.rows).unwrap_or(u16::MAX));
+        let mut encoded = "\r\n".repeat(usize::from(reserved));
+        let _ = write!(encoded, "\x1b[{reserved}A\r");
+        if let Protocol::Sixel(sixel) = &protocol {
+            // Sixel advances below its own image, including images taller than the viewport.
+            encoded.push_str(&sixel.data);
+            encoded.push_str("\x1b[0m\r");
+        } else {
+            let area = Rect::new(0, 0, size.width, size.height);
+            let mut buffer = Buffer::empty(area);
+            Image::new(&protocol).render(area, &mut buffer);
+            for y in 0..size.height {
+                // Native protocols differ in cursor movement; restore the row origin before advancing.
+                encoded.push_str("\x1b7");
+                for x in 0..size
+                    .width
+                    .min(u16::try_from(geometry.columns).unwrap_or(u16::MAX))
+                {
+                    let cell = &buffer[(x, y)];
+                    if cell.diff_option == CellDiffOption::Skip {
+                        continue;
+                    }
+                    if let Color::Rgb(r, g, b) = cell.fg {
+                        let _ = write!(encoded, "\x1b[38;2;{r};{g};{b}m");
+                    }
+                    encoded.push_str(cell.symbol());
+                }
+                encoded.push_str("\x1b8\x1b[0m\r\n");
             }
-            encoded.push_str("\x1b[0m\r\n");
         }
         let report = FrameReport {
-            crop,
-            payload_width,
-            payload_height,
+            protocol: format!("{:?}", picker.protocol_type()),
+            payload_width: u32::from(size.width).saturating_mul(u32::from(font.width)),
+            payload_height: u32::from(size.height).saturating_mul(u32::from(font.height)),
             image_columns: size.width,
             image_rows: size.height,
-            printed_columns: area.width,
             encoded_bytes: encoded.len(),
-            scaling: "none; one source pixel per protocol screen pixel",
         };
         Ok(Self {
             bytes: encoded.into_bytes(),
@@ -405,68 +227,23 @@ impl NativeFrame {
         &self.bytes
     }
 
-    /// Writes only inline graphics/text. No cursor hiding, screen switching or termios changes.
-    /// If a write is interrupted mid-escape, make a best-effort cancellation/reset. A permanently
-    /// broken writer cannot accept cleanup; return that limitation with the original failure.
+    /// Write inline output, cancelling an incomplete escape and resetting style on failure.
     ///
     /// # Errors
-    ///
-    /// Returns the write or flush error, including a cleanup failure when both operations fail.
+    /// Returns the output error, including any failed cleanup.
     pub fn write_to(&self, output: &mut impl Write) -> io::Result<()> {
-        let mut guard = OutputGuard {
-            output,
-            complete: false,
-        };
-        let result = guard
-            .output
-            .write_all(&self.bytes)
-            .and_then(|()| guard.output.flush());
-        match result {
-            Ok(()) => {
-                guard.complete = true;
-                Ok(())
+        if let Err(error) = output.write_all(&self.bytes).and_then(|()| output.flush()) {
+            if let Err(cleanup) = output
+                .write_all(b"\x18\x1b\\\x1b[0m\r\n")
+                .and_then(|()| output.flush())
+            {
+                return Err(io::Error::new(
+                    error.kind(),
+                    format!("{error}; output cleanup also failed: {cleanup}"),
+                ));
             }
-            Err(error) => {
-                let cleanup = guard.cleanup();
-                guard.complete = true;
-                match cleanup {
-                    Ok(()) => Err(error),
-                    Err(cleanup) => Err(io::Error::new(
-                        error.kind(),
-                        format!("{error}; output cleanup also failed: {cleanup}"),
-                    )),
-                }
-            }
+            return Err(error);
         }
-    }
-}
-
-// IDs must be nonzero and should not collide with other programs' images. Use kernel entropy
-// through std's independently seeded hash builder, avoiding another RNG dependency.
-fn fresh_image_id() -> u32 {
-    use std::hash::{BuildHasher, Hasher};
-    let hash = std::collections::hash_map::RandomState::new()
-        .build_hasher()
-        .finish();
-    let [byte_0, byte_1, byte_2, byte_3, ..] = hash.to_le_bytes();
-    let id = u32::from_le_bytes([byte_0, byte_1, byte_2, byte_3]);
-    id.max(1)
-}
-
-struct OutputGuard<'a, W: Write> {
-    output: &'a mut W,
-    complete: bool,
-}
-impl<W: Write> OutputGuard<'_, W> {
-    fn cleanup(&mut self) -> io::Result<()> {
-        self.output.write_all(b"\x18\x1b\\\x1b[0m\r\n")?;
-        self.output.flush()
-    }
-}
-impl<W: Write> Drop for OutputGuard<'_, W> {
-    fn drop(&mut self) {
-        if !self.complete {
-            let _ = self.cleanup();
-        }
+        Ok(())
     }
 }

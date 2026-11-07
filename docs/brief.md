@@ -58,6 +58,8 @@ When stdout is piped or redirected, `--mode auto` emits plain, uncoloured ASCII 
 
 Art should be printed with ratatui-image if img used. Try and autodetect the best output type from the terminal. For blocks use unicode blocks to match the colours. For ascii convert the image to coloured ascii art, subject to the colour policy above.
 
+2026-11-07 native integration correction: use ratatui-image's Picker for capability/font detection and its protocol encoders. Do not impose a Ghostty/version allowlist or disable images merely because the session uses SSH. Standard capability queries may briefly read terminal responses and change terminal mode, with settings restored afterward; explicit text modes and redirected output do not probe. This supersedes the earlier feasibility prototype's zero-query implementation choice. See [D33](20261106-design.md#d33--use-ratatui-image-detection-and-protocols--2026-11-07).
+
 When downscaling/upscaling use appropriate sampling in every display mode.
 
 ### Shared command behavior

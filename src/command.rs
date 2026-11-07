@@ -164,6 +164,7 @@ pub struct Runtime<R> {
     bootstrap: Option<Bootstrap>,
     rng: R,
     terminal: Terminal,
+    picker: Option<ratatui_image::picker::Picker>,
 }
 impl<R: Rng + Send> Runtime<R> {
     #[must_use]
@@ -173,6 +174,7 @@ impl<R: Rng + Send> Runtime<R> {
             bootstrap: None,
             rng,
             terminal: Terminal::from_stdio(),
+            picker: None,
         }
     }
 
@@ -183,9 +185,72 @@ impl<R: Rng + Send> Runtime<R> {
     }
 
     #[must_use]
+    pub fn with_picker(mut self, picker: ratatui_image::picker::Picker) -> Self {
+        self.picker = Some(picker);
+        self
+    }
+
+    #[must_use]
     pub fn with_bootstrap(mut self, bootstrap: Bootstrap) -> Self {
         self.bootstrap = Some(bootstrap);
         self
+    }
+
+    fn native_frame(
+        &self,
+        image: &image::RgbaImage,
+        width: Width,
+        mode: Mode,
+    ) -> std::io::Result<Option<crate::inline_image::NativeFrame>> {
+        use ratatui_image::picker::ProtocolType;
+        use std::io::{Error, ErrorKind};
+        if mode != Mode::Img
+            && (mode != Mode::Auto
+                || (!self.terminal.unicode && self.terminal.depth == crate::text_art::Depth::None))
+        {
+            return Ok(None);
+        }
+        let picker = self.picker.clone().map_or_else(
+            || {
+                if self.terminal.is_terminal {
+                    crate::inline_image::query_picker()
+                } else {
+                    Err(Error::new(
+                        ErrorKind::Unsupported,
+                        "native images require terminal stdin and stdout",
+                    ))
+                }
+            },
+            Ok,
+        );
+        match picker {
+            Ok(picker) if picker.protocol_type() != ProtocolType::Halfblocks => {
+                match crate::inline_image::NativeFrame::render(
+                    image,
+                    width,
+                    self.terminal.geometry,
+                    &picker,
+                ) {
+                    Ok(frame) => Ok(Some(frame)),
+                    Err(error) if mode == Mode::Auto && error.kind() == ErrorKind::Unsupported => {
+                        Ok(None)
+                    }
+                    Err(error) => Err(error),
+                }
+            }
+            result if mode == Mode::Img => {
+                let reason = result
+                    .err()
+                    .map_or_else(|| "no detected image protocol".into(), |e| e.to_string());
+                Err(Error::new(
+                    ErrorKind::Unsupported,
+                    format!(
+                        "native image unavailable: {reason}; use --mode auto, blocks, or ascii"
+                    ),
+                ))
+            }
+            _ => Ok(None),
+        }
     }
 
     async fn execute(
@@ -212,11 +277,11 @@ impl<R: Rng + Send> Runtime<R> {
                         reason: error.to_string(),
                     })?
                     .into_rgba8();
-                if mode == Mode::Img {
-                    return Err(CommandError::Output(std::io::Error::new(
-                        std::io::ErrorKind::Unsupported,
-                        "native image unavailable; use --mode auto, blocks, or ascii",
-                    )));
+                if let Some(frame) = self
+                    .native_frame(&image, width.unwrap_or_default(), mode)
+                    .map_err(|error| image_error(&self.store, selected, error))?
+                {
+                    return frame.write_to(stdout).map_err(CommandError::Output);
                 }
                 let blocks = mode == Mode::Blocks
                     || (mode == Mode::Auto && self.terminal.is_terminal && self.terminal.unicode);
@@ -226,16 +291,7 @@ impl<R: Rng + Send> Runtime<R> {
                     self.terminal.geometry,
                     blocks,
                 )
-                .map_err(|error| {
-                    if error.kind() == std::io::ErrorKind::InvalidData {
-                        CommandError::Store(StoreError::RepairRequired {
-                            path: self.store.root().join(selected.local_artwork.as_str()),
-                            reason: error.to_string(),
-                        })
-                    } else {
-                        CommandError::Art(ArtError::from(error))
-                    }
-                })?;
+                .map_err(|error| image_error(&self.store, selected, error))?;
                 let text = crate::text_art::render(&prepared, blocks, self.terminal.color(color));
                 stdout
                     .write_all(text.as_bytes())
@@ -258,6 +314,21 @@ impl<R: Rng + Send> Runtime<R> {
             }
         }
         Ok(())
+    }
+}
+
+fn image_error(
+    store: &Store,
+    form: &crate::catalogue::Form,
+    error: std::io::Error,
+) -> CommandError {
+    if error.kind() == std::io::ErrorKind::InvalidData {
+        CommandError::Store(StoreError::RepairRequired {
+            path: store.root().join(form.local_artwork.as_str()),
+            reason: error.to_string(),
+        })
+    } else {
+        CommandError::Art(ArtError::from(error))
     }
 }
 
