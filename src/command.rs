@@ -6,15 +6,17 @@ use clap::{Parser, Subcommand};
 use rand::{Rng, seq::SliceRandom};
 
 use crate::{
+    art::{self, ArtError, Color, Mode, Width},
     bootstrap::{Bootstrap, BootstrapError},
     catalogue::Catalogue,
     store::{Store, StoreError},
+    terminal::Terminal,
 };
 
 #[derive(Parser)]
 #[command(
     version,
-    about = "Choose Pokémon names from a locally installed catalogue"
+    about = "Choose Pokémon names and display locally installed artwork"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -23,6 +25,18 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Display an original or alternate-form illustration inline.
+    Art {
+        name: Option<String>,
+        #[arg(long)]
+        form: Option<String>,
+        #[arg(long, value_enum, default_value_t)]
+        mode: Mode,
+        #[arg(long, value_name = "N|original")]
+        width: Option<Width>,
+        #[arg(long, value_enum, default_value_t)]
+        color: Color,
+    },
     /// Choose distinct original species names uniformly at random.
     Choose {
         #[arg(short, long)]
@@ -43,6 +57,7 @@ enum Command {
 
 #[derive(Debug)]
 pub enum CommandError {
+    Art(ArtError),
     Store(StoreError),
     Bootstrap(BootstrapError),
     File {
@@ -59,6 +74,7 @@ pub enum CommandError {
 impl fmt::Display for CommandError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::Art(error) => error.fmt(f),
             Self::Store(error) => error.fmt(f),
             Self::Bootstrap(error) => error.fmt(f),
             Self::File { path, source } => write!(f, "exclusion file {}: {source}", path.display()),
@@ -74,6 +90,11 @@ impl fmt::Display for CommandError {
     }
 }
 impl std::error::Error for CommandError {}
+impl From<ArtError> for CommandError {
+    fn from(value: ArtError) -> Self {
+        Self::Art(value)
+    }
+}
 impl From<StoreError> for CommandError {
     fn from(value: StoreError) -> Self {
         Self::Store(value)
@@ -142,15 +163,23 @@ pub struct Runtime<R> {
     store: Store,
     bootstrap: Option<Bootstrap>,
     rng: R,
+    terminal: Terminal,
 }
 impl<R: Rng + Send> Runtime<R> {
     #[must_use]
-    pub const fn new(store: Store, rng: R) -> Self {
+    pub fn new(store: Store, rng: R) -> Self {
         Self {
             store,
             bootstrap: None,
             rng,
+            terminal: Terminal::from_stdio(),
         }
+    }
+
+    #[must_use]
+    pub const fn with_terminal(mut self, terminal: Terminal) -> Self {
+        self.terminal = terminal;
+        self
     }
 
     #[must_use]
@@ -166,16 +195,59 @@ impl<R: Rng + Send> Runtime<R> {
         stderr: &mut (impl Write + Send),
     ) -> Result<(), CommandError> {
         match command {
+            Command::Art {
+                name,
+                form,
+                mode,
+                width,
+                color,
+            } => {
+                let catalogue = catalogue(&self.store, self.bootstrap.as_ref(), stderr).await?;
+                let (_, selected) =
+                    art::select(&catalogue, name.as_deref(), form.as_deref(), &mut self.rng)?;
+                let bytes = self.store.read_artwork(&selected.local_artwork)?;
+                let image = image::load_from_memory_with_format(&bytes, image::ImageFormat::Png)
+                    .map_err(|error| StoreError::RepairRequired {
+                        path: self.store.root().join(selected.local_artwork.as_str()),
+                        reason: error.to_string(),
+                    })?
+                    .into_rgba8();
+                if mode == Mode::Img {
+                    return Err(CommandError::Output(std::io::Error::new(
+                        std::io::ErrorKind::Unsupported,
+                        "native image unavailable; use --mode auto, blocks, or ascii",
+                    )));
+                }
+                let blocks = mode == Mode::Blocks
+                    || (mode == Mode::Auto && self.terminal.is_terminal && self.terminal.unicode);
+                let prepared = art::prepare(
+                    &image,
+                    width.unwrap_or_default(),
+                    self.terminal.geometry,
+                    blocks,
+                )
+                .map_err(|error| {
+                    if error.kind() == std::io::ErrorKind::InvalidData {
+                        CommandError::Store(StoreError::RepairRequired {
+                            path: self.store.root().join(selected.local_artwork.as_str()),
+                            reason: error.to_string(),
+                        })
+                    } else {
+                        CommandError::Art(ArtError::from(error))
+                    }
+                })?;
+                let text = crate::text_art::render(&prepared, blocks, self.terminal.color(color));
+                stdout
+                    .write_all(text.as_bytes())
+                    .map_err(CommandError::Output)?;
+            }
             Command::Choose {
                 count,
                 exclude,
                 files,
             } => {
                 let text = exclusion_text(&files)?;
-                let catalogue = match self.store.load_active()? {
-                    Some(catalogue) => catalogue,
-                    None => bootstrap(&self.store, self.bootstrap.as_ref(), false, stderr).await?,
-                };
+                let catalogue = catalogue(&self.store, self.bootstrap.as_ref(), stderr).await?;
                 let names = choose(&catalogue, count, &exclude, &text, &mut self.rng)?;
                 for name in names {
                     writeln!(stdout, "{name}").map_err(CommandError::Output)?;
@@ -186,6 +258,17 @@ impl<R: Rng + Send> Runtime<R> {
             }
         }
         Ok(())
+    }
+}
+
+async fn catalogue(
+    store: &Store,
+    source: Option<&Bootstrap>,
+    stderr: &mut (impl Write + Send),
+) -> Result<Catalogue, CommandError> {
+    match store.load_active()? {
+        Some(catalogue) => Ok(catalogue),
+        None => bootstrap(store, source, false, stderr).await,
     }
 }
 

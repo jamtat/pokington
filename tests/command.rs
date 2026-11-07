@@ -169,6 +169,7 @@ async fn parser_handles_help_version_and_invalid_arguments_before_runtime_creati
         (vec!["pokington", "--version"], 0),
         (vec!["pokington", "choose", "--help"], 0),
         (vec!["pokington", "bootstrap", "--help"], 0),
+        (vec!["pokington", "art", "--help"], 0),
         (vec!["pokington"], 2),
         (vec!["pokington", "choose"], 2),
         (vec!["pokington", "choose", "-c", "-1"], 2),
@@ -178,7 +179,11 @@ async fn parser_handles_help_version_and_invalid_arguments_before_runtime_creati
             2,
         ),
         (vec!["pokington", "bootstrap", "--unknown"], 2),
-        (vec!["pokington", "art"], 2),
+        (vec!["pokington", "art", "--width", "0"], 2),
+        (vec!["pokington", "art", "--width", "-1"], 2),
+        (vec!["pokington", "art", "--width", "huge"], 2),
+        (vec!["pokington", "art", "--mode", "invalid"], 2),
+        (vec!["pokington", "art", "--color", "invalid"], 2),
     ] {
         let mut stdout = Vec::new();
         let mut stderr = Vec::new();
@@ -330,6 +335,7 @@ fn executable_returns_clap_status_and_uses_separate_output_streams() {
         vec!["--version"],
         vec!["choose", "--help"],
         vec!["bootstrap", "--help"],
+        vec!["art", "--help"],
     ] {
         let output = Command::new(env!("CARGO_BIN_EXE_pokington"))
             .args(words)
@@ -346,4 +352,247 @@ fn executable_returns_clap_status_and_uses_separate_output_streams() {
     assert_eq!(output.status.code(), Some(2));
     assert_eq!(output.stdout, b"");
     assert_ne!(output.stderr, b"");
+}
+
+fn install_artwork(store: &Store) -> Result<(), Failure> {
+    use image::{DynamicImage, Rgba, RgbaImage};
+    let image = RgbaImage::from_pixel(8, 8, Rgba([255, 255, 255, 255]));
+    let mut bytes = std::io::Cursor::new(Vec::new());
+    DynamicImage::ImageRgba8(image).write_to(&mut bytes, image::ImageFormat::Png)?;
+    fs::create_dir_all(store.root().join("artwork"))?;
+    for form in catalogue()?.forms() {
+        fs::write(
+            store.root().join(form.local_artwork.as_str()),
+            bytes.get_ref(),
+        )?;
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn art_runner_uses_local_data_and_redirected_color_policy() {
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    install_artwork(&store).unwrap();
+    let (code, stdout, stderr) = invoke(
+        &store,
+        args(&["pokington", "art", "mEw", "--width", "original"]),
+    )
+    .await
+    .unwrap();
+    assert_eq!(code, 0);
+    assert_eq!(stdout, "@@@@@@@@\n".repeat(8));
+    assert_eq!(stderr, "");
+    let (code, stdout, stderr) = invoke(
+        &store,
+        args(&[
+            "pokington",
+            "art",
+            "1",
+            "--mode",
+            "ascii",
+            "--width",
+            "4",
+            "--color",
+            "always",
+        ]),
+    )
+    .await
+    .unwrap();
+    assert_eq!(code, 0);
+    assert!(stdout.contains("\x1b[38;2;255;255;255m@"));
+    assert_eq!(stdout.lines().count(), 2);
+    assert_eq!(stderr, "");
+    let (code, stdout, stderr) = invoke(
+        &store,
+        args(&[
+            "pokington",
+            "art",
+            "--form",
+            "ORIGINAL",
+            "--mode",
+            "blocks",
+            "--width",
+            "original",
+            "--color",
+            "never",
+        ]),
+    )
+    .await
+    .unwrap();
+    assert_eq!(code, 0);
+    assert_eq!(stdout, "████████\n".repeat(4));
+    assert_eq!(stderr, "");
+}
+
+#[tokio::test]
+async fn art_runner_reports_lookup_and_selected_png_errors_without_output() {
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    for (words, expected) in [
+        (vec!["pokington", "art", "missing"], "unknown Pokémon"),
+        (
+            vec!["pokington", "art", "Mew", "--form", "missing"],
+            "available forms: original",
+        ),
+        (
+            vec!["pokington", "art", "--form", "missing"],
+            "no artwork matches",
+        ),
+        (vec!["pokington", "art", "Mew"], "pokington bootstrap"),
+    ] {
+        let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
+        assert_eq!(code, 1);
+        assert_eq!(stdout, "");
+        assert!(stderr.contains(expected), "{stderr}");
+        assert!(!stderr.contains("Downloading"));
+    }
+    install_artwork(&store).unwrap();
+    let catalogue = catalogue().unwrap();
+    let reference = &catalogue
+        .species
+        .first()
+        .unwrap()
+        .forms
+        .first()
+        .unwrap()
+        .local_artwork;
+    let path = store.root().join(reference.as_str());
+    fs::write(&path, b"invalid PNG").unwrap();
+    let (code, stdout, stderr) = invoke(&store, args(&["pokington", "art", "Mew"]))
+        .await
+        .unwrap();
+    assert_eq!((code, stdout.as_str()), (1, ""));
+    assert!(stderr.contains("pokington bootstrap") && stderr.contains(&path.display().to_string()));
+    let mut bytes = std::io::Cursor::new(Vec::new());
+    image::DynamicImage::ImageRgba8(image::RgbaImage::new(2, 2))
+        .write_to(&mut bytes, image::ImageFormat::Png)
+        .unwrap();
+    fs::write(path, bytes.get_ref()).unwrap();
+    let (code, stdout, stderr) = invoke(&store, args(&["pokington", "art", "Mew"]))
+        .await
+        .unwrap();
+    assert_eq!((code, stdout.as_str()), (1, ""));
+    assert!(stderr.contains("fully transparent") && stderr.contains("pokington bootstrap"));
+}
+
+#[tokio::test]
+async fn terminal_context_selects_blocks_and_limits_automatic_color_depth() {
+    use pokington::{art::Geometry, terminal::Terminal, text_art::Depth};
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    install_artwork(&store).unwrap();
+    for (unicode, depth, expected_escape) in [
+        (true, Depth::Ansi16, "\x1b[97m"),
+        (true, Depth::Ansi256, "\x1b[38;5;231m"),
+        (false, Depth::None, ""),
+    ] {
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        let code = command::run(
+            ["pokington", "art", "Mew", "--width", "4"],
+            || {
+                Ok(
+                    Runtime::new(store.clone(), StdRng::seed_from_u64(1)).with_terminal(Terminal {
+                        geometry: Geometry::default(),
+                        is_terminal: true,
+                        unicode,
+                        depth,
+                    }),
+                )
+            },
+            &mut stdout,
+            &mut stderr,
+        )
+        .await;
+        assert_eq!(code, 0);
+        assert_eq!(stderr, b"");
+        let text = String::from_utf8(stdout).unwrap();
+        if unicode {
+            assert!(text.contains('▀'));
+        } else {
+            assert_eq!(text, "@@@@\n".repeat(2));
+        }
+        assert!(text.contains(expected_escape));
+    }
+}
+
+#[tokio::test]
+async fn terminal_metadata_child() {
+    let Some(path) = std::env::var_os("POKINGTON_TEST_ART_STORE") else {
+        return;
+    };
+    let store = Store::at(PathBuf::from(path)).unwrap();
+    let code = command::run(
+        [
+            "pokington",
+            "art",
+            "Mew",
+            "--mode",
+            "ascii",
+            "--width",
+            "8",
+            "--color",
+            "never",
+        ],
+        || Ok(Runtime::new(store, StdRng::seed_from_u64(1))),
+        &mut std::io::stdout(),
+        &mut std::io::stderr(),
+    )
+    .await;
+    assert_eq!(code, 0);
+}
+
+#[test]
+fn runner_uses_reported_cell_proportions_without_querying_input() {
+    use nix::pty::{Winsize, openpty};
+    use std::{fs::File, io::Read, process::Stdio};
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    install_artwork(&store).unwrap();
+    for (cell_width, cell_height, rows) in [(8_u16, 16_u16, 4), (12, 12, 8)] {
+        let pty = openpty(
+            Some(&Winsize {
+                ws_col: 80,
+                ws_row: 24,
+                ws_xpixel: 80 * cell_width,
+                ws_ypixel: 24 * cell_height,
+            }),
+            None,
+        )
+        .unwrap();
+        let mut master = File::from(pty.master);
+        let slave = File::from(pty.slave);
+        let reader = std::thread::spawn(move || {
+            let mut bytes = Vec::new();
+            // Drain while the slave is open; macOS can discard unread bytes at its last close.
+            if let Err(error) = master.read_to_end(&mut bytes) {
+                assert_eq!(error.raw_os_error(), Some(5));
+            }
+            bytes
+        });
+        let output = Command::new(std::env::current_exe().unwrap())
+            .env("POKINGTON_TEST_ART_STORE", store.root())
+            .env("TERM", "dumb")
+            .args([
+                "--exact",
+                "terminal_metadata_child",
+                "--quiet",
+                "--nocapture",
+            ])
+            .stdin(Stdio::null())
+            .stdout(Stdio::from(slave))
+            .stderr(Stdio::piped())
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "{:?}", output.stderr);
+        let bytes = reader.join().unwrap();
+        let text = String::from_utf8(bytes).unwrap();
+        assert_eq!(
+            text.lines().filter(|line| *line == "@@@@@@@@").count(),
+            rows,
+            "{text}"
+        );
+        assert!(!text.contains('\x1b'));
+    }
 }

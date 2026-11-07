@@ -1200,3 +1200,57 @@ async fn failed_first_run_reports_bootstrap_error_without_printing_names() {
     assert!(store.load_active().unwrap().is_none());
     assert_eq!(server.hits("/pokemon/art/006.png").unwrap(), 3);
 }
+
+#[tokio::test]
+async fn art_first_run_completes_all_downloads_before_rendering_and_then_stays_offline() {
+    use pokington::command::{self, Runtime};
+    use rand::{SeedableRng, rngs::StdRng};
+    let temp = Temp::new().unwrap();
+    let server = Server::fixture().unwrap();
+    let store = temp.store().unwrap();
+    let source = server.source().unwrap();
+    for first_run in [true, false] {
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        let code = command::run(
+            [
+                "pokington",
+                "art",
+                "Charizard",
+                "--width",
+                "4",
+                "--mode",
+                "ascii",
+            ],
+            || {
+                Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(3))
+                    .with_bootstrap(source.clone()))
+            },
+            &mut stdout,
+            &mut stderr,
+        )
+        .await;
+        assert_eq!(code, 0);
+        assert_eq!(
+            String::from_utf8(stdout)
+                .unwrap()
+                .lines()
+                .next()
+                .unwrap()
+                .len(),
+            4
+        );
+        if first_run {
+            assert!(
+                String::from_utf8(stderr)
+                    .unwrap()
+                    .contains("Complete: 1 species, 4 forms")
+            );
+        } else {
+            assert_eq!(stderr, b"");
+        }
+        assert_eq!(server.hits(INDEX_PATH).unwrap(), 1);
+        assert_eq!(server.image_hits().unwrap(), 4);
+        installed(&store, &store.load_active().unwrap().unwrap()).unwrap();
+    }
+}
