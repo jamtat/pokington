@@ -32,7 +32,7 @@ Pokington chooses random names, avoids names you have already used, and displays
 
 ## Installation
 
-Download the archive for your platform and `SHA256SUMS` from [GitHub Releases](https://github.com/jamtat/pokington/releases). Release binaries use mimalloc; Linux binaries are statically linked with musl.
+Download the archive for your platform and its matching `.tar.gz.sha256` file from [GitHub Releases](https://github.com/jamtat/pokington/releases). Release binaries use mimalloc; Linux binaries are statically linked with musl.
 
 | Platform | Archive target suffix |
 | --- | --- |
@@ -45,7 +45,7 @@ For example, after downloading the macOS Apple Silicon archive for version `0.0.
 
 ```sh
 archive=pokington-0.0.1-aarch64-apple-darwin.tar.gz
-grep -F "  $archive" SHA256SUMS | shasum -a 256 --check
+shasum -a 256 --check "$archive.sha256"
 tar -xzf "$archive"
 mkdir -p "$HOME/.local/bin"
 install -m 755 "${archive%.tar.gz}/pokington" "$HOME/.local/bin/pokington"
@@ -264,12 +264,6 @@ cargo test-ci
 
 The alias runs `cargo nextest run --profile ci --all-targets --all-features --locked`. It completes the full test suite after failures and writes the JUnit report to `target/nextest/ci/junit.xml`.
 
-CI runs this alias with `--release --target TARGET` on all four release targets and checks each extracted archive. It restores cached Rust dependencies and nextest, downloading a prebuilt nextest binary on cache misses. Keep the nextest version in `.cargo/config.toml` and `.github/workflows/build.yml` aligned when upgrading it. Linux musl sysroots are cached by runner image and architecture, so warm runs skip apt setup.
+CI runs this alias with `--release --target TARGET` on all four native release targets and checks each extracted archive. It restores cached Rust dependencies and nextest, downloading a prebuilt nextest binary on cache misses. Linux jobs install the native distro `musl-tools` package. Keep the nextest version in `.cargo/config.toml` and `.github/workflows/build.yml` aligned when upgrading it, and keep the Rust version in `rust-toolchain.toml` and both build and CI workflows aligned.
 
-Release helper tests use Node's built-in runner and require no npm dependencies:
-
-```sh
-node --test .github/scripts/release.test.mjs
-```
-
-See the [maintainer release guide](docs/20261107-releasing.md) for version tags, draft review, failed-run recovery and CI cache behavior.
+See the [maintainer release guide](docs/20261107-releasing.md) for version tags, draft review, failed-run recovery and workflow setup.

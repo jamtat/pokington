@@ -9,6 +9,11 @@ on:
 permissions:
   contents: read
 
+env:
+  CARGO_INCREMENTAL: "0"
+  CARGO_PROFILE_DEV_DEBUG: "0"
+  CARGO_TERM_COLOR: always
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -21,26 +26,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/rust
+          ref: ${{ github.sha }}
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # master
         with:
-          components: rustfmt clippy
-          cache-key: lint
+          toolchain: "1.99.1"
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          shared-key: lint
+          cache-on-failure: true
       - name: Check formatting
         run: cargo fmt --check
       - name: Check compilation
         run: cargo check --all-targets --all-features --locked
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features --locked -- -D warnings
-
-  release-scripts:
-    name: Release helper tests
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - run: node --test .github/scripts/release.test.mjs
-      - run: bash -n .github/scripts/setup-musl.sh && shellcheck .github/scripts/setup-musl.sh
 
   rust-test:
     name: Rust test

@@ -1,8 +1,10 @@
 # GitHub release design
 
-Date: 2026-11-07. Status: design settled; implementation authorised on `btat-github-releases`.
+Date: 2026-11-07. Status: D08 simplification implemented and checked locally on `btat-github-releases`; commit/publication and new hosted validation pending.
 
 ## Outcome and sources
+
+The following paragraph records the initial planning snapshot; D08 governs the current simplification.
 
 Distribute Pokington through GitHub Releases. Current user decisions govern this design. The [brief](brief.md) limits initial platform support to macOS and Linux. [Cargo.toml](../Cargo.toml) and [Cargo.lock](../Cargo.lock) contain version `0.0.1`, committed in `7a5f6c6`. The existing [CI workflow](../.github/workflows/ci.yml) checks Linux pull requests and pushes to `main`; no release workflow exists.
 
@@ -71,6 +73,8 @@ Distribute Pokington through GitHub Releases. Current user decisions govern this
 
 ## Implementation stages and authority
 
+Current implementation follows D08 and S08 below. S06/S07 and their grants are historical records of the first implementation.
+
 - S06: integrate mimalloc and verify the local application.
 - S07: implement shared four-target build/test/packaging, tag validation, draft release preparation, safe recovery and installation/release documentation; investigate and reduce repeated CI setup.
 - User instructions: “do it on a branch”, “then PR it it”, and “open diffle when you're done with the PR content. use summon when finished. i want you to auto proceed through all commits required and then push without my approval please”.
@@ -82,3 +86,14 @@ Distribute Pokington through GitHub Releases. Current user decisions govern this
 - S06: mimalloc wired into the executable; locked host checks, 108 tests and release help/version passed. Both approved allocator reviews reported no findings. Native release acceptance remains S07. See [S06 evidence](logs/20261107-s06-release-log.md).
 - Dated correction: at the user's request, the branch was rebased onto `origin/main` at `8418404`. The version commit is now `e5b0e24` and the allocator commit is now `ded2ba5`; earlier hashes remain historical. Upstream species-exclusion behavior and documentation were preserved. See [S07 continuation](logs/20261107-s07-release-log.md#dated-continuation--requested-rebase).
 - S07: custom shared native workflows, cached musl setup, archive/checksum verification, draft preparation/recovery and installation/release documentation implemented. Local ARM64 macOS release validation passed 111 tests; ten helper tests and static workflow/shell checks pass. Correctness review's draft-discovery finding was fixed and tested; simplification review had no findings. Real hosted matrix acceptance remains pending the PR's automatic CI. See [S07 evidence](logs/20261107-s07-release-log.md).
+- Completion correction: the final S07 native CI run [42401861071](https://github.com/jamtat/pokington/actions/runs/42401861071) passed all six jobs at `d314459`; the earlier pending wording was the pre-publication snapshot. PR #4 and its final description recorded hosted acceptance. That evidence does not validate the later S08 workflow changes.
+
+## D08: use ordinary workflow commands and a maintained release action — 2026-11-07
+
+- User request after research: “delegate a sol xhigh agent to implement the suggestion. set a goal for yourself and the agent. it MUST look like your recommendation”. This explicitly authorises immediate implementation of the recommendation, with one `gpt-6.1-sol` implementer at `xhigh` and matching parent/agent goals.
+- Evidence: three agents inspected 15 distinct Rust repositories. Recurring patterns were Cargo/cross, ordinary shell archive/checksum commands, standard artifact actions and softprops or gh. Close examples are [zoxide](https://github.com/ajeetdsouza/zoxide/blob/c21f547371ebd635eba0474c793069b37b0570ab/.github/workflows/release.yml), [delta](https://github.com/dandavison/delta/blob/3c2269c6b845913965575f11b0196d70ef5352f3/.github/workflows/cd.yml) and [bottom](https://github.com/ClementTsang/bottom/blob/cc6facab16600fd79d822e6e37deb42abefe7b0f/.github/workflows/deployment.yml). This sample did not establish the previously proposed taiki packaging/toolchain stack as standard.
+- Accepted direction: retain the four native full-test jobs, mimalloc and application behavior. Use short inline Cargo metadata/jq, tar, checksum, extracted-executable and ELF checks. Transfer files with standard artifact actions. One final `softprops/action-gh-release` job uses `draft: true` after all checks pass; publication stays manual.
+- Delete `release.mjs`, its Node tests, `setup-musl.sh` and the local Rust composite action. Use ordinary native Linux musl-tools setup and standard Rust dependency caching. Produce per-archive `.sha256` files. Update installation and maintainer instructions.
+- Supersedes: S07's custom parser/API recovery program, combined checksum manifest, source-note markers, custom sysroot relocation/cache and helper test suite. Do not recreate them in Rust, shell helper files, large inline programs or another local action. Minimal published-release protection may use the existing CLI.
+- Scope/permission limits: local implementation and checks are authorised. This instruction does not explicitly grant a new independent review, commit, push, manual CI action or release mutation. S08 records the delegated implementation and resulting evidence; earlier grants do not authorise new review agents.
+- Local result: the Sol xhigh implementer deleted the three helper files and local Rust action, and replaced them with ordinary inline workflow commands and one final softprops draft job. Its nine implementation/doc files changed by +134/-601 lines. Workflow/shell validation, real ARM64 macOS archive checks, tag matching and ELF rejection checks passed; the parent confirmed recommendation compliance and unchanged application/Cargo/test files. New hosted CI remains pending an authorised push.
