@@ -134,6 +134,29 @@ pub fn select<'a>(
         .ok_or_else(|| form.map_or(ArtError::EmptyCatalogue, ArtError::NoMatchingForm))
 }
 
+/// Label artwork using its form display name without repeating the species name.
+#[must_use]
+pub fn display_name(species: &Species, form: &Form) -> String {
+    if form
+        .display_name
+        .to_lowercase()
+        .contains(&species.name.to_lowercase())
+    {
+        return form.display_name.clone();
+    }
+    let description = form
+        .display_name
+        .split_whitespace()
+        .filter(|word| !word.eq_ignore_ascii_case("form"))
+        .collect::<Vec<_>>()
+        .join(" ");
+    if description.is_empty() {
+        species.name.clone()
+    } else {
+        format!("{} ({description})", species.name)
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Geometry {
     pub columns: u32,

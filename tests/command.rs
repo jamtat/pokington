@@ -437,6 +437,64 @@ async fn art_runner_uses_local_data_and_redirected_color_policy() {
 }
 
 #[tokio::test]
+async fn art_name_flag_prints_the_selected_form_label_below_the_image() {
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    install_artwork(&store).unwrap();
+    let mut catalogue = catalogue().unwrap();
+    let mut alternate = catalogue
+        .species
+        .get(1)
+        .unwrap()
+        .forms
+        .get(1)
+        .unwrap()
+        .clone();
+    // Use a single species to make random selection deterministic, including an alternate form.
+    catalogue.species.truncate(1);
+    catalogue.source.max_id = 1;
+    let species = catalogue.species.first_mut().unwrap();
+    species.name = "Sandshrew".into();
+    alternate.key = "alola".into();
+    alternate.display_name = "Alola Form".into();
+    species.forms.first_mut().unwrap().display_name = "SANDSHREW".into();
+    species.forms.push(alternate);
+    catalogue.validate().unwrap();
+    fs::write(
+        store.root().join("installed/catalogue.json"),
+        serde_json::to_vec(&catalogue).unwrap(),
+    )
+    .unwrap();
+    for mode in ["auto", "ascii", "blocks"] {
+        for (selection, expected) in [
+            (vec!["sandshrew"], "SANDSHREW"),
+            (vec!["1", "--form", "ALOLA"], "Sandshrew (Alola)"),
+            (vec!["--form", "alola"], "Sandshrew (Alola)"),
+            (vec![], "SANDSHREW"),
+        ] {
+            let mut words = vec![
+                "pokington",
+                "art",
+                "--mode",
+                mode,
+                "--width",
+                "original",
+                "--color",
+                "never",
+            ];
+            words.extend(selection);
+            let (code, image, stderr) = invoke(&store, args(&words)).await.unwrap();
+            assert_eq!((code, stderr.as_str()), (0, ""));
+            assert!(image.ends_with('\n'));
+            words.push("--name");
+            let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
+            assert_eq!((code, stderr.as_str()), (0, ""));
+            assert_eq!(stdout, format!("{image}{expected}\n"));
+        }
+    }
+}
+
+#[tokio::test]
 async fn art_runner_reports_lookup_and_selected_png_errors_without_output() {
     let temp = Temp::new().unwrap();
     let store = temp.install().unwrap();
@@ -452,6 +510,8 @@ async fn art_runner_reports_lookup_and_selected_png_errors_without_output() {
         ),
         (vec!["pokington", "art", "Mew"], "pokington bootstrap"),
     ] {
+        let mut words = words;
+        words.push("--name");
         let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
         assert_eq!(code, 1);
         assert_eq!(stdout, "");
@@ -636,6 +696,7 @@ async fn native_modes_use_library_protocol_and_explicit_text_bypasses_it() {
                     "original",
                     "--color",
                     "never",
+                    "--name",
                 ],
                 || {
                     Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(1))
@@ -653,6 +714,7 @@ async fn native_modes_use_library_protocol_and_explicit_text_bypasses_it() {
             assert_eq!(code, 0);
             assert_eq!(stderr, b"");
             let text = String::from_utf8(stdout).unwrap();
+            assert!(text.ends_with("Mew (Charizard)\n"), "{text}");
             if mode == "auto" || mode == "img" {
                 assert!(text.contains('\x1b'));
                 assert!(!text.contains("\x1b[?1049"));
