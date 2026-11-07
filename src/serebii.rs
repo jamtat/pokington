@@ -2,7 +2,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use scraper::{ElementRef, Html, Selector};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::source::SourceError;
 
@@ -738,7 +738,7 @@ fn extract_type_evidence(document: &Html) -> Result<Vec<TypeGroup>, SourceError>
     Ok(groups)
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Species {
     pub id: u32,
     pub name: String,
@@ -748,7 +748,7 @@ pub struct Species {
     pub excluded_illustrations: Vec<ExcludedIllustration>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct ExcludedIllustration {
     pub label: String,
     pub artwork_url: String,
@@ -756,7 +756,7 @@ pub struct ExcludedIllustration {
     pub source_context: String,
 }
 
-#[derive(Debug, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum ExclusionReason {
     NonBattleDeviceWithoutTypes,
@@ -764,7 +764,7 @@ pub enum ExclusionReason {
     ApprovedUnsupportedTypeEvidence,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Form {
     pub key: String,
     pub display_name: String,
