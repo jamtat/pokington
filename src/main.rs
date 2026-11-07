@@ -7,6 +7,9 @@ use pokington::{
     store::Store,
 };
 
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 #[tokio::main]
 async fn main() -> ExitCode {
     let args: Vec<_> = std::env::args_os().collect();
