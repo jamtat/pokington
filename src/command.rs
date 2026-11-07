@@ -31,6 +31,9 @@ enum Command {
         /// Print the Pokémon's form display name on a line below the artwork.
         #[arg(long = "name")]
         show_name: bool,
+        /// Omit the newline after the printed name. Requires --name.
+        #[arg(long, requires = "show_name")]
+        no_newline: bool,
         /// Set the terminal title to the same display name as --name.
         #[arg(long)]
         title: bool,
@@ -269,6 +272,7 @@ impl<R: Rng + Send> Runtime<R> {
             Command::Art {
                 name,
                 show_name,
+                no_newline,
                 title,
                 form,
                 mode,
@@ -311,7 +315,8 @@ impl<R: Rng + Send> Runtime<R> {
                 if show_name || title {
                     let display_name = art::display_name(species, selected);
                     if show_name {
-                        writeln!(stdout, "{display_name}").map_err(CommandError::Output)?;
+                        let ending = if no_newline { "" } else { "\n" };
+                        write!(stdout, "{display_name}{ending}").map_err(CommandError::Output)?;
                     }
                     if title {
                         write!(stdout, "\x1b]2;{display_name}\x07")

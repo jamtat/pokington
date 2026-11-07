@@ -18,6 +18,7 @@ Names and descriptive form keys ignore case. Named species default to the origin
 | Option | Behavior |
 | --- | --- |
 | `--name` | Print the selected form's name on its own line immediately below the artwork. |
+| `--no-newline` | Omit the newline after the printed name so the caller can append text. Requires `--name`. |
 | `--title` | Set the terminal title to the same label as `--name`, independently of printing the label. |
 | `--mode auto` | Native graphics when verified; otherwise Unicode blocks in a suitable terminal, then ASCII. Redirected output uses ASCII. |
 | `--mode img` | Native images only; unsupported contexts report an error suggesting text modes. |

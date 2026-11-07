@@ -195,6 +195,8 @@ async fn parser_handles_help_version_and_invalid_arguments_before_runtime_creati
         (vec!["pokington", "art", "--width", "huge"], 2),
         (vec!["pokington", "art", "--mode", "invalid"], 2),
         (vec!["pokington", "art", "--color", "invalid"], 2),
+        (vec!["pokington", "art", "--no-newline"], 2),
+        (vec!["pokington", "art", "--title", "--no-newline"], 2),
     ] {
         let mut stdout = Vec::new();
         let mut stderr = Vec::new();
@@ -495,10 +497,19 @@ async fn art_name_and_title_flags_use_the_selected_form_label() {
             let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
             assert_eq!((code, stderr.as_str()), (0, ""));
             assert_eq!(stdout, format!("{image}{expected}\n"));
+            words.push("--no-newline");
+            let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
+            assert_eq!((code, stderr.as_str()), (0, ""));
+            assert_eq!(stdout, format!("{image}{expected}"));
+            words.pop();
             words.push("--title");
             let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
             assert_eq!((code, stderr.as_str()), (0, ""));
             assert_eq!(stdout, format!("{image}{expected}\n\x1b]2;{expected}\x07"));
+            words.push("--no-newline");
+            let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
+            assert_eq!((code, stderr.as_str()), (0, ""));
+            assert_eq!(stdout, format!("{image}{expected}\x1b]2;{expected}\x07"));
         }
     }
 }
@@ -707,6 +718,7 @@ async fn native_modes_use_library_protocol_and_explicit_text_bypasses_it() {
                     "--color",
                     "never",
                     "--name",
+                    "--no-newline",
                 ],
                 || {
                     Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(1))
@@ -724,7 +736,7 @@ async fn native_modes_use_library_protocol_and_explicit_text_bypasses_it() {
             assert_eq!(code, 0);
             assert_eq!(stderr, b"");
             let text = String::from_utf8(stdout).unwrap();
-            assert!(text.ends_with("Mew (Charizard)\n"), "{text}");
+            assert!(text.ends_with("Mew (Charizard)"), "{text}");
             if mode == "auto" || mode == "img" {
                 assert!(text.contains('\x1b'));
                 assert!(!text.contains("\x1b[?1049"));
