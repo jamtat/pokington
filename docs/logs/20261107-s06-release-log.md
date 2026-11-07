@@ -29,6 +29,13 @@ Plan: [Implementation plan](../20261107-release-plan.md). Index: [Implementation
 - Record time: 2026-11-07T18:00:51Z is a later preparation observation; exact user-message times are unavailable.
 - Supersedes: ordinary stage pauses and separate commit questions for the approved scope. Specific approval still applies to any additional review or manual CI action.
 
+### Q03 — native CI correction commit and push
+
+- User instruction (exact): “commit and push now please”.
+- Context: the user had been shown the terminal-test portability fix and informed that its first commit attempt was blocked by Clippy's function-length limit. No correction commit or second push had yet occurred.
+- Interpretation: finish the lint-preserving helper extraction, make the correction commit and push it to the existing release PR. This is an additional specific commit/push grant following the original final push.
+- Limits retained: no merge, force push, tag push, actual release mutation, extra reviewer or manual CI action. CI caused by this branch push is authorised. Exact message time is unavailable.
+
 ## S06.T00 — Quilava: stage timing and exit
 
 - Start: 2026-11-07T18:03:50Z.

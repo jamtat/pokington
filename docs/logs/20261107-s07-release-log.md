@@ -29,6 +29,15 @@ Plan: [Implementation plan](../20261107-release-plan.md). Index: [Implementation
 - Separate simplification review: `/root/s07_simplification`, one fresh `gpt-6.1-sol` high reviewer, no findings. Shared workflows/actions remove meaningful duplication; asset checks protect distinct boundaries. After that review, executable inspection was moved unchanged into a named function for negative-path tests, and workflow artifact overwrite/cache-save settings were tightened for failed-run recovery; local checks were repeated.
 - Native hosted acceptance remains pending the authorised final push and PR. No additional independent review or manual CI action has been launched. The final PR check results and PR description will record hosted evidence and run closure without a bookkeeping-only additional push.
 
+## Native CI continuation — 2026-11-07T18:29:49Z
+
+- PR: [#4](https://github.com/jamtat/pokington/pull/4), source `1563945`. Diffle opened at `http://127.0.0.1:4966/`; its optional language servers were unavailable for some languages, but the diff viewer started successfully.
+- First native run [42401117347](https://github.com/jamtat/pokington/actions/runs/42401117347): lint, helper tests and both macOS native test/package jobs passed. Both Linux targets compiled and ran all 111 tests; each had 110 passes and one failure in the existing terminal-restoration test.
+- Diagnosis: `nix::Termios` equality includes libc storage beyond the initialized Linux kernel terminal settings. The failing values had identical meaningful flags/speeds and differing unused trailing control storage. The test now obtains terminal settings through the existing rustix API and compares every defined mode, special control code, speed and Linux line discipline. PENDIN remains the existing documented exception. No test was skipped or assertion on a meaningful setting removed.
+- Local fix validation: all 111 native ARM64 macOS release tests passed in 4.32 seconds after the fix. Commit hooks will validate the ordinary profile as well. No extra reviewer or manual CI rerun was launched.
+- Cold setup evidence: Linux sysroot preparation succeeded in 5 seconds on x86-64 and 7 seconds on ARM64, and both caches were saved before compilation. The next ordinary push will also exercise cached setup under the same PR cache scope.
+- The first correction commit attempt passed formatting/check/tests but Clippy rejected the expanded test's 123-line function. Extracted the same defined-setting comparisons into `assert_terminal_restored`; no lint was disabled. The user then explicitly instructed “commit and push now please”; canonical Q03 records that grant.
+
 ## Dated continuation — requested rebase
 
 - User instruction: “rebase branch on current origin main please”.

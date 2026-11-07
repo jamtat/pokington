@@ -19,4 +19,4 @@ Cross-stage entries link to canonical Run 01 rather than copying grants.
 - Record actual UTC stage/task starts, checks, review identities/outcomes, accepted/rejected simplifications, deviations and commits. Finish stays blank until required checks and reviews pass.
 - Keep local, mocked and hosted evidence distinct. Missing native CI evidence does not pass because local checks pass.
 - Run 01 remains open through the authorised PR, Diffle and completion summon. Record closure once with actual UTC time and outcome; do not create recursive commits only to record their own hashes.
-- Existing grants cover only the same run and specified reviews, branch, one final push/PR and summons. Follow current personal instructions for additional reviews, manual CI actions, sudo, merges, tags and release publication.
+- Existing grants cover only the same run and specified reviews, branch, recorded pushes to the same PR and summons; Run 01 Q03 records the additional correction commit/push. Follow current personal instructions for additional reviews, manual CI actions, sudo, merges, tags and release publication.
