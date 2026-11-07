@@ -37,5 +37,20 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2
         with:
           build-warnings: ""
+      - name: Install nextest
+        uses: taiki-e/install-action@3a3daafd3b7f23b8f65d9f5ba2db203fb59b79e2 # v2
+        with:
+          tool: cargo-nextest@0.9.151
       - name: Run tests
-        run: cargo test --all-targets --all-features --locked
+        id: tests
+        run: cargo nextest run --profile ci --all-targets --all-features --locked
+      - name: Publish test report
+        if: ${{ !cancelled() && steps.tests.outcome != 'skipped' }}
+        uses: mikepenz/action-junit-report@a16be3a69023e9bd7e748ede768b3282ea7b30ce # v6
+        with:
+          report_paths: target/nextest/ci/junit.xml
+          annotate_only: true
+          detailed_summary: true
+          failed_summary_logs: true
+          require_tests: true
+          fail_on_parse_error: true
