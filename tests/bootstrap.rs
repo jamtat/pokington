@@ -1224,6 +1224,7 @@ async fn art_first_run_completes_all_downloads_before_rendering_and_then_stays_o
             ],
             || {
                 Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(3))
+                    .with_terminal(pokington::terminal::Terminal::default())
                     .with_bootstrap(source.clone()))
             },
             &mut stdout,
