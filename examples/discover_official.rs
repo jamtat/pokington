@@ -1,7 +1,7 @@
 //! Full metadata feasibility evidence. This is not the production bootstrap command.
 use std::{error::Error, fs, path::Path};
 
-use http_body_util::{BodyExt, Limited};
+use pokington::source::read_limited;
 #[allow(dead_code)]
 #[path = "support/official_source.rs"]
 mod official_source;
@@ -14,7 +14,7 @@ use pokington::source;
 type Failure = Box<dyn Error + Send + Sync>;
 
 async fn read(
-    client: &wreq::Client,
+    client: &reqwest::Client,
     url: &str,
     path: &Path,
     offline: bool,
@@ -23,11 +23,8 @@ async fn read(
         return Ok(fs::read_to_string(path)?);
     }
     let response = client.get(url).send().await?.error_for_status()?;
-    let bytes = Limited::new(response, 4 * 1024 * 1024)
-        .collect()
-        .await?
-        .to_bytes();
-    let text = String::from_utf8(bytes.to_vec())?;
+    let bytes = read_limited(response, 4 * 1024 * 1024).await?;
+    let text = String::from_utf8(bytes)?;
     fs::write(path, &text)?;
     Ok(text)
 }

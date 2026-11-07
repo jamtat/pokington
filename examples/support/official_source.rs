@@ -1,6 +1,5 @@
 //! Main-site discovery and form parsing, independent of HTTP and local storage.
 use std::collections::BTreeSet;
-use std::time::Duration;
 
 use scraper::{ElementRef, Html, Selector};
 use serde::{Deserialize, Serialize};
@@ -9,22 +8,9 @@ use crate::source::SourceError;
 
 pub const ORIGIN: &str = "https://www.pokemon.com";
 pub const INDEX_URL: &str = "https://www.pokemon.com/us/pokedex";
-/// Browser impersonation is the default for every official-source request.
-/// No browser process, imported cookies, proxy, or challenge solving is involved.
-pub fn http_client() -> Result<wreq::Client, wreq::Error> {
-    wreq::Client::builder()
-        .emulation(
-            wreq_util::Emulation::builder()
-                .profile(wreq_util::Profile::Chrome147)
-                .platform(wreq_util::Platform::MacOS)
-                .build(),
-        )
-        .connect_timeout(Duration::from_secs(10))
-        .timeout(Duration::from_secs(30))
-        .https_only(true)
-        .redirect(wreq::redirect::Policy::limited(5))
-        .no_proxy()
-        .build()
+/// Use the application's shared HTTP client for historical source probes.
+pub fn http_client() -> Result<reqwest::Client, reqwest::Error> {
+    pokington::source::http_client()
 }
 
 #[derive(Debug)]

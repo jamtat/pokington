@@ -1,7 +1,7 @@
 //! Sample only artwork referenced by an already captured main-site detail page.
 use std::{error::Error, fs, io::Cursor, path::Path};
 
-use http_body_util::{BodyExt, Limited};
+use pokington::source::read_limited;
 #[allow(dead_code)]
 #[path = "support/official_source.rs"]
 mod official_source;
@@ -44,11 +44,8 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
             .and_then(|value| value.to_str().ok())
             .unwrap_or_default()
             .to_owned();
-        let final_url = response.uri().to_string();
-        let bytes = Limited::new(response, 16 * 1024 * 1024)
-            .collect()
-            .await?
-            .to_bytes();
+        let final_url = response.url().to_string();
+        let bytes = read_limited(response, 16 * 1024 * 1024).await?;
         let filename = form
             .artwork_url
             .rsplit('/')

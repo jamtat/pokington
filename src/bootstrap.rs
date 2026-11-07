@@ -4,7 +4,6 @@ use std::{
     collections::VecDeque, ffi::OsStr, fmt, io::Write, num::NonZeroUsize, sync::Arc, time::Duration,
 };
 
-use http_body_util::{BodyExt, Limited};
 use tokio::{
     sync::{Mutex, Notify, mpsc},
     task::JoinSet,
@@ -64,7 +63,7 @@ enum Content {
 
 #[derive(Clone)]
 pub struct Bootstrap {
-    client: wreq::Client,
+    client: reqwest::Client,
     origin: String,
     concurrency: Option<NonZeroUsize>,
 }
@@ -88,7 +87,7 @@ impl Bootstrap {
     /// Map canonical source paths onto an injected server, for deterministic HTTP fixtures.
     /// Stored URLs and source identities always remain the canonical HTTPS Serebii URLs.
     #[must_use]
-    pub fn with_http(client: wreq::Client, origin: &str) -> Self {
+    pub fn with_http(client: reqwest::Client, origin: &str) -> Self {
         Self {
             client,
             origin: origin.trim_end_matches('/').to_owned(),
@@ -210,11 +209,11 @@ impl Bootstrap {
             .send()
             .await
             .map_err(|e| e.to_string())?;
-        if response.status() != wreq::StatusCode::OK {
+        if response.status() != reqwest::StatusCode::OK {
             return Err(format!("HTTP {}", response.status()));
         }
         if !response
-            .uri()
+            .url()
             .to_string()
             .starts_with(&format!("{}/", self.origin))
         {
@@ -222,7 +221,7 @@ impl Bootstrap {
         }
         let mime = response
             .headers()
-            .get(wreq::header::CONTENT_TYPE)
+            .get(reqwest::header::CONTENT_TYPE)
             .and_then(|value| value.to_str().ok())
             .unwrap_or("")
             .split(';')
@@ -242,12 +241,9 @@ impl Bootstrap {
             Content::Html => MAX_HTML_BYTES,
             Content::Png => MAX_PNG_BYTES,
         };
-        let bytes = Limited::new(response, limit)
-            .collect()
+        let bytes = source::read_limited(response, limit)
             .await
-            .map_err(|e| e.to_string())?
-            .to_bytes()
-            .to_vec();
+            .map_err(|e| e.to_string())?;
         if bytes.is_empty() {
             return Err("empty response body".into());
         }

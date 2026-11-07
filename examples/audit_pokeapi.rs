@@ -1,6 +1,5 @@
 //! Full cached `PokéAPI` feasibility audit. Does not select or adopt this provider.
-use http_body_util::{BodyExt, Limited};
-use pokington::source::http_client;
+use pokington::source::{http_client, read_limited};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::{
@@ -38,7 +37,7 @@ fn cache_path(dir: &Path, url: &str) -> Result<PathBuf, Failure> {
 }
 
 async fn get(
-    client: &wreq::Client,
+    client: &reqwest::Client,
     dir: &Path,
     url: &str,
     offline: bool,
@@ -51,20 +50,17 @@ async fn get(
         return Err(format!("uncached URL: {url}").into());
     }
     let response = client.get(url).send().await?.error_for_status()?;
-    if !response.uri().to_string().starts_with(API) {
+    if !response.url().to_string().starts_with(API) {
         return Err("foreign API redirect".into());
     }
-    let bytes = Limited::new(response, 16 * 1024 * 1024)
-        .collect()
-        .await?
-        .to_bytes();
+    let bytes = read_limited(response, 16 * 1024 * 1024).await?;
     let value = serde_json::from_slice(&bytes)?;
     fs::write(path, bytes)?;
     Ok(value)
 }
 
 async fn list(
-    client: &wreq::Client,
+    client: &reqwest::Client,
     dir: &Path,
     endpoint: &str,
     offline: bool,

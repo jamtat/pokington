@@ -1,6 +1,5 @@
 //! Fetch and validate only image URLs declared by the evaluated `PokéAPI` form resources.
-use http_body_util::{BodyExt, Limited};
-use pokington::source::http_client;
+use pokington::source::{http_client, read_limited};
 use serde_json::{Value, json};
 use std::{error::Error, fs, io::Cursor, path::Path};
 
@@ -63,8 +62,8 @@ async fn main() -> Result<(), Failure> {
                     if !url.starts_with("https://raw.githubusercontent.com/PokeAPI/sprites/master/")||!url.to_ascii_lowercase().ends_with(".png") {return Err::<_,Failure>("unexpected declared image URL".into());}
                     let path=dir.join(format!("{id}-{tier}.response"));let meta=dir.join(format!("{id}-{tier}.json"));
                     let (bytes,status)=if meta.exists(){let info:Value=serde_json::from_slice(&fs::read(&meta)?)?;(fs::read(&path)?,info.get("status").and_then(Value::as_u64).ok_or("cached status")?)}else{
-                        let response=client.get(url).send().await?;let status=response.status().as_u16();let final_url=response.uri().to_string();
-                        let bytes=Limited::new(response,16*1024*1024).collect().await?.to_bytes().to_vec();
+                        let response=client.get(url).send().await?;let status=response.status().as_u16();let final_url=response.url().to_string();
+                        let bytes=read_limited(response,16*1024*1024).await?;
                         fs::write(&path,&bytes)?;fs::write(&meta,serde_json::to_vec(&json!({"url":url,"final_url":final_url,"status":status,"unix_time":std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)?.as_secs()}))?)?;
                         (bytes,u64::from(status))
                     };

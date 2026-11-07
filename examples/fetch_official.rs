@@ -14,7 +14,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .send()
         .await?;
     let status = response.status();
-    println!("{} {}", response.status(), response.uri());
+    println!("{} {}", response.status(), response.url());
     let content_type = response
         .headers()
         .get("content-type")

@@ -1,8 +1,7 @@
 //! Bounded metadata investigation, not production bootstrap or accepted catalogue output.
-use http_body_util::{BodyExt, Limited};
 use pokington::{
     serebii::{INDEX_URL, ORIGIN, parse_hub, parse_index},
-    source::http_client,
+    source::{http_client, read_limited},
 };
 use std::{error::Error, fs, path::Path};
 
@@ -14,7 +13,7 @@ fn decode(bytes: &[u8]) -> String {
 }
 
 async fn read(
-    client: &wreq::Client,
+    client: &reqwest::Client,
     url: &str,
     path: &Path,
     offline: bool,
@@ -23,13 +22,10 @@ async fn read(
         return Ok(decode(&fs::read(path)?));
     }
     let response = client.get(url).send().await?.error_for_status()?;
-    if !response.uri().to_string().starts_with(ORIGIN) {
+    if !response.url().to_string().starts_with(ORIGIN) {
         return Err("unexpected redirect origin".into());
     }
-    let bytes = Limited::new(response, 4 * 1024 * 1024)
-        .collect()
-        .await?
-        .to_bytes();
+    let bytes = read_limited(response, 4 * 1024 * 1024).await?;
     fs::write(path, &bytes)?;
     Ok(decode(&bytes))
 }

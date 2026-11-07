@@ -10,7 +10,7 @@ fn select(css: &str) -> ProbeResult<Selector> {
     Selector::parse(css).map_err(Into::into)
 }
 
-async fn fetch(client: &wreq::Client, url: &str, path: &PathBuf) -> ProbeResult<String> {
+async fn fetch(client: &reqwest::Client, url: &str, path: &PathBuf) -> ProbeResult<String> {
     if path.exists() {
         return Ok(fs::read_to_string(path)?);
     }
@@ -33,7 +33,7 @@ async fn fetch(client: &wreq::Client, url: &str, path: &PathBuf) -> ProbeResult<
 }
 
 async fn species(
-    client: wreq::Client,
+    client: reqwest::Client,
     cache: PathBuf,
     item: Value,
     home: bool,
@@ -123,7 +123,7 @@ async fn species(
     Ok(json!({"species":item,"gallery":gallery_url,"artwork":artwork}))
 }
 
-async fn png(client: wreq::Client, cache: PathBuf, url: String) -> ProbeResult<Value> {
+async fn png(client: reqwest::Client, cache: PathBuf, url: String) -> ProbeResult<Value> {
     let relative = url
         .strip_prefix("https://img.pokemondb.net/")
         .or_else(|| url.strip_prefix("https://www.serebii.net/"))
@@ -149,7 +149,7 @@ async fn png(client: wreq::Client, cache: PathBuf, url: String) -> ProbeResult<V
         if content_type != "image/png" {
             return Err(format!("not PNG: {url}: {content_type}").into());
         }
-        metadata = json!({"url":url,"final_url":response.uri().to_string(),"status":response.status().as_u16(),"content_type":content_type});
+        metadata = json!({"url":url,"final_url":response.url().to_string(),"status":response.status().as_u16(),"content_type":content_type});
         let body = response.bytes().await?;
         if body.len() > 20_000_000 {
             return Err("image exceeds bound".into());
@@ -232,7 +232,7 @@ async fn main() -> ProbeResult<()> {
 
 async fn audit_pngs(
     cache: &std::path::Path,
-    client: &wreq::Client,
+    client: &reqwest::Client,
     list: Option<&str>,
 ) -> ProbeResult<()> {
     let mut urls = std::collections::BTreeSet::new();
@@ -305,7 +305,7 @@ async fn audit_pngs(
 
 async fn audit_galleries(
     cache: &std::path::Path,
-    client: &wreq::Client,
+    client: &reqwest::Client,
     home: bool,
 ) -> ProbeResult<()> {
     let index = fetch(

@@ -94,6 +94,8 @@ Source species, forms, types and artwork from [Serebii's National Pokédex](http
 
 All data requests impersonate a browser by default using an appropriate, consistent browser HTTP request profile. This uses HTTP clients and does not require browser automation. See [D23](20261106-design.md#d23--browser-impersonation-for-all-data-requests--2026-11-06).
 
+2026-11-07 HTTP correction: use ordinary `reqwest` requests without browser impersonation, retaining gzip, Brotli, deflate and Zstd compression to reduce source bandwidth. This supersedes the preceding browser-profile requirement and D23/D24's transport choice. Keep existing request timeouts, redirect limits, concurrency, retries and decompressed response-size limits. See [D34](20261106-design.md#d34--remove-browser-impersonation-and-retain-compression--2026-11-07).
+
 Bootstrap needs to pull in data about all the pokemon by fetching from the website. Save the pokedex number, the name, the primary and secondary type. Also save the image. Save in a format that's simple and fast to read - used on every call. Also need to save all the png artwork for every Pokemon.
 
 Keep one species entry per National Pokédex number for name selection, with original and alternate artwork forms associated with that species.
@@ -116,6 +118,8 @@ These original Pokémon.com examples are retained as history. Current Serebii ar
 - wreq 0.16.3 and wreq-util 0.2.0: browser-profile HTTP, replacing the originally requested reqwest under D24
 - ratatui-image: for displaying images on the cmdline
 - serde and serde_json: versioned local JSON catalogue
+
+2026-11-07 dependency correction: replace the historical `wreq`/`wreq-util` entry with `reqwest` 0.13.5, default features disabled, Rustls TLS and all four compression formats enabled. Remove direct `http-body-util` use in favour of bounded chunk reads. Disable `scraper`'s unused default features. Other dependencies remain unchanged under D34.
 
 ## Design clarifications
 
