@@ -97,3 +97,70 @@ Current implementation follows D08 and S08 below. S06/S07 and their grants are h
 - Supersedes: S07's custom parser/API recovery program, combined checksum manifest, source-note markers, custom sysroot relocation/cache and helper test suite. Do not recreate them in Rust, shell helper files, large inline programs or another local action. Minimal published-release protection may use the existing CLI.
 - Scope/permission limits: local implementation and checks are authorised. This instruction does not explicitly grant a new independent review, commit, push, manual CI action or release mutation. S08 records the delegated implementation and resulting evidence; earlier grants do not authorise new review agents.
 - Local result: the Sol xhigh implementer deleted the three helper files and local Rust action, and replaced them with ordinary inline workflow commands and one final softprops draft job. Its nine implementation/doc files changed by +134/-601 lines. Workflow/shell validation, real ARM64 macOS archive checks, tag matching and ELF rejection checks passed; the parent confirmed recommendation compliance and unchanged application/Cargo/test files. New hosted CI remains pending an authorised push.
+
+## D09: manually start release preparation; publish after user review — 2026-11-08
+
+- User request: “i want a github action that can do the relase instead please and deal with all that.” Proposed flow: manually start the release action, select a version, update Cargo files, commit/tag, run the existing four-target checks and prepare release assets and notes.
+- Publication history: the user initially selected “A” for automatic publication, then revised that choice: “actually i would like it to publish a draft then have the additional manual step of me approving is that ok”.
+- Accepted publication decision: the action creates a draft after checks pass. The user reviews the draft and publishes it manually using GitHub's Publish release button. The revised answer supersedes automatic publication; D03/D08's draft behavior is retained while a manual workflow trigger is added.
+- Version discussion: proposed stable `X.Y.Z` input and Ubuntu `sort -V` comparison against the highest existing stable `vX.Y.Z` tag, rejecting equal/older versions before writes and allowing the first release when no matching tags exist. Version selection remains to be settled.
+- Scope limits: no workflow changes implemented yet. This design records future workflow behavior; it does not execute a commit, push, tag, workflow dispatch or release operation, or authorise an independent review.
+
+## D10: allow replacing an unpublished draft — 2026-11-08
+
+- User requirement: “we should be able to re-publish over draft versions right”.
+- Accepted direction: allow preparing the same version again while its release remains a draft, replacing generated archives and checksums and retaining draft status. Reject changes to a published version.
+- Correction to D09's proposed comparison: new versions must be newer than the highest published stable release version, rather than every existing tag. An existing draft may reuse its version, provided it remains newer than the highest published version. Existing tags without a release require explicit recovery handling; do not treat every existing tag as an editable draft.
+- Implementation evidence: [softprops/action-gh-release documentation](https://github.com/softprops/action-gh-release#customizing) supports reusing drafts with `draft: true` and replacing matching assets with `overwrite_files: true`. Keep the existing published-release protection.
+- Unresolved source decision: whether preparing an existing draft uses its original tagged commit or incorporates newer main changes. Incorporating newer changes would require revising the historical fixed-tag rule; do not move any tag before that decision and implementation approval.
+- No workflow edits, actual release writes, tag changes, commits or pushes were performed to record this decision.
+
+## D11: rebuild drafts from latest main — 2026-11-08
+
+- Options: A, rebuild an existing draft from latest main so fixes can be included before publication; B, rebuild only its original tagged commit for retries.
+- Recommendation: A permits correcting an unreleased version without a version bump. User response (exact): “a”.
+- Accepted decision: preparing an existing draft uses latest main and replaces that draft's generated assets. Its version tag must identify the exact new release commit used for all builds; keep the release as a draft until manual publication.
+- Supersedes: the historical rule forbidding tag movement is relaxed only for a confirmed existing draft newer than every published stable version. Published release tags and assets remain protected; an unrelated existing tag is not implicitly editable.
+- Implementation boundary: serialize release preparation, verify draft status before writes, and reuse the existing checks and native packaging. Preserve manually edited draft notes when refreshing assets.
+- Version input remains unresolved: exact stable version entry versus calculated patch/minor/major increment.
+- This decision approves the intended workflow behavior, not running a release or performing a tag update during development. No workflow edits or release operations have been performed.
+
+## D12: enter an exact stable version — 2026-11-08
+
+- Options: A, enter an exact version such as `0.0.2`, reusing an existing draft's version to rebuild it; B, select patch/minor/major or rebuild the current draft. Recommendation: A is simpler and explicit. User response (exact): “a”.
+- Accepted decision: the manual release action takes one required stable `X.Y.Z` version, without a `v` prefix. Validate numeric components without leading zeros; reject a version at or below the highest published stable version. Allow the first release and D10/D11's draft replacement.
+- User asked whether the version box can be prefilled, adding “if not no issue”. GitHub supports literal input defaults but has no built-in repository-file lookup for the dispatch form. Keep the input manual instead of introducing a stale fixed default or extra automation. Sources: [manual inputs](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow#defining-inputs-for-manually-triggered-workflows), [expression context availability](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability).
+- Design is settled. Proposed implementation is S09 in the existing release plan; implementation-stage approval remains pending. No workflow changes or release operations have been performed.
+
+## 2026-11-08 — Current-version display requirement, decision pending
+
+- User request: “it would be really helpful if somewhere in the input box or around the inputs for the workflow it showed the current version so i can decide what to bump it to”. This reopens D12's manual-form presentation; exact version entry remains accepted.
+- Feasible direct display: put the current Cargo package version in the input description, for example `Release version (current: 0.0.1)`, and synchronize that literal in the version-update commit. GitHub does not run repository queries while rendering the dispatch form.
+- Credential consequence: automatic synchronization modifies `.github/workflows/release.yml`; it needs authentication permitted to write workflow files, beyond the ordinary contents-only bot token assumed in S09. See [GitHub workflow-file permissions](https://docs.github.com/en/rest/repos/contents#create-or-update-file-contents) and [token limitations](https://docs.github.com/en/actions/tutorials/authenticate-with-github_token). Do not silently add credentials, broaden permissions or represent the label as dynamically evaluated.
+- Alternative: keep ordinary token permissions and provide the Cargo.toml location in the input description for manual lookup. Direct synchronized display versus manual lookup remains a user decision. No workflow changes, credential setup or implementation approval has occurred.
+
+## D13: synchronize the current version in the input description — 2026-11-08
+
+- Options: A, add a workflow-write token and keep the current version displayed in the input description; B, show the Cargo.toml location for manual lookup. Recommendation: A provides the current version where the user selects the release version. User response (exact): “A”.
+- Accepted decision: use `Release version (current: X.Y.Z)` in the required version input's description, initialized from the package version. Synchronize the description, Cargo.toml and Cargo.lock in the same version-update commit. The label means the package version on main, which may be an unpublished draft version; it is not a claim about the latest published release. Rebuilding the same version must not create an empty version commit.
+- Credential setup: document one fine-grained token restricted to this repository with Contents and Workflows write permission, stored as the Actions secret `RELEASE_TOKEN`. Use it only where required for release preparation; retain ordinary scoped GITHUB_TOKEN usage for other jobs. Check for the secret before mutations; never print it, request its value in chat or expose it in process arguments. The token does not bypass branch protection.
+- Supersedes: D12's decision to omit extra form synchronization and the pending display choice above. Exact manual version entry, draft-only output, version ordering and published protection remain accepted.
+- Design is settled; S09 implementation-stage and specific review approvals remain pending. Selecting the token-backed design does not create a token, configure a secret, commit/push, dispatch a workflow or run a release.
+
+## S09 implementation record — 2026-11-08
+
+- User approved local implementation on existing main and one Sol high correctness review followed by one separate Sol high simplification review; all changes must remain uncommitted. [Run 03 Q01](logs/20261108-s09-release-log.md#q01--implementation-stage-and-exact-reviews) supersedes the earlier pending implementation/review statements.
+- Manual exact-version release preparation, synchronized version label, version/published-state checks, exact prepared SHA through all build jobs, post-check draft-tag replacement and manual publication documentation are implemented locally. No new release framework or helper-test suite was added.
+- Actionlint/ShellCheck, inline shell syntax, 38 local actual-script fixtures and documentation/diff checks pass. Both approved reviewers found no changes required. This is local/synthetic evidence; no token setup, hosted acceptance or real release execution was performed. [Run 03 closure](logs/20261108-s09-release-log.md#local-stage-completion--2026-11-08t010429z).
+
+## D14: drop synchronized version display; use the built-in token — 2026-11-08
+
+- Context: after discussing PAT ownership for shared project administration and the GitHub App alternative, the user asked whether dropping the current-version label removes the PAT requirement. The answer explained that the workflow could use the built-in GITHUB_TOKEN for Cargo version commits, tags and draft releases without modifying its own YAML.
+- User instruction (exact): “ok drop it”.
+- Accepted decision: remove the synchronized current-version display and custom-token prerequisite. The input description points to Cargo.toml on main for manual version lookup. The version commit updates only Cargo.toml and the matching Cargo.lock package entry. Preparation and draft jobs request `contents: write`; other jobs remain read-only. All CLI authentication uses the built-in token. No PAT, GitHub App or extra repository secret is required.
+- Supersedes: D13's synchronized input label and RELEASE_TOKEN setup. D09–D12's exact-version input, published-version ordering, draft replacement from latest main and manual publication remain unchanged. Branch/tag rules are still enforced.
+- Implementation correction: removed the custom-secret validation and references, label edits and workflow file from the version commit. Removed `[skip ci]` from the future version commit message because built-in-token pushes do not trigger another push workflow; checks are invoked explicitly as before.
+- Validation: all 38 updated local checks pass, including no custom-secret requirement, only the two Cargo files in the version commit, unchanged workflow content, built-in-token references and write permissions limited to preparation/finalization. Actionlint/ShellCheck and diff checks pass. The two Run 03 reviews cover the earlier variant; no fresh independent review was authorised or launched for this narrow revision.
+- No repository commits, pushes, secret configuration, real workflow runs or release operations were performed. See [Run 04](logs/20261108-s09-release-log.md#run-04--remove-the-pat-and-synchronized-label).
+
+2026-11-08 review correction: the user subsequently approved one fresh Sol high review of D14's final built-in-token variant. [Run 05](logs/20261108-s09-release-log.md#run-05--final-built-in-token-review) completed with no actionable findings and independently passed actionlint/ShellCheck, diff checks and all 38 updated local fixtures. Earlier no-review statements describe the pre-Run05 boundary. No hosted release validation or commit/publication was performed.

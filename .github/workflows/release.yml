@@ -1,8 +1,13 @@
 name: Release
+run-name: Prepare v${{ inputs.version }} draft
 
 on:
-  push:
-    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (X.Y.Z; check Cargo.toml on main)'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -12,35 +17,99 @@ defaults:
     shell: bash
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 jobs:
-  validate:
-    name: Validate release tag
+  prepare:
+    name: Prepare version on main
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    outputs:
+      source_sha: ${{ steps.version.outputs.source_sha }}
+      tag: ${{ steps.version.outputs.tag }}
+      tag_oid: ${{ steps.version.outputs.tag_oid }}
+      draft_id: ${{ steps.version.outputs.draft_id }}
     steps:
+      - name: Validate input
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          test "$GITHUB_REF" = refs/heads/main || { echo 'Run Release from main.' >&2; exit 1; }
+          [[ "$RELEASE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || {
+            echo 'Enter a stable X.Y.Z version without a v prefix or leading zeros.' >&2
+            exit 1
+          }
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ github.sha }}
-      - name: Check tag and package versions
+          ref: main
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # master
+        with:
+          toolchain: "1.99.1"
+      - name: Validate releases and prepare version
+        id: version
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
         run: |
-          version=$(cargo metadata --no-deps --format-version 1 --locked | jq -er '.packages[] | select(.name == "pokington") | .version')
-          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
-          test "$RELEASE_TAG" = "v$version"
+          tag="v$RELEASE_VERSION"
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/releases" > "$RUNNER_TEMP/releases.json"
+          published=$(jq -r '.[][] | select(.draft == false) | .tag_name | select(test("^v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$")) | ltrimstr("v")' "$RUNNER_TEMP/releases.json" | sort -V | tail -n 1)
+          if [[ -n "$published" ]]; then
+            test "$RELEASE_VERSION" != "$published" &&
+              test "$(printf '%s\n' "$published" "$RELEASE_VERSION" | sort -V | tail -n 1)" = "$RELEASE_VERSION" || {
+              echo "Version must be newer than published version $published." >&2
+              exit 1
+            }
+          fi
+          draft_id=$(jq -r --arg tag "$tag" '[.[][] | select(.tag_name == $tag)] | if length > 1 then error("Duplicate releases for tag") else .[0] | select(.draft == true) | .id end' "$RUNNER_TEMP/releases.json")
+          tag_oid=$(git rev-parse --verify -q "refs/tags/$tag" || test "$?" = 1)
+          current=$(cargo metadata --no-deps --format-version 1 --locked | jq -er '.packages[] | select(.name == "pokington") | .version')
+          sed -i.bak "s/^version = \"$current\"$/version = \"$RELEASE_VERSION\"/" Cargo.toml
+          sed -i.bak "/^name = \"pokington\"$/,/^$/s/^version = \"$current\"$/version = \"$RELEASE_VERSION\"/" Cargo.lock
+          rm Cargo.toml.bak Cargo.lock.bak
+          test "$(cargo metadata --no-deps --format-version 1 --locked | jq -er '.packages[] | select(.name == "pokington") | .version')" = "$RELEASE_VERSION"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Cargo.toml Cargo.lock
+          if ! git diff --cached --quiet; then
+            git commit -m "release: prepare $tag"
+          fi
+          source_sha=$(git rev-parse HEAD)
+          if [[ -n "$tag_oid" && -z "$draft_id" ]]; then
+            test "$(git rev-parse "$tag^{commit}")" = "$source_sha" || {
+              echo 'Existing tag has no editable draft and points to another commit.' >&2
+              exit 1
+            }
+          fi
+          gh auth setup-git
+          git push origin HEAD:refs/heads/main
+          {
+            echo "source_sha=$source_sha"
+            echo "tag=$tag"
+            echo "tag_oid=$tag_oid"
+            echo "draft_id=$draft_id"
+          } >> "$GITHUB_OUTPUT"
   checks:
-    needs: validate
+    needs: prepare
     uses: ./.github/workflows/ci.yml
+    with:
+      source_sha: ${{ needs.prepare.outputs.source_sha }}
   draft:
     name: Prepare draft release
-    needs: [validate, checks]
+    needs: [prepare, checks]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ needs.prepare.outputs.source_sha }}
+          fetch-depth: 0
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: release-*
@@ -49,25 +118,46 @@ jobs:
       - name: Verify archive checksums
         working-directory: ${{ runner.temp }}/packages
         run: sha256sum --check --strict ./*.sha256
-      - name: Refuse changes to a published release
+      - name: Recheck releases and update version tag
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          SOURCE_SHA: ${{ needs.prepare.outputs.source_sha }}
+          EXPECTED_TAG_OID: ${{ needs.prepare.outputs.tag_oid }}
+          EXPECTED_DRAFT_ID: ${{ needs.prepare.outputs.draft_id }}
         run: |
-          published_tags=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases" --jq '.[] | select(.draft == false) | .tag_name')
-          if grep -Fxq "$RELEASE_TAG" <<< "$published_tags"; then
-            echo "Refusing to change published release $RELEASE_TAG" >&2
-            exit 1
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/releases" > "$RUNNER_TEMP/releases.json"
+          published=$(jq -r '.[][] | select(.draft == false) | .tag_name | select(test("^v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$")) | ltrimstr("v")' "$RUNNER_TEMP/releases.json" | sort -V | tail -n 1)
+          version="${RELEASE_TAG#v}"
+          if [[ -n "$published" ]]; then
+            test "$version" != "$published" &&
+              test "$(printf '%s\n' "$published" "$version" | sort -V | tail -n 1)" = "$version" || {
+              echo "Version must be newer than published version $published." >&2
+              exit 1
+            }
           fi
+          draft_id=$(jq -r --arg tag "$RELEASE_TAG" '[.[][] | select(.tag_name == $tag)] | if length > 1 then error("Duplicate releases for tag") else .[0] | select(.draft == true) | .id end' "$RUNNER_TEMP/releases.json")
+          test "$draft_id" = "$EXPECTED_DRAFT_ID" || { echo 'Draft changed during the build; start a new run.' >&2; exit 1; }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git tag --force --annotate "$RELEASE_TAG" "$SOURCE_SHA" -m "Pokington $RELEASE_TAG"
+          gh auth setup-git
+          git push --force-with-lease="refs/tags/$RELEASE_TAG:$EXPECTED_TAG_OID" origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
       - name: Create or update draft release
+        id: release
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
-          tag_name: ${{ github.ref_name }}
-          target_commitish: ${{ github.sha }}
-          name: Pokington ${{ github.ref_name }}
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          target_commitish: ${{ needs.prepare.outputs.source_sha }}
+          name: Pokington ${{ needs.prepare.outputs.tag }}
           draft: true
-          generate_release_notes: true
+          overwrite_files: true
+          generate_release_notes: ${{ needs.prepare.outputs.draft_id == '' }}
           fail_on_unmatched_files: true
           files: |
             ${{ runner.temp }}/packages/*.tar.gz
             ${{ runner.temp }}/packages/*.tar.gz.sha256
+      - name: Link draft for review
+        env:
+          DRAFT_URL: ${{ steps.release.outputs.url }}
+        run: echo "Review the [draft release]($DRAFT_URL), then click **Publish release** when ready." >> "$GITHUB_STEP_SUMMARY"

@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
   workflow_call:
+    inputs:
+      source_sha:
+        description: Commit to check; ordinary CI uses the event commit
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -26,7 +31,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ github.sha }}
+          ref: ${{ inputs.source_sha || github.sha }}
       - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # master
         with:
           toolchain: "1.99.1"
@@ -45,3 +50,5 @@ jobs:
   rust-test:
     name: Rust test
     uses: ./.github/workflows/build.yml
+    with:
+      source_sha: ${{ inputs.source_sha || github.sha }}

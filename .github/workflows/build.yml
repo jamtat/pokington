@@ -2,6 +2,11 @@ name: Release builds
 
 on:
   workflow_call:
+    inputs:
+      source_sha:
+        description: Commit to build; ordinary CI uses the event commit
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -41,7 +46,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ github.sha }}
+          ref: ${{ inputs.source_sha || github.sha }}
       - name: Install native musl compiler
         if: runner.os == 'Linux'
         run: |

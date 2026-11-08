@@ -3,16 +3,32 @@
 ## Continuation prompt
 
 ```text
-Use $jamtat-work to continue GitHub releases using docs/20261107-release-plan.md and docs/20261107-release-log.md. Read D08 and current Run 02 in docs/logs/20261107-s08-release-log.md; earlier S06/S07 permissions are historical. If scope is unspecified, recommend the next incomplete S08 task. Preserve btat-github-releases and existing work. Sxx.T00 rows are completion markers.
+Use $jamtat-work to continue GitHub releases using docs/20261107-release-plan.md and docs/20261107-release-log.md. Read D09–D14 in docs/20261107-release-design.md and the latest Run 06 in docs/logs/20261108-s09-release-log.md. S09.T01 is locally implemented, checked and independently reviewed. D14 drops the synchronized current-version label and uses only GITHUB_TOKEN; no PAT, GitHub App or custom secret is required. Do not reimplement completed work, resume historical S08 delegation or reuse closed-run review permissions. Sxx.T00 rows are completion markers. Preserve the current worktree and unrelated Dustox documentation edits.
 
-S08.T01 is explicitly delegated to one gpt-6.1-sol agent at xhigh, with a matching concrete goal. Keep the implementation exactly within D08: ordinary inline commands, stock artifact actions and one final softprops draft job; delete the custom programs and helper tests. Do not launch review agents or infer new commit/push/manual-CI/release permission. Complete authorised local work/checks before presenting the concrete commit and publication proposal. Record evidence in the separate S08 log. Distinguish old passing CI from new local checks and future hosted acceptance.
+Run 06 authorises one scoped commit titled release: S09.T01 automate manual draft releases and one push to origin/main including automatic CI. Honour that exact grant while unfinished; do not ask again. Run 05's final-token review passed; Run 03's initial two reviews are historical. Retain D08's ordinary inline commands, stock artifact actions and one final softprops draft job. No PR, manual CI, workflow dispatch, actual tag mutation or release operation is authorised. Distinguish local fixture checks, hosted build evidence and actual release acceptance.
 ```
 
 Date: 2026-11-07. Status: S06/S07 completed; S08 local implementation/checks complete, commit/push and whole-PR Diffle approved; new hosted acceptance pending.
 
+2026-11-08 update: release changes are merged on main as `e5b2d3b`; the historical S08 log has not been reconciled with final hosted evidence. D09–D12 settle the new manual-release design. S09 below is proposed; no implementation-stage approval or new review/publication grant has been recorded.
+
+2026-11-08 display decision: D13 additionally accepts a synchronized current-version input description and repository-limited workflow-write token. S09 includes this work and its credential prerequisite; design is settled, implementation-stage and specific review approvals remain pending.
+
+2026-11-08 execution update: user answered “y” to the S09 local implementation and two Sol high review proposal. [Run 03 Q01](logs/20261108-s09-release-log.md#q01--implementation-stage-and-exact-reviews) is current authority, superseding the pending approval statements above. Implementation and initial 38 local fixture checks pass; the correctness review is in progress. Changes must remain uncommitted; hosted and actual release execution are not authorised.
+
+2026-11-08 completion update: S09 local implementation/checks and both approved reviews are complete with no findings requiring changes. All 38 local fixture checks and workflow/shell/documentation checks pass. Changes remain uncommitted under the user's explicit scope. Hosted/native release execution and token setup remain unverified. [Run 03 closure](logs/20261108-s09-release-log.md#local-stage-completion--2026-11-08t010429z).
+
+2026-11-08 D14 correction: the user instructed “ok drop it” for the synchronized version label and custom-token requirement. The local workflow now uses GITHUB_TOKEN with write permission in preparation/finalization and commits only the two Cargo files. All 38 updated local checks and static validation pass. Earlier independent reviews cover the pre-D14 variant; no new review was authorised or performed. Changes remain uncommitted; real hosted acceptance remains unverified. [Run 04](logs/20261108-s09-release-log.md#run-04--remove-the-pat-and-synchronized-label).
+
+2026-11-08 final review update: the user approved one fresh Sol high review of the final GITHUB_TOKEN change. That exact review is in progress under [Run 05](logs/20261108-s09-release-log.md#run-05--final-built-in-token-review); no new commit, push or release grant exists.
+
+2026-11-08 final review result: Run 05 completed with no actionable findings; its fresh Sol high reviewer independently passed workflow/ShellCheck/diff checks and all 38 local fixtures for the final built-in-token variant. Current local implementation is ready for a separately approved commit/publication; real hosted execution remains unverified.
+
+2026-11-08 publication grant: user answered “y” to the concrete S09.T01 commit proposal and one origin/main push, including automatic CI. [Run 06](logs/20261108-s09-release-log.md#run-06--approved-release-commit-and-originmain-publication) supersedes earlier uncommitted/no-publication limits for the nine selected release files. Normal hooks and the push remain to be executed; actual release dispatch/publication is not authorised. Dustox documentation edits are excluded.
+
 ## Scope and precedence
 
-Current user instructions and [release decisions D01–D08](20261107-release-design.md) govern, with D08/S08 superseding the custom helper implementation described historically below. The [brief](brief.md) and existing bootstrap/data/terminal contracts remain applicable. The [log index](20261107-release-log.md) links canonical run authority. Historical grants in other plans do not authorise this work.
+Current user instructions and [release decisions D01–D14](20261107-release-design.md) govern. D09–D12 and D14 define S09 manual preparation and draft replacement using the built-in token, superseding D13's synchronized display/custom token. D08's simple implementation boundary remains. Earlier S06–S08 descriptions record historical work and permissions. The [brief](brief.md) and existing bootstrap/data/terminal contracts remain applicable. The [log index](20261107-release-log.md) links canonical run authority. Historical grants in other plans do not authorise this work.
 
 Deliver a custom GitHub Actions release workflow for version `0.0.1` and future matching version tags, four native build/test targets, mimalloc in the executable, static Linux binaries, downloadable archives and SHA-256 checksums, and draft releases requiring manual publication. Build and test the exact tagged commit. Catalogue/artwork stay outside the archives and continue through bootstrap.
 
@@ -89,6 +105,38 @@ Prerequisites: D08 and the explicit user delegation; existing branch at `d314459
 
 Stage exit: local implementation and scope checks complete; any user-approved review and resulting fixes pass; authorised commit/push and new native CI establish hosted acceptance. Keep missing external evidence explicit.
 
+## S09 — Kakuna: prepare releases from the Actions UI
+
+<a id="s09-t00"></a>
+Prerequisites: D09–D12 and D14 settled; current local implementation is complete under Run 03 and the user's Run 04 revision. Use the current main checkout and preserve unrelated edits. Hosted execution uses GITHUB_TOKEN; existing branch/tag rules must permit the Actions bot's writes. No custom secret is required. S08 hosted-evidence reconciliation is separate from this stage.
+
+<a id="s09-t01"></a>
+### S09.T01 — Cyndaquil: automate versioning, builds and draft replacement
+
+- Outcome: Actions → Release → Run workflow accepts one required exact stable `X.Y.Z` version. It uses latest main, prepares Cargo version files and a version commit when needed, runs all existing release checks and builds, then creates or replaces a draft. Manual Publish release remains the final step. No static input default, automatic version increment or protected-environment setup.
+- Version lookup and authentication: the input description directs the user to Cargo.toml on main; no synchronized display or self-editing workflow remains. Use the built-in GITHUB_TOKEN for GitHub CLI operations, with contents write permission only in preparation/finalization. The version commit changes only Cargo.toml and Cargo.lock. Rebuilds at the same version do not create empty commits.
+- Version validation: use ordinary shell, the GitHub CLI and Ubuntu `sort -V`. Reject malformed versions, leading zeros, and any version at or below the highest published stable release. Fail on API errors before writes; no published releases is a valid first-release state. A matching draft may be replaced; preserve edited notes. Existing version tags without a draft may be reused only when already pointing to the exact candidate commit; otherwise fail for manual recovery.
+- Reuse/build boundary: extend `.github/workflows/release.yml`; thread an explicit source SHA through `ci.yml` and `build.yml` while retaining their ordinary CI defaults. Reuse native tests, mimalloc, archive/checksum/smoke/static-link checks, standard artifacts and the pinned softprops action. Update README and the existing dated maintainer guide. No new release framework, helper program, test suite that mirrors the workflow or composite action.
+- Source and ordering: serialize manual release preparation globally and require dispatch from main. Read latest main at execution, update only the package version and matching lockfile metadata, and commit only those two files when changed. Push the version commit without force and build/test that exact SHA. Invoke reusable checks explicitly because built-in-token pushes do not trigger another push workflow. The release trigger is workflow_dispatch. Only after checks pass create the version tag or update the confirmed draft's tag to that SHA, then replace draft assets. Recheck published status before tag/release writes; use a lease for an existing draft tag so a concurrent ref change fails. Never force-update main or alter a published release. Keep permission writes confined to preparation/finalization jobs.
+- Failure boundaries: a failed build leaves the version commit on main but does not replace draft assets or move its tag. Retry uses latest main and the requested version. A failure after tag creation can reuse that exact tag/commit; an unexplained conflicting tag fails. Missing/insufficient token permissions or branch rules may reject preparation; report the failure without bypassing protection or falling back to unrelated credentials. Manual publication during an in-flight draft rebuild must be detected before final writes; document the remaining API race rather than claiming atomicity across Git refs and release assets.
+- Verification: run `actionlint` (including ShellCheck), inline shell syntax checks and `git diff --check`. Exercise the actual version-validation commands with synthetic release inventories and local temporary Git repositories: no releases, larger patch/minor/major, equal/older published version, malformed input, draft refresh from changed main, unrelated tag rejection, exact-commit recovery, stale tag lease and failed API/read/push paths. Confirm every checkout builds the selected SHA and normal push/PR CI retains its original default. No Rust behavior changes are planned; broaden Cargo checks only if relevant changes or failures justify them.
+- Credential/scope verification: require no custom secret, confirm every GH_TOKEN reference uses github.token, verify preparation/finalization contents-write permissions and read-only build/check jobs, assert only Cargo.toml/Cargo.lock change during a version bump and workflow content remains unchanged, and retain unchanged-version rebuild behavior. No extra push-triggered release workflow is expected.
+- Reviews proposed, not authorised: one fresh `gpt-6.1-sol` at `high` for version ordering, exact source propagation, published protection, tag/commit handling and failure paths; then a separate fresh `gpt-6.1-sol` at `high` for unnecessary logic, shell clarity and D08 compliance. Primary implements directly; reviewers make findings only. Offer further review at the stage boundary with its exact scope/model/effort/count; do not launch it without approval.
+- Evidence/authority: create the S09 stage log when implementation starts; record local checks, synthetic evidence and both approved review outcomes separately. Present the final commit title and changes-by-file table before asking for commit permission. Current design choices do not grant commits, pushes, PRs, manual CI or a real release run.
+
+Stage exit: local implementation and documentation pass checks and the specifically approved reviews. Commit/publication remain separately gated. Hosted native checks require an approved push; a real manual release remains unverified until separately authorised execution. Stop after S09; do not perform a release to demonstrate completion.
+
+### S09 requirement mapping
+
+| Requirement | Task | Acceptance |
+| --- | --- | --- |
+| Exact version; simple ordering | S09.T01 | Stable versions only; reject versions at or below the highest published stable version before writes. |
+| Built-in token without custom setup | S09.T01 | No custom-secret references; preparation/finalization contents-write permission; only Cargo files change during a version bump. |
+| Rebuild an existing draft from main | S09.T01 | Updated candidate SHA reaches all builds; tag/assets change only after passing checks; draft stays unpublished. |
+| Protect published releases and unrelated tags | S09.T01 | Published-version refusal, conflicting-tag failure and stale-lease failure observed in local fixtures. |
+| Existing four platforms and packaging | S09.T01 | Shared jobs preserved and statically validated; actual new hosted results recorded after an approved push. |
+| Manual publication and simple implementation | S09.T01 | Draft link and review instructions documented; ordinary inline commands and stock actions retained. |
+
 ## Historical S06/S07 requirements and failure coverage
 
 | Requirement | Source | Task | Acceptance |
@@ -107,6 +155,8 @@ Test malformed/mismatched versions, missing/wrong/duplicate assets, corrupt chec
 
 Historical S06/S07 implementation was by the primary agent with four specifically approved reviews. Current S08 implementation is delegated to one `gpt-6.1-sol` at `xhigh`. No S08 independent reviewer has been authorised; earlier review grants do not apply.
 
+2026-11-08 correction: the preceding assignment describes historical S08. S09 uses direct primary implementation and the two separate `gpt-6.1-sol` `high` reviews approved in Run 03 Q01. No additional review, commit or publication grant exists.
+
 Done remains blank until checks and required reviews pass. S07 hosted acceptance is recorded after the PR's automatic CI; an untested workflow is not completed acceptance. All historical permission restrictions remain unless explicitly superseded by Run 01.
 
 | ID | Done | Stage or task | Implementation | Review | Rationale | Comments |
@@ -117,3 +167,5 @@ Done remains blank until checks and required reviews pass. S07 hosted acceptance
 | [S07.T01](#s07-t01) | ✅ | Dratini: original release pipeline and CI setup | Primary agent | Sol high correctness: one P1 resolved/tested; Sol high simplification: no findings | Historical implementation | [S07 evidence](logs/20261107-s07-release-log.md); final native checks passed before S08 |
 | [S08.T00](#s08-t00) |  | Hypno: simplified release stage completion | — | No new review authorised | Require actual simplified pipeline acceptance | [S08 log](logs/20261107-s08-release-log.md) |
 | [S08.T01](#s08-t01) | ✅ | Infernape: remove custom release automation locally | 1 gpt-6.1-sol xhigh agent | No new independent review authorised or run | Exact implementation delegated by user | [Local implementation/checks complete](logs/20261107-s08-release-log.md); commit/hosted acceptance remains S08.T00 |
+| [S09.T00](#s09-t00) | ✅ | Kakuna: manual release preparation stage completion (local scope) | — | Initial two reviews passed; fresh final Sol high token review passed in Run 05 | Keep source, tag and assets consistent | [Run 05](logs/20261108-s09-release-log.md#run-05--final-built-in-token-review): final variant locally checked/reviewed; uncommitted; hosted execution unverified. |
+| [S09.T01](#s09-t01) | ✅ | Cyndaquil: version input, exact-source builds and draft replacement (local scope) | Primary agent directly | Sol high correctness/simplification for initial variant; fresh Sol high final token review: no findings | Check release mutations and preserve simple workflow structure | [Run 05](logs/20261108-s09-release-log.md#run-05--final-built-in-token-review): 38 updated checks and static validation independently passed; built-in token only; uncommitted. |
