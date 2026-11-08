@@ -192,10 +192,8 @@ fn library_query_child() {
 
 #[test]
 fn library_detects_protocol_responses_over_ssh_and_restores_terminal_on_timeout() {
-    use nix::{
-        pty::{Winsize, openpty},
-        sys::termios,
-    };
+    use nix::pty::{Winsize, openpty};
+    use rustix::termios;
     use std::{
         fs::File,
         io::{Read, Write},
@@ -228,7 +226,7 @@ fn library_detects_protocol_responses_over_ssh_and_restores_terminal_on_timeout(
         .unwrap();
         let mut master = File::from(pty.master);
         let slave = File::from(pty.slave);
-        let mut before = termios::tcgetattr(&slave).unwrap();
+        let before = termios::tcgetattr(&slave).unwrap();
         let input = slave.try_clone().unwrap();
         let output = slave.try_clone().unwrap();
         let peer = std::thread::spawn(move || {
@@ -267,13 +265,8 @@ fn library_detects_protocol_responses_over_ssh_and_restores_terminal_on_timeout(
             .stderr(Stdio::piped())
             .output()
             .unwrap();
-        let mut after = termios::tcgetattr(&slave).unwrap();
-        // PENDIN is a kernel input-reprocessing marker, not an application terminal setting.
-        before.local_flags.remove(termios::LocalFlags::PENDIN);
-        after.local_flags.remove(termios::LocalFlags::PENDIN);
-        assert_eq!(termios::cfgetispeed(&after), termios::cfgetispeed(&before));
-        assert_eq!(termios::cfgetospeed(&after), termios::cfgetospeed(&before));
-        assert_eq!(after, before);
+        let after = termios::tcgetattr(&slave).unwrap();
+        assert_terminal_restored(before, after);
         drop(slave);
         let captured = peer.join().unwrap();
         assert!(
@@ -284,4 +277,53 @@ fn library_detects_protocol_responses_over_ssh_and_restores_terminal_on_timeout(
         );
         assert!(captured.windows(4).any(|part| part == b"\x1b[5n"));
     }
+}
+
+fn assert_terminal_restored(
+    mut before: rustix::termios::Termios,
+    mut after: rustix::termios::Termios,
+) {
+    use rustix::termios::{LocalModes, SpecialCodeIndex as Code};
+
+    // PENDIN is a kernel input-reprocessing marker, not an application terminal setting.
+    before.local_modes.remove(LocalModes::PENDIN);
+    after.local_modes.remove(LocalModes::PENDIN);
+    // Compare terminal settings, not libc's unused termios storage on musl.
+    assert_eq!(after.input_modes, before.input_modes);
+    assert_eq!(after.output_modes, before.output_modes);
+    assert_eq!(after.control_modes, before.control_modes);
+    assert_eq!(after.local_modes, before.local_modes);
+    for code in [
+        Code::VINTR,
+        Code::VQUIT,
+        Code::VERASE,
+        Code::VKILL,
+        Code::VEOF,
+        Code::VTIME,
+        Code::VMIN,
+        Code::VSTART,
+        Code::VSTOP,
+        Code::VSUSP,
+        Code::VEOL,
+        Code::VREPRINT,
+        Code::VDISCARD,
+        Code::VWERASE,
+        Code::VLNEXT,
+        Code::VEOL2,
+        #[cfg(target_os = "linux")]
+        Code::VSWTC,
+        #[cfg(target_os = "macos")]
+        Code::VDSUSP,
+        #[cfg(target_os = "macos")]
+        Code::VSTATUS,
+    ] {
+        assert_eq!(
+            after.special_codes[code], before.special_codes[code],
+            "{code:?}"
+        );
+    }
+    assert_eq!(after.input_speed(), before.input_speed());
+    assert_eq!(after.output_speed(), before.output_speed());
+    #[cfg(target_os = "linux")]
+    assert_eq!(after.line_discipline, before.line_discipline);
 }

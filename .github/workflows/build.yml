@@ -1,0 +1,136 @@
+name: Release builds
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            runner: macos-15
+          - target: x86_64-apple-darwin
+            runner: macos-15-intel
+          - target: x86_64-unknown-linux-musl
+            runner: ubuntu-24.04
+          - target: aarch64-unknown-linux-musl
+            runner: ubuntu-24.04-arm
+    env:
+      TARGET: ${{ matrix.target }}
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+      CARGO_INCREMENTAL: "0"
+      CARGO_PROFILE_DEV_DEBUG: "0"
+      CARGO_TERM_COLOR: always
+      CC_x86_64_unknown_linux_musl: musl-gcc
+      CC_aarch64_unknown_linux_musl: musl-gcc
+      CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
+      CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Install native musl compiler
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes musl-tools
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # master
+        with:
+          toolchain: "1.99.1"
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          shared-key: release-${{ matrix.target }}
+          cache-on-failure: true
+      - name: Find cached nextest
+        id: nextest
+        shell: bash
+        run: |
+          version=$(cargo nextest --version 2>/dev/null || true)
+          if [[ "$version" == 'cargo-nextest 0.9.151 ('* || "$version" == 'cargo-nextest 0.9.151' ]]; then
+            echo 'present=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install nextest
+        if: steps.nextest.outputs.present != 'true'
+        uses: taiki-e/install-action@3a3daafd3b7f23b8f65d9f5ba2db203fb59b79e2 # v2
+        with:
+          tool: cargo-nextest@0.9.151
+          fallback: none
+      - name: Run full release tests
+        id: tests
+        run: cargo test-ci --release --target "$TARGET"
+      - name: Publish test report
+        if: ${{ !cancelled() && steps.tests.outcome != 'skipped' }}
+        uses: mikepenz/action-junit-report@a16be3a69023e9bd7e748ede768b3282ea7b30ce # v6
+        with:
+          report_paths: target/nextest/ci/junit.xml
+          annotate_only: true
+          resolve_ignore_classname: true
+          detailed_summary: true
+          failed_summary_logs: true
+          require_tests: true
+          fail_on_parse_error: true
+      - name: Build release executable
+        run: cargo build --release --locked --bin pokington --target "$TARGET"
+      - name: Package and verify extracted executable
+        env:
+          PACKAGE_OUTPUT: ${{ runner.temp }}/packages
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 --locked | jq -er '.packages[] | select(.name == "pokington") | .version')
+          stem="pokington-$version-$TARGET"
+          archive="$stem.tar.gz"
+          staging=$(mktemp -d)
+          trap 'rm -rf "$staging"' EXIT
+          mkdir -p "$staging/$stem" "$staging/extracted" "$PACKAGE_OUTPUT"
+          install -m 755 "target/$TARGET/release/pokington" "$staging/$stem/pokington"
+          cp README.md "$staging/$stem/README.md"
+          tar -czf "$PACKAGE_OUTPUT/$archive" -C "$staging" "$stem"
+          tar -xzf "$PACKAGE_OUTPUT/$archive" -C "$staging/extracted"
+          binary="$staging/extracted/$stem/pokington"
+          test "$("$binary" --version)" = "pokington $version"
+          "$binary" --help > "$staging/help"
+          grep -F 'Usage: pokington' "$staging/help"
+          case "$TARGET" in
+            aarch64-apple-darwin) test "$(lipo -archs "$binary")" = arm64 ;;
+            x86_64-apple-darwin) test "$(lipo -archs "$binary")" = x86_64 ;;
+            aarch64-unknown-linux-musl) readelf -h "$binary" | grep -F AArch64 ;;
+            x86_64-unknown-linux-musl) readelf -h "$binary" | grep -F 'Advanced Micro Devices X86-64' ;;
+          esac
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            readelf -l "$binary" > "$staging/elf"
+            readelf -d "$binary" >> "$staging/elf"
+            if grep -E 'INTERP|\(NEEDED\)' "$staging/elf"; then
+              echo 'Linux executable must be statically linked' >&2
+              exit 1
+            fi
+          fi
+          cd "$PACKAGE_OUTPUT"
+          if [[ "$RUNNER_OS" == macOS ]]; then
+            shasum -a 256 "$archive" > "$archive.sha256"
+            shasum -a 256 --check "$archive.sha256"
+          else
+            sha256sum "$archive" > "$archive.sha256"
+            sha256sum --check "$archive.sha256"
+          fi
+      - name: Upload checked archive
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: release-${{ matrix.target }}
+          path: ${{ runner.temp }}/packages/*
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+          overwrite: true

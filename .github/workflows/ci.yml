@@ -4,9 +4,15 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
+
+env:
+  CARGO_INCREMENTAL: "0"
+  CARGO_PROFILE_DEV_DEBUG: "0"
+  CARGO_TERM_COLOR: always
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
@@ -18,10 +24,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2
         with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # master
+        with:
+          toolchain: "1.99.1"
           components: rustfmt, clippy
-          build-warnings: ""
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          shared-key: lint
+          cache-on-failure: true
       - name: Check formatting
         run: cargo fmt --check
       - name: Check compilation
@@ -31,27 +44,4 @@ jobs:
 
   rust-test:
     name: Rust test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2
-        with:
-          build-warnings: ""
-      - name: Install nextest
-        uses: taiki-e/install-action@3a3daafd3b7f23b8f65d9f5ba2db203fb59b79e2 # v2
-        with:
-          tool: cargo-nextest@0.9.151
-      - name: Run tests
-        id: tests
-        run: cargo test-ci
-      - name: Publish test report
-        if: ${{ !cancelled() && steps.tests.outcome != 'skipped' }}
-        uses: mikepenz/action-junit-report@a16be3a69023e9bd7e748ede768b3282ea7b30ce # v6
-        with:
-          report_paths: target/nextest/ci/junit.xml
-          annotate_only: true
-          resolve_ignore_classname: true
-          detailed_summary: true
-          failed_summary_logs: true
-          require_tests: true
-          fail_on_parse_error: true
+    uses: ./.github/workflows/build.yml
