@@ -11,6 +11,7 @@ pokington art Meowth --form galarian --mode blocks
 pokington art --form gigantamax
 pokington art Charizard --mode ascii --width 64 --color never
 pokington art Charizard --mode img --width original
+pokington art Mew --mode img --protocol kitty
 ```
 
 Names and descriptive form keys ignore case. Named species default to the original form. An invalid form lists that species's available keys; a random form filter with no matches reports an error.
@@ -22,6 +23,7 @@ Names and descriptive form keys ignore case. Named species default to the origin
 | `--title` | Set the terminal title to the same label as `--name`, independently of printing the label. |
 | `--mode auto` | Native graphics when verified; otherwise Unicode blocks in a suitable terminal, then ASCII. Redirected output uses ASCII. |
 | `--mode img` | Native images only; unsupported contexts report an error suggesting text modes. |
+| `--protocol kitty\|sixel\|iterm2` | Force an image protocol supported by your terminal. Requires explicit `--mode img`. |
 | `--mode blocks` | Two sample rows per character using Unicode half-blocks; monochrome output retains upper/lower positions. |
 | `--mode ascii` | Brightness mapped to ASCII characters. |
 | Omitted width | Fit terminal width/height with aspect correction; redirected text defaults to 80 columns. |
@@ -37,7 +39,9 @@ With `--title`, the command emits an OSC 2 terminal-title sequence on stdout aft
 
 Transparent margins are trimmed before sizing. Text uses alpha-weighted brightness/colour over black; fully transparent cells leave blank terminal cells. Native PNG output retains alpha. Downscaling and enlargement resample premultiplied RGBA; original width preserves source pixels.
 
-Native detection and encoding use ratatui-image Picker and its Kitty, Sixel and iTerm2 protocols. SSH does not disable images. For auto/img on matching terminal stdin/stdout, Picker sends its standard capability and cell-size queries; terminal settings are restored afterward, including query timeout. Explicit text modes and pipelines skip probing. Output remains inline without an alternate screen. If the library cannot establish an image protocol, auto uses text and explicit img reports an error.
+Native detection and encoding use ratatui-image Picker and its Kitty, Sixel and iTerm2 protocols. SSH does not disable images. For auto/img on matching terminal stdin/stdout, Picker sends its standard capability and cell-size queries; terminal settings are restored afterward, including query timeout. Explicit text modes and pipelines skip probing. Output remains inline without an alternate screen. If detection finds no native protocol, `auto` uses text and `img` without an explicit protocol reports an error.
+
+With `--protocol`, Pokington uses the requested encoder and keeps the Picker's cell sizing and tmux handling. Native images still require stdin and stdout on the same terminal. The receiving terminal can ignore graphics sequences it does not support.
 
 ## Acceptance evidence
 

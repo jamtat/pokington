@@ -164,6 +164,20 @@ fn unsupported_or_transparent_images_fail_before_output() {
 }
 
 #[test]
+fn native_frame_rejects_zero_cell_dimensions() {
+    let image = calibration::calibration_image();
+    for cell_size in [(0, 20), (10, 0)] {
+        #[expect(deprecated, reason = "Exercise invalid terminal measurements directly")]
+        let mut picker = Picker::from_fontsize(cell_size.into());
+        picker.set_protocol_type(ProtocolType::Kitty);
+        let error =
+            NativeFrame::render(&image, Width::Original, Geometry::default(), &picker).unwrap_err();
+        assert_eq!(error.kind(), std::io::ErrorKind::Unsupported);
+        assert!(error.to_string().contains("zero cell dimension"));
+    }
+}
+
+#[test]
 fn interrupted_inline_output_cancels_escape_and_restores_style() {
     let frame = NativeFrame::render(
         &calibration::calibration_image(),

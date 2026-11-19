@@ -24,7 +24,7 @@ Sample uniformly without replacement. `--exclude` is repeatable, and an unknown 
 
 ### art
 
-`art [name/id] [--form form] [--mode auto|img|blocks|ascii] [--width n|original] [--color auto|always|never]`
+`art [name/id] [--form form] [--mode auto|img|blocks|ascii] [--protocol kitty|sixel|iterm2] [--width n|original] [--color auto|always|never]`
 
 Print art for pokemon with id or name matching (name case insensitive). For a specified Pokémon, use the original form unless `--form` explicitly selects an alternate form. No specified pokemon produces random artwork, with equal probability for every species/form artwork entry, including originals and alternate forms. Species with more forms therefore have a greater combined probability. Transparent pixels should be trimmed off the source png before display (crop to only visible pixels).
 
@@ -59,6 +59,8 @@ When stdout is piped or redirected, `--mode auto` emits plain, uncoloured ASCII 
 Art should be printed with ratatui-image if img used. Try and autodetect the best output type from the terminal. For blocks use unicode blocks to match the colours. For ascii convert the image to coloured ascii art, subject to the colour policy above.
 
 2026-11-07 native integration correction: use ratatui-image's Picker for capability/font detection and its protocol encoders. Do not impose a Ghostty/version allowlist or disable images merely because the session uses SSH. Standard capability queries may briefly read terminal responses and change terminal mode, with settings restored afterward; explicit text modes and redirected output do not probe. This supersedes the earlier feasibility prototype's zero-query implementation choice. See [D33](20261106-design.md#d33--use-ratatui-image-detection-and-protocols--2026-11-07).
+
+2026-11-19 native protocol correction. `--protocol kitty|sixel|iterm2` requires explicit `--mode img`. It selects the encoder after Picker acquisition, even when detection selects a different protocol or finds none. The earlier error on missing detected support applies to `--mode img` without an override. When the caller supplies `--protocol`, the terminal may silently ignore unsupported graphics sequences. Native output requires matching terminal stdin and stdout and keeps the Picker's cell sizing and tmux handling. See the [native artwork protocol design](20261119-art-protocol-design.md).
 
 When downscaling/upscaling use appropriate sampling in every display mode.
 
