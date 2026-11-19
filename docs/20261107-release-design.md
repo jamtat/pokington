@@ -164,3 +164,9 @@ Current implementation follows D08 and S08 below. S06/S07 and their grants are h
 - No repository commits, pushes, secret configuration, real workflow runs or release operations were performed. See [Run 04](logs/20261108-s09-release-log.md#run-04--remove-the-pat-and-synchronized-label).
 
 2026-11-08 review correction: the user subsequently approved one fresh Sol high review of D14's final built-in-token variant. [Run 05](logs/20261108-s09-release-log.md#run-05--final-built-in-token-review) completed with no actionable findings and independently passed actionlint/ShellCheck, diff checks and all 38 updated local fixtures. Earlier no-review statements describe the pre-Run05 boundary. No hosted release validation or commit/publication was performed.
+
+## D15. Require CI for version PRs, 2026-11-19
+
+- User selected A. Require PRs and all five CI checks on `main`, including for Cargo version bumps. GitHub auto-merge is available once those checks pass.
+- This supersedes D14's automatic version commit and direct push to `main`. The Release workflow validates that the requested version is already on `main` and passes the checked-out commit to the shared build workflow. Only the final draft job writes tags and release assets. Draft publication remains manual.
+- See the [release procedure](20261107-releasing.md#prepare-a-release) and [Protect main ruleset](https://github.com/jamtat/pokington/rules/27649107).

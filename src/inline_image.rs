@@ -124,7 +124,8 @@ impl NativeFrame {
     /// Let Picker create the protocol; serialize its widget cells as inline rows.
     ///
     /// # Errors
-    /// Returns unsupported when Picker selected text, or image/encoding/output-size errors.
+    /// Returns unsupported when Picker selected text or reported zero cell dimensions.
+    /// Returns image, encoding or output-size errors when frame generation fails.
     pub fn render(
         image: &RgbaImage,
         width: Width,
@@ -138,6 +139,12 @@ impl NativeFrame {
             ));
         }
         let font = picker.font_size();
+        if font.width == 0 || font.height == 0 {
+            return Err(io::Error::new(
+                io::ErrorKind::Unsupported,
+                "terminal reported a zero cell dimension. Use --mode auto, blocks, or ascii",
+            ));
+        }
         let width = match width {
             Width::Columns(columns) => {
                 Width::Columns(columns.checked_mul(u32::from(font.width)).ok_or_else(|| {

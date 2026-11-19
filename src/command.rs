@@ -2,8 +2,9 @@
 
 use std::{ffi::OsString, fmt, fs, io::Write, path::PathBuf};
 
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand, ValueEnum};
 use rand::{Rng, seq::SliceRandom};
+use ratatui_image::picker::ProtocolType;
 
 use crate::{
     art::{self, ArtError, Color, Mode, Width},
@@ -21,6 +22,42 @@ use crate::{
 struct Cli {
     #[command(subcommand)]
     command: Command,
+}
+
+impl Cli {
+    fn validate(self) -> Result<Self, clap::Error> {
+        if matches!(
+            self.command,
+            Command::Art {
+                mode,
+                protocol: Some(_),
+                ..
+            } if mode != Mode::Img
+        ) {
+            return Err(Self::command().error(
+                clap::error::ErrorKind::ArgumentConflict,
+                "--protocol requires --mode img",
+            ));
+        }
+        Ok(self)
+    }
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+enum NativeProtocol {
+    Kitty,
+    Sixel,
+    Iterm2,
+}
+
+impl From<NativeProtocol> for ProtocolType {
+    fn from(protocol: NativeProtocol) -> Self {
+        match protocol {
+            NativeProtocol::Kitty => Self::Kitty,
+            NativeProtocol::Sixel => Self::Sixel,
+            NativeProtocol::Iterm2 => Self::Iterm2,
+        }
+    }
 }
 
 #[derive(Subcommand)]
@@ -47,6 +84,9 @@ enum Command {
         form: Option<String>,
         #[arg(long, value_enum, default_value_t)]
         mode: Mode,
+        /// Force a native image protocol. Requires --mode img.
+        #[arg(long, value_enum)]
+        protocol: Option<NativeProtocol>,
         #[arg(long, value_name = "N|original")]
         width: Option<Width>,
         #[arg(long, value_enum, default_value_t)]
@@ -234,8 +274,8 @@ impl<R: Rng + Send> Runtime<R> {
         image: &image::RgbaImage,
         width: Width,
         mode: Mode,
+        protocol: Option<NativeProtocol>,
     ) -> std::io::Result<Option<crate::inline_image::NativeFrame>> {
-        use ratatui_image::picker::ProtocolType;
         use std::io::{Error, ErrorKind};
         if mode != Mode::Img
             && (mode != Mode::Auto
@@ -243,7 +283,7 @@ impl<R: Rng + Send> Runtime<R> {
         {
             return Ok(None);
         }
-        let picker = self.picker.clone().map_or_else(
+        let mut picker = self.picker.clone().map_or_else(
             || {
                 if self.terminal.is_terminal {
                     crate::inline_image::query_picker()
@@ -256,6 +296,9 @@ impl<R: Rng + Send> Runtime<R> {
             },
             Ok,
         );
+        if let (Ok(picker), Some(protocol)) = (&mut picker, protocol) {
+            picker.set_protocol_type(protocol.into());
+        }
         match picker {
             Ok(picker) if picker.protocol_type() != ProtocolType::Halfblocks => {
                 match crate::inline_image::NativeFrame::render(
@@ -302,6 +345,7 @@ impl<R: Rng + Send> Runtime<R> {
                 title,
                 form,
                 mode,
+                protocol,
                 width,
                 color,
             } => {
@@ -326,7 +370,7 @@ impl<R: Rng + Send> Runtime<R> {
                     })?
                     .into_rgba8();
                 if let Some(frame) = self
-                    .native_frame(&image, width.unwrap_or_default(), mode)
+                    .native_frame(&image, width.unwrap_or_default(), mode, protocol)
                     .map_err(|error| image_error(&self.store, selected, error))?
                 {
                     frame.write_to(stdout).map_err(CommandError::Output)?;
@@ -434,7 +478,7 @@ where
     T: Into<OsString> + Clone,
     R: Rng + Send,
 {
-    let cli = match Cli::try_parse_from(args) {
+    let cli = match Cli::try_parse_from(args).and_then(Cli::validate) {
         Ok(cli) => cli,
         Err(error) => {
             let code = if error.use_stderr() { 2 } else { 0 };

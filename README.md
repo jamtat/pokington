@@ -112,6 +112,7 @@ If a file is unreadable or is not valid UTF-8, or too few eligible names remain,
 
 ```text
 pokington art [NAME_OR_ID] [--form FORM] [--mode auto|img|blocks|ascii]
+              [--protocol kitty|sixel|iterm2]
               [--width N|original] [--color auto|always|never]
               [--exclude NAME]... [--exclude-file FILE]...
               [--name] [--no-newline] [--title]
@@ -154,14 +155,17 @@ The catalogue uses illustration PNGs from [Serebii](https://www.serebii.net/poke
 | Mode | Output |
 | --- | --- |
 | `auto` | Detects native image support, then falls back to Unicode blocks or ASCII. The default. |
-| `img` | Uses a native terminal image protocol. Reports an error if unsupported. |
+| `img` | Uses a native image protocol. Requires stdin and stdout on the same terminal. |
 | `blocks` | Renders with Unicode half-block characters. |
 | `ascii` | Renders with ASCII characters. |
 
 ```sh
 pokington art Bulbasaur --mode blocks
 pokington art Gengar --mode ascii
+pokington art Mew --mode img --protocol kitty
 ```
+
+Use `--protocol kitty|sixel|iterm2` with explicit `--mode img` to select a protocol your terminal supports. With `--mode img` alone, Pokington detects the protocol and reports an error if detection finds none.
 
 When piped or redirected, `auto` produces plain, uncoloured ASCII by default:
 

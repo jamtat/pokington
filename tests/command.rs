@@ -219,6 +219,51 @@ async fn parser_handles_help_version_and_invalid_arguments_before_runtime_creati
 }
 
 #[tokio::test]
+async fn art_protocol_help_and_argument_errors_do_not_create_runtime() {
+    let mut stdout = Vec::new();
+    let mut stderr = Vec::new();
+    let code = command::run::<_, _, StdRng>(
+        ["pokington", "art", "--help"],
+        || panic!("help accessed runtime"),
+        &mut stdout,
+        &mut stderr,
+    )
+    .await;
+    assert_eq!(code, 0);
+    assert_eq!(stderr, b"");
+    let help = String::from_utf8(stdout).unwrap();
+    assert!(help.contains("--protocol <PROTOCOL>"));
+    assert!(help.contains("Requires --mode img"));
+    assert!(help.contains("[possible values: kitty, sixel, iterm2]"));
+
+    for (mode, protocol, diagnostic) in [
+        (None, "kitty", "--protocol requires --mode img"),
+        (Some("auto"), "kitty", "--protocol requires --mode img"),
+        (Some("blocks"), "kitty", "--protocol requires --mode img"),
+        (Some("ascii"), "kitty", "--protocol requires --mode img"),
+        (Some("img"), "halfblocks", "invalid value 'halfblocks'"),
+    ] {
+        let mut words = vec!["pokington", "art", "--protocol", protocol];
+        if let Some(mode) = mode {
+            words.extend(["--mode", mode]);
+        }
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        let code = command::run::<_, _, StdRng>(
+            words,
+            || panic!("invalid protocol arguments accessed runtime"),
+            &mut stdout,
+            &mut stderr,
+        )
+        .await;
+        assert_eq!(code, 2, "{mode:?}, {protocol}");
+        assert_eq!(stdout, b"");
+        let error = String::from_utf8(stderr).unwrap();
+        assert!(error.contains(diagnostic), "{error}");
+    }
+}
+
+#[tokio::test]
 async fn runner_applies_repeatable_exact_and_unicode_exclusions_and_clean_output() {
     let temp = Temp::new().unwrap();
     let store = temp.install().unwrap();
@@ -877,4 +922,71 @@ async fn native_modes_use_library_protocol_and_explicit_text_bypasses_it() {
         stderr.contains("terminal stdin and stdout")
             && stderr.contains("--mode auto, blocks, or ascii")
     );
+}
+
+#[tokio::test]
+async fn explicit_native_protocol_overrides_picker_selection() {
+    use ratatui_image::picker::{Picker, ProtocolType};
+
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    install_artwork(&store).unwrap();
+    let cases = [
+        ("kitty", "\x1b_G", ProtocolType::Halfblocks),
+        ("sixel", ";0q\"", ProtocolType::Kitty),
+        ("iterm2", "\x1b]1337;File=", ProtocolType::Sixel),
+    ];
+    for (protocol, marker, detected) in cases {
+        let mut picker = Picker::halfblocks();
+        picker.set_protocol_type(detected);
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        let code = command::run(
+            [
+                "pokington",
+                "art",
+                "Mew",
+                "--mode",
+                "img",
+                "--protocol",
+                protocol,
+                "--width",
+                "original",
+            ],
+            || {
+                Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(1))
+                    .with_terminal(Terminal {
+                        is_terminal: true,
+                        ..Terminal::default()
+                    })
+                    .with_picker(picker))
+            },
+            &mut stdout,
+            &mut stderr,
+        )
+        .await;
+        assert_eq!(code, 0, "{protocol}: {}", String::from_utf8_lossy(&stderr));
+        assert_eq!(stderr, b"");
+        let text = String::from_utf8(stdout).unwrap();
+        for (_, candidate, _) in cases {
+            assert_eq!(text.contains(candidate), candidate == marker, "{protocol}");
+        }
+    }
+
+    let (code, stdout, stderr) = invoke(
+        &store,
+        args(&[
+            "pokington",
+            "art",
+            "Mew",
+            "--mode",
+            "img",
+            "--protocol",
+            "kitty",
+        ]),
+    )
+    .await
+    .unwrap();
+    assert_eq!((code, stdout.as_str()), (1, ""));
+    assert!(stderr.contains("terminal stdin and stdout"));
 }
