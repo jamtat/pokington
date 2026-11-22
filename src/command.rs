@@ -77,9 +77,6 @@ enum Command {
         /// Omit the newline after the printed name. Requires --name.
         #[arg(long, requires = "show_name")]
         no_newline: bool,
-        /// Set the terminal title to the same display name as --name.
-        #[arg(long)]
-        title: bool,
         #[arg(long)]
         form: Option<String>,
         #[arg(long, value_enum, default_value_t)]
@@ -342,7 +339,6 @@ impl<R: Rng + Send> Runtime<R> {
                 exclude_file,
                 show_name,
                 no_newline,
-                title,
                 form,
                 mode,
                 protocol,
@@ -392,16 +388,10 @@ impl<R: Rng + Send> Runtime<R> {
                         .write_all(text.as_bytes())
                         .map_err(CommandError::Output)?;
                 }
-                if show_name || title {
+                if show_name {
                     let display_name = art::display_name(species, selected);
-                    if show_name {
-                        let ending = if no_newline { "" } else { "\n" };
-                        write!(stdout, "{display_name}{ending}").map_err(CommandError::Output)?;
-                    }
-                    if title {
-                        write!(stdout, "\x1b]2;{display_name}\x07")
-                            .map_err(CommandError::Output)?;
-                    }
+                    let ending = if no_newline { "" } else { "\n" };
+                    write!(stdout, "{display_name}{ending}").map_err(CommandError::Output)?;
                 }
             }
             Command::Choose {

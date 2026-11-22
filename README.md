@@ -27,7 +27,7 @@ Pokington chooses random names, avoids names you have already used, and displays
 - Display illustrations by name or National Pokédex number, or let Pokington pick one.
 - Select illustrated Mega Evolutions, regional forms, Gigantamax forms, and other alternate forms.
 - Automatically use native terminal images, Unicode blocks, or ASCII art.
-- Control artwork size, text colour, name labels, and the terminal title.
+- Control artwork size, text colour, and name labels.
 - Work offline after the initial download, with explicit updates whenever you want them.
 
 ## Installation
@@ -115,7 +115,7 @@ pokington art [NAME_OR_ID] [--form FORM] [--mode auto|img|blocks|ascii]
               [--protocol kitty|sixel|iterm2]
               [--width N|original] [--color auto|always|never]
               [--exclude NAME]... [--exclude-file FILE]...
-              [--name] [--no-newline] [--title]
+              [--name] [--no-newline]
 ```
 
 Artwork appears inline and remains visible after the command exits.
@@ -187,20 +187,17 @@ pokington art Lapras --mode blocks --color always > lapras.ansi
 
 Use `--width original` to skip resizing after trimming. Native images use one source pixel per screen pixel; blocks pack two source pixel rows into each character row; ASCII uses one source pixel per character. Original-size output can exceed the terminal dimensions.
 
-### Names and terminal titles
+### Name labels
 
 ```sh
 # Print the selected Pokémon's display name below its artwork.
 pokington art --name
 
-# Set the terminal title to the selected display name too.
-pokington art Charizard --form "mega y" --name --title
-
 # Leave the cursor immediately after the printed name.
 pokington art Eevee --name --no-newline
 ```
 
-`--title` also works without `--name`. It writes a terminal title escape sequence, so use it for terminal output. `--no-newline` requires `--name` and only removes the newline after the label.
+`--no-newline` requires `--name` and only removes the newline after the label.
 
 ## Download and refresh data
 

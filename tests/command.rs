@@ -196,7 +196,7 @@ async fn parser_handles_help_version_and_invalid_arguments_before_runtime_creati
         (vec!["pokington", "art", "--mode", "invalid"], 2),
         (vec!["pokington", "art", "--color", "invalid"], 2),
         (vec!["pokington", "art", "--no-newline"], 2),
-        (vec!["pokington", "art", "--title", "--no-newline"], 2),
+        (vec!["pokington", "art", "--title"], 2),
     ] {
         let mut stdout = Vec::new();
         let mut stderr = Vec::new();
@@ -482,7 +482,7 @@ async fn art_excludes_species_using_repeated_exact_names_without_excluding_forms
         // A named or numeric request must also respect exclusions, including alternate forms.
         for name in ["Eevee", "3"] {
             let mut selected = words.clone();
-            selected.extend(args(&[name, "--form", &form.key, "-e", "EEVEE", "--title"]));
+            selected.extend(args(&[name, "--form", &form.key, "-e", "EEVEE"]));
             let (code, stdout, stderr) = invoke(&store, selected).await.unwrap();
             assert_eq!((code, stdout.as_str()), (1, ""));
             assert!(stderr.contains("Pokémon is excluded: Eevee"));
@@ -499,7 +499,7 @@ async fn art_combines_multiple_exclusion_files_with_exact_names_and_reports_exha
     let second = temp.0.join("second.txt");
     fs::write(&first, "before MEWTWO after").unwrap();
     fs::write(&second, "FLABÉBÉ").unwrap();
-    let mut words = args(&["pokington", "art", "--name", "--title", "--width", "4"]);
+    let mut words = args(&["pokington", "art", "--name", "--width", "4"]);
     for file in [&first, &second] {
         words.push("--exclude-file".into());
         words.push(file.as_os_str().into());
@@ -537,7 +537,7 @@ async fn art_validates_every_exclusion_file_before_bootstrap_or_output() {
     fs::write(&valid, "unrelated").unwrap();
     fs::write(&invalid, [0xff, 0xfe]).unwrap();
     for file in [&missing, &invalid, &temp.0] {
-        let mut words = args(&["pokington", "art", "--name", "--title"]);
+        let mut words = args(&["pokington", "art", "--name"]);
         for path in [&valid, file] {
             words.push("--exclude-file".into());
             words.push(path.as_os_str().into());
@@ -607,7 +607,7 @@ async fn art_runner_uses_local_data_and_redirected_color_policy() {
 }
 
 #[tokio::test]
-async fn art_name_and_title_flags_use_the_selected_form_label() {
+async fn art_name_uses_the_selected_form_label() {
     let temp = Temp::new().unwrap();
     let store = temp.install().unwrap();
     install_artwork(&store).unwrap();
@@ -656,11 +656,6 @@ async fn art_name_and_title_flags_use_the_selected_form_label() {
             let (code, image, stderr) = invoke(&store, args(&words)).await.unwrap();
             assert_eq!((code, stderr.as_str()), (0, ""));
             assert!(image.ends_with('\n'));
-            words.push("--title");
-            let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
-            assert_eq!((code, stderr.as_str()), (0, ""));
-            assert_eq!(stdout, format!("{image}\x1b]2;{expected}\x07"));
-            words.pop();
             words.push("--name");
             let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
             assert_eq!((code, stderr.as_str()), (0, ""));
@@ -669,15 +664,6 @@ async fn art_name_and_title_flags_use_the_selected_form_label() {
             let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
             assert_eq!((code, stderr.as_str()), (0, ""));
             assert_eq!(stdout, format!("{image}{expected}"));
-            words.pop();
-            words.push("--title");
-            let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
-            assert_eq!((code, stderr.as_str()), (0, ""));
-            assert_eq!(stdout, format!("{image}{expected}\n\x1b]2;{expected}\x07"));
-            words.push("--no-newline");
-            let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
-            assert_eq!((code, stderr.as_str()), (0, ""));
-            assert_eq!(stdout, format!("{image}{expected}\x1b]2;{expected}\x07"));
         }
     }
 }
@@ -700,7 +686,6 @@ async fn art_runner_reports_lookup_and_selected_png_errors_without_output() {
     ] {
         let mut words = words;
         words.push("--name");
-        words.push("--title");
         let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
         assert_eq!(code, 1);
         assert_eq!(stdout, "");
