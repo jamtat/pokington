@@ -76,3 +76,4 @@ Plan [Artwork export implementation plan](20261122-art-output-plan.md).
 - Recorded at 2026-11-23T01:48:10Z.
 - User instruction `commit them all to branch and PR`
 - Scope is one local closeout commit containing this log and the export plan, one push to `origin/btat-art-export`, and one pull request against `jamtat/pokington:main`, including automatically triggered CI. The branch includes the previously committed `--title` removal and PNG and Markdown exports. The scoped closeout subject is `art: S01.T00 record export stage completion`.
+- At 2026-11-23T01:49:22Z the user directed `do not leave things uncommitted or unstaged`. The publication scope also includes the three existing Dustox acceptance edits, committed together as `docs: S04.T00 record Dustox acceptance` before publishing the branch.
