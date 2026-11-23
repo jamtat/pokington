@@ -13,8 +13,9 @@ Pokington chooses random names, avoids names you have already used, and displays
 - [Display artwork](#display-artwork)
   - [Pokémon and forms](#pokémon-and-forms)
   - [Display modes](#display-modes)
+  - [Export artwork](#export-artwork)
   - [Size and colour](#size-and-colour)
-  - [Names and terminal titles](#names-and-terminal-titles)
+  - [Name labels](#name-labels)
 - [Download and refresh data](#download-and-refresh-data)
 - [Local data](#local-data)
 - [Help and scripting](#help-and-scripting)
@@ -27,6 +28,7 @@ Pokington chooses random names, avoids names you have already used, and displays
 - Display illustrations by name or National Pokédex number, or let Pokington pick one.
 - Select illustrated Mega Evolutions, regional forms, Gigantamax forms, and other alternate forms.
 - Automatically use native terminal images, Unicode blocks, or ASCII art.
+- Export artwork as a PNG file or an embedded Markdown image.
 - Control artwork size, text colour, and name labels.
 - Work offline after the initial download, with explicit updates whenever you want them.
 
@@ -111,14 +113,14 @@ If a file is unreadable or is not valid UTF-8, or too few eligible names remain,
 ## Display artwork
 
 ```text
-pokington art [NAME_OR_ID] [--form FORM] [--mode auto|img|blocks|ascii]
+pokington art [NAME_OR_ID] [--form FORM] [--mode auto|img|blocks|ascii|png|markdown]
               [--protocol kitty|sixel|iterm2]
               [--width N|original] [--color auto|always|never]
               [--exclude NAME]... [--exclude-file FILE]...
               [--name] [--no-newline]
 ```
 
-Artwork appears inline and remains visible after the command exits.
+Terminal artwork appears inline and remains visible after the command exits. Export modes write the requested format to stdout.
 
 ### Pokémon and forms
 
@@ -158,6 +160,8 @@ The catalogue uses illustration PNGs from [Serebii](https://www.serebii.net/poke
 | `img` | Uses a native image protocol. Requires stdin and stdout on the same terminal. |
 | `blocks` | Renders with Unicode half-block characters. |
 | `ascii` | Renders with ASCII characters. |
+| `png` | Writes binary PNG bytes to stdout. |
+| `markdown` | Writes a Markdown image reference containing a Base64-encoded PNG. |
 
 ```sh
 pokington art Bulbasaur --mode blocks
@@ -173,9 +177,22 @@ When piped or redirected, `auto` produces plain, uncoloured ASCII by default:
 pokington art Snorlax > snorlax.txt
 ```
 
+### Export artwork
+
+```sh
+pokington art Mew --mode png > mew.png
+pokington art Mew --mode markdown --width 64 > mew.md
+```
+
+Both export modes retain transparency and trim fully transparent margins. They use the cropped original size by default. Set `--width N` to resize to N pixels wide while preserving aspect ratio. `--width original` explicitly requests the default export size.
+
+Link to an exported PNG with `![Mew](mew.png)` from a Markdown file in the same directory. This works in GitHub READMEs. Use the `markdown` mode for a self-contained image in viewers that allow PNG data URLs, such as VS Code's Markdown preview. Its image reference includes the selected form's name as alt text.
+
+If you pass a Markdown file to `choose` or `art --exclude-file`, the name search includes any embedded Base64. Use a relative PNG link in those files to avoid extra exclusions from coincidental matches in the encoded image.
+
 ### Size and colour
 
-Transparent margins are trimmed before display. By default, artwork fits the available terminal width and height; redirected ASCII defaults to 80 columns. Set a positive width in character columns to choose your own size:
+Transparent margins are trimmed before display. By default, artwork fits the available terminal width and height. Redirected ASCII defaults to 80 columns. Set a positive width in character columns for terminal rendering:
 
 ```sh
 pokington art Dragonite --width 60
@@ -183,7 +200,7 @@ pokington art Mew --mode ascii --width 40 --color never
 pokington art Lapras --mode blocks --color always > lapras.ansi
 ```
 
-`--color` controls block and ASCII output: `auto` follows terminal colour support, `always` includes ANSI colour even when redirected, and `never` produces monochrome text. Native images retain their PNG colours.
+`--color` controls block and ASCII output: `auto` follows terminal colour support, `always` includes ANSI colour even when redirected, and `never` produces monochrome text. Native images and exports retain their PNG colours.
 
 Use `--width original` to skip resizing after trimming. Native images use one source pixel per screen pixel; blocks pack two source pixel rows into each character row; ASCII uses one source pixel per character. Original-size output can exceed the terminal dimensions.
 
@@ -197,7 +214,7 @@ pokington art --name
 pokington art Eevee --name --no-newline
 ```
 
-`--no-newline` requires `--name` and only removes the newline after the label.
+`--name` is available in terminal rendering modes. `--no-newline` requires `--name` and only removes the newline after the label.
 
 ## Download and refresh data
 

@@ -24,7 +24,7 @@ Sample uniformly without replacement. `--exclude` is repeatable, and an unknown 
 
 ### art
 
-`art [name/id] [--form form] [--mode auto|img|blocks|ascii] [--protocol kitty|sixel|iterm2] [--width n|original] [--color auto|always|never]`
+`art [name/id] [--form form] [--mode auto|img|blocks|ascii|png|markdown] [--protocol kitty|sixel|iterm2] [--width n|original] [--color auto|always|never]`
 
 Print art for pokemon with id or name matching (name case insensitive). For a specified Pokémon, use the original form unless `--form` explicitly selects an alternate form. No specified pokemon produces random artwork, with equal probability for every species/form artwork entry, including originals and alternate forms. Species with more forms therefore have a greater combined probability. Transparent pixels should be trimmed off the source png before display (crop to only visible pixels).
 
@@ -48,9 +48,11 @@ modes (default auto):
 
 If explicit `--mode img` is unsupported by the terminal, fail with a clear error suggesting `--mode auto`, `blocks`, or `ascii`. Do not silently fall back; automatic fallback belongs to `--mode auto`.
 
-With no `--width`, fit the terminal's available width and height while preserving aspect ratio; redirected ASCII defaults to 80 columns. `--width n` requests output n character columns wide. `--width original` disables resizing after trimming transparent margins: native image mode uses one source pixel per screen pixel; block mode uses one source pixel per half-block, packing two pixel rows per character row; ASCII mode uses one source pixel per character. Original-size output may overflow the terminal, and ASCII character proportions may stretch it vertically.
+For terminal rendering, omitted width fits the terminal's available width and height, and redirected ASCII defaults to 80 columns. `--width n` requests n character columns. `--width original` disables resizing after trimming transparent margins: native image mode uses one source pixel per screen pixel; block mode uses one source pixel per half-block, packing two pixel rows per character row; ASCII mode uses one source pixel per character. Original-size output may overflow the terminal, and ASCII character proportions may stretch it vertically.
 
-Artwork prints inline and the command exits, leaving the result visible. Numeric widths must be positive. Unknown names/forms, invalid local artwork references, and unsupported local catalogue schemas are errors.
+Terminal artwork prints inline and the command exits, leaving the result visible. Numeric widths must be positive. Unknown names/forms, invalid local artwork references, and unsupported local catalogue schemas are errors.
+
+`--mode png` writes raw PNG bytes to stdout. `--mode markdown` writes one Markdown image reference and a newline, with the selected form's escaped display name as alt text and its PNG encoded in a data URL. With omitted width or `--width original`, both modes use the cropped source dimensions. With `--width n`, both resize to n pixels wide while preserving aspect ratio. Both retain alpha and reject `--name` and `--no-newline`. [Artwork export design](20261122-art-output-evaluation.md#design-update-2026-11-22).
 
 When stdout is piped or redirected, `--mode auto` emits plain, uncoloured ASCII without terminal control codes by default.
 
