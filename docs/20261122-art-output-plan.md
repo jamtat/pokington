@@ -65,5 +65,5 @@ Model and reasoning settings are proposals. Each review requires explicit user a
 
 | ID | Done | Stage or task | Implementation | Review | Rationale | Comments |
 | --- | --- | --- | --- | --- | --- | --- |
-| [S01.T00](#s01-t00) |  | Farigiraf, stage completion | — | 1 × `gpt-6.2-sol` `medium`, stage exit | Compare CLI help, documentation, and test evidence against the design. | Exit review passed. Commit hooks pending. [Log](20261122-art-output-log.md) |
-| [S01.T01](#s01-t01) |  | Teddiursa, add PNG and Markdown modes | `gpt-6.2-sol` `high` | 1 × `gpt-6.2-sol` `high`, correctness. 1 × `gpt-6.2-sol` `medium`, simplification. | Check binary and Markdown output, width behavior, and terminal interactions. Review the Rust structure and reuse separately. | Correctness and simplification reviewed. Follow-up checks passed. Commit pending. [Log](20261122-art-output-log.md) |
+| [S01.T00](#s01-t00) | ✅ | Farigiraf, stage completion | — | 1 × `gpt-6.2-sol` `medium`, stage exit | Compare CLI help, documentation, and test evidence against the design. | Exit review and all commit hooks passed. [Log](20261122-art-output-log.md) |
+| [S01.T01](#s01-t01) | ✅ | Teddiursa, add PNG and Markdown modes | `gpt-6.2-sol` `high` | 1 × `gpt-6.2-sol` `high`, correctness. 1 × `gpt-6.2-sol` `medium`, simplification. | Check binary and Markdown output, width behavior, and terminal interactions. Review the Rust structure and reuse separately. | Committed as `01df76e`. [Log](20261122-art-output-log.md) |

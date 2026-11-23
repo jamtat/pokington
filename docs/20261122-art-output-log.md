@@ -5,10 +5,10 @@ Plan [Artwork export implementation plan](20261122-art-output-plan.md).
 ## Run 2026-11-23 / S01.T01
 
 - Preparation recorded at 2026-11-23T00:57:24Z.
-- Run status open. Closure time and reason pending.
+- Run status closed at 2026-11-23T01:33:40Z. The approved local commit and all verification completed.
 - Scope `S01.T01`, PNG and Markdown export with the existing terminal behavior preserved.
 - Branch `btat-art-export` from local `main` at `1038cdb`.
-- Implementation by the current assistant. Correctness and CLI intent, simplification, and stage exit reviews are approved. One local task commit is approved. Publication approval is pending.
+- Implementation by the current assistant. Correctness and CLI intent, simplification, and stage exit reviews were approved. The run's approved scope ends with the local task commit.
 
 ### Implementation and branch approval
 
@@ -47,15 +47,15 @@ Plan [Artwork export implementation plan](20261122-art-output-plan.md).
 ## S01.T00 stage timing and exit evidence
 
 - Start 2026-11-23T00:58:05Z.
-- Finish pending.
+- Finish recorded at 2026-11-23T01:33:40Z.
 - Stage exit review by `export_stage_exit`, `gpt-6.2-sol` at medium reasoning effort, recorded at 2026-11-23T01:28:37Z. No blocking findings. CLI help and usage docs match the accepted design. The reviewer independently ran all 37 focused tests and `git diff --check`.
 - The reviewer confirmed that real Mew PNG and Markdown output matched at 64×65. The default PNG matched `--width original` at 425×431. All eight tested export flag conflicts exited 2 with empty stdout.
-- The stage is ready for the scoped commit. Final verification includes the normal commit hooks, including `cargo test-ci`.
+- The scoped commit `01df76e` passed the normal formatting, compilation, Clippy, and `cargo test-ci` hooks. The Nextest report recorded 117 tests passed.
 
 ## S01.T01 add PNG and Markdown modes
 
 - Start 2026-11-23T00:58:05Z.
-- Finish pending.
+- Finish recorded at 2026-11-23T01:33:40Z.
 - Implementation adds PNG and Markdown export after local artwork selection and decode. Both use shared crop, resize, and PNG encoding, with width measured in pixels. Documentation describes the formats and width behavior. The terminal rendering path continues to use its existing sizing and protocol logic.
 - Verification recorded at 2026-11-23T01:02:30Z. `CARGO_NET_OFFLINE=true cargo test --locked --test command --test art --test inline_image --quiet` passed all 36 tests. `git diff --check` passed.
 - A local Mew export produced a 425×431 cropped original and a 64×65 resized PNG. The 64 px PNG contained 7,532 bytes, and the Markdown line contained 10,075 bytes. The embedded PNG matched the raw export byte for byte. Pandoc 3.14 with GFM input preserved the data URL and alt text in the output HTML.
@@ -69,4 +69,10 @@ Plan [Artwork export implementation plan](20261122-art-output-plan.md).
 - Applied the findings. The success matrix now uses eight CLI invocations, down from 18, while covering the three width choices in both modes, terminal geometry, PNG and Markdown byte equality, selected artwork, and resized alpha. The fixture overwrites only the alternate artwork. Export flag checks share the existing parser test. Retained representative missing, corrupt, and transparent artwork cases and the portrait-overflow and PNG stdout-flush regressions.
 - Follow-up verification recorded at 2026-11-23T01:18:54Z. All 37 focused tests and `git diff --check` passed. The 64×65 Mew export still produced a 7,532-byte PNG and an identical decoded Markdown payload.
 - The first commit attempt passed formatting, compilation, and the full test suite. Clippy rejected unchecked indexing and unwraps in a fixture helper, and requested a clearer assertion for nonempty stdout. The fixture helper now returns setup errors and the assertion reports the actual output on failure.
-- Stage exit review passed. The scoped commit is approved. Commit hook results and the resulting hash are pending. Publication approval is pending.
+- Stage exit review passed. The retry created `01df76e` (`art: S01.T01 add PNG and Markdown exports`) after all commit hooks passed. The local commit completes the approved run.
+
+## Publication follow-up, 2026-11-23
+
+- Recorded at 2026-11-23T01:48:10Z.
+- User instruction `commit them all to branch and PR`
+- Scope is one local closeout commit containing this log and the export plan, one push to `origin/btat-art-export`, and one pull request against `jamtat/pokington:main`, including automatically triggered CI. The branch includes the previously committed `--title` removal and PNG and Markdown exports. The scoped closeout subject is `art: S01.T00 record export stage completion`.
