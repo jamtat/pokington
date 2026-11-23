@@ -106,6 +106,15 @@ fn args(words: &[&str]) -> Vec<OsString> {
     words.iter().map(OsString::from).collect()
 }
 async fn invoke(store: &Store, args: Vec<OsString>) -> Result<(u8, String, String), Failure> {
+    let (code, stdout, stderr) = invoke_bytes(store, args, Terminal::default()).await?;
+    Ok((code, String::from_utf8(stdout)?, stderr))
+}
+
+async fn invoke_bytes(
+    store: &Store,
+    args: Vec<OsString>,
+    terminal: Terminal,
+) -> Result<(u8, Vec<u8>, String), Failure> {
     let source = pokington::bootstrap::Bootstrap::with_http(
         pokington::source::http_client_builder()
             .https_only(false)
@@ -117,16 +126,15 @@ async fn invoke(store: &Store, args: Vec<OsString>) -> Result<(u8, String, Strin
     let code = command::run(
         args,
         || {
-            // The injected output buffers represent redirected streams, even under a TTY.
             Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(23))
-                .with_terminal(Terminal::default())
+                .with_terminal(terminal)
                 .with_bootstrap(source))
         },
         &mut stdout,
         &mut stderr,
     )
     .await;
-    Ok((code, String::from_utf8(stdout)?, String::from_utf8(stderr)?))
+    Ok((code, stdout, String::from_utf8(stderr)?))
 }
 
 #[test]
@@ -192,11 +200,16 @@ async fn parser_handles_help_version_and_invalid_arguments_before_runtime_creati
         (vec!["pokington", "bootstrap", "--unknown"], 2),
         (vec!["pokington", "art", "--width", "0"], 2),
         (vec!["pokington", "art", "--width", "-1"], 2),
-        (vec!["pokington", "art", "--width", "huge"], 2),
+        (
+            vec!["pokington", "art", "--mode", "png", "--width", "64px"],
+            2,
+        ),
         (vec!["pokington", "art", "--mode", "invalid"], 2),
         (vec!["pokington", "art", "--color", "invalid"], 2),
         (vec!["pokington", "art", "--no-newline"], 2),
-        (vec!["pokington", "art", "--title", "--no-newline"], 2),
+        (vec!["pokington", "art", "--mode", "png", "--name"], 2),
+        (vec!["pokington", "art", "--mode", "markdown", "--name"], 2),
+        (vec!["pokington", "art", "--title"], 2),
     ] {
         let mut stdout = Vec::new();
         let mut stderr = Vec::new();
@@ -235,12 +248,15 @@ async fn art_protocol_help_and_argument_errors_do_not_create_runtime() {
     assert!(help.contains("--protocol <PROTOCOL>"));
     assert!(help.contains("Requires --mode img"));
     assert!(help.contains("[possible values: kitty, sixel, iterm2]"));
+    assert!(help.contains("[possible values: auto, img, blocks, ascii, png, markdown]"));
+    assert!(help.contains("Pixels for PNG and Markdown, columns for terminal output"));
 
     for (mode, protocol, diagnostic) in [
         (None, "kitty", "--protocol requires --mode img"),
         (Some("auto"), "kitty", "--protocol requires --mode img"),
         (Some("blocks"), "kitty", "--protocol requires --mode img"),
         (Some("ascii"), "kitty", "--protocol requires --mode img"),
+        (Some("png"), "kitty", "--protocol requires --mode img"),
         (Some("img"), "halfblocks", "invalid value 'halfblocks'"),
     ] {
         let mut words = vec!["pokington", "art", "--protocol", protocol];
@@ -482,7 +498,7 @@ async fn art_excludes_species_using_repeated_exact_names_without_excluding_forms
         // A named or numeric request must also respect exclusions, including alternate forms.
         for name in ["Eevee", "3"] {
             let mut selected = words.clone();
-            selected.extend(args(&[name, "--form", &form.key, "-e", "EEVEE", "--title"]));
+            selected.extend(args(&[name, "--form", &form.key, "-e", "EEVEE"]));
             let (code, stdout, stderr) = invoke(&store, selected).await.unwrap();
             assert_eq!((code, stdout.as_str()), (1, ""));
             assert!(stderr.contains("Pokémon is excluded: Eevee"));
@@ -499,7 +515,7 @@ async fn art_combines_multiple_exclusion_files_with_exact_names_and_reports_exha
     let second = temp.0.join("second.txt");
     fs::write(&first, "before MEWTWO after").unwrap();
     fs::write(&second, "FLABÉBÉ").unwrap();
-    let mut words = args(&["pokington", "art", "--name", "--title", "--width", "4"]);
+    let mut words = args(&["pokington", "art", "--name", "--width", "4"]);
     for file in [&first, &second] {
         words.push("--exclude-file".into());
         words.push(file.as_os_str().into());
@@ -537,7 +553,7 @@ async fn art_validates_every_exclusion_file_before_bootstrap_or_output() {
     fs::write(&valid, "unrelated").unwrap();
     fs::write(&invalid, [0xff, 0xfe]).unwrap();
     for file in [&missing, &invalid, &temp.0] {
-        let mut words = args(&["pokington", "art", "--name", "--title"]);
+        let mut words = args(&["pokington", "art", "--name"]);
         for path in [&valid, file] {
             words.push("--exclude-file".into());
             words.push(path.as_os_str().into());
@@ -606,8 +622,171 @@ async fn art_runner_uses_local_data_and_redirected_color_policy() {
     assert_eq!(stderr, "");
 }
 
+fn install_export_alternate(store: &Store) -> Result<(String, image::RgbaImage), Failure> {
+    use image::{ImageFormat, Rgba, RgbaImage};
+
+    install_artwork(store)?;
+    let mut catalogue = catalogue()?;
+    let alternate = catalogue
+        .species
+        .get_mut(1)
+        .and_then(|species| species.forms.get_mut(1))
+        .ok_or("missing alternate artwork fixture")?;
+    alternate.display_name = r"Mewtwo [Mega] \ *X*".into();
+    let alternate_path = store.root().join(alternate.local_artwork.as_str());
+    let alternate_key = alternate.key.clone();
+    catalogue.validate()?;
+    fs::write(
+        store.root().join("installed/catalogue.json"),
+        serde_json::to_vec(&catalogue)?,
+    )?;
+
+    let mut crop = RgbaImage::from_pixel(3, 4, Rgba([20, 100, 50, 190]));
+    crop.put_pixel(1, 1, Rgba([200, 30, 120, 0]));
+    let mut source = RgbaImage::new(8, 6);
+    image::imageops::replace(&mut source, &crop, 2, 1);
+    source.save_with_format(alternate_path, ImageFormat::Png)?;
+    Ok((alternate_key, crop))
+}
+
 #[tokio::test]
-async fn art_name_and_title_flags_use_the_selected_form_label() {
+async fn art_exports_share_cropped_png_pixels_and_ignore_terminal_geometry() {
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
+    use image::ImageFormat;
+    use pokington::{art::Geometry, text_art::Depth};
+
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    let (alternate_key, crop) = install_export_alternate(&store).unwrap();
+    let terminal = Terminal {
+        geometry: Geometry {
+            columns: 1,
+            rows: 1,
+            cell_width: 9,
+            cell_height: 18,
+        },
+        is_terminal: true,
+        unicode: true,
+        depth: Depth::TrueColor,
+    };
+    for (width, dimensions) in [
+        (None, crop.dimensions()),
+        (Some("original"), crop.dimensions()),
+        (Some("5"), (5, 7)),
+    ] {
+        let mut words = vec![
+            "pokington",
+            "art",
+            "Mewtwo",
+            "--form",
+            &alternate_key,
+            "--color",
+            "always",
+        ];
+        if let Some(width) = width {
+            words.extend(["--width", width]);
+        }
+        words.extend(["--mode", "png"]);
+        let (code, png, stderr) = invoke_bytes(&store, args(&words), Terminal::default())
+            .await
+            .unwrap();
+        assert_eq!((code, stderr.as_str()), (0, ""));
+        assert!(png.ends_with(b"\0\0\0\0IEND\xaeB`\x82"));
+        let decoded = image::load_from_memory_with_format(&png, ImageFormat::Png)
+            .unwrap()
+            .into_rgba8();
+        assert_eq!(decoded.dimensions(), dimensions);
+        if width == Some("5") {
+            assert!(decoded.pixels().any(|pixel| (1..255).contains(&pixel[3])));
+            let (code, terminal_png, stderr) =
+                invoke_bytes(&store, args(&words), terminal).await.unwrap();
+            assert_eq!((code, stderr.as_str()), (0, ""));
+            assert_eq!(terminal_png, png);
+        } else {
+            assert_eq!(decoded, crop);
+        }
+        words.pop();
+        words.push("markdown");
+        let (code, markdown, stderr) = invoke(&store, args(&words)).await.unwrap();
+        assert_eq!((code, stderr.as_str()), (0, ""));
+        let payload = markdown
+            .strip_prefix(r"![Mewtwo \[Mega\] \\ \*X\*](data:image/png;base64,")
+            .unwrap()
+            .strip_suffix(")\n")
+            .unwrap();
+        assert_eq!(STANDARD.decode(payload).unwrap(), png);
+    }
+
+    let original_args = args(&["pokington", "art", "Mewtwo", "--mode", "png"]);
+    let (code, png, stderr) = invoke_bytes(&store, original_args, Terminal::default())
+        .await
+        .unwrap();
+    assert_eq!((code, stderr.as_str()), (0, ""));
+    let original = image::load_from_memory_with_format(&png, ImageFormat::Png).unwrap();
+    assert_eq!((original.width(), original.height()), (8, 8));
+}
+
+#[tokio::test]
+async fn art_export_rejects_a_width_that_overflows_portrait_height() {
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    let (alternate_key, _) = install_export_alternate(&store).unwrap();
+    let words = args(&[
+        "pokington",
+        "art",
+        "Mewtwo",
+        "--form",
+        &alternate_key,
+        "--mode",
+        "png",
+        "--width",
+        "4294967295",
+    ]);
+    let (code, stdout, stderr) = invoke(&store, words).await.unwrap();
+    assert_eq!((code, stdout.as_str()), (1, ""));
+    assert!(
+        stderr.contains("width is too large for this image"),
+        "{stderr}"
+    );
+}
+
+#[tokio::test]
+async fn art_exports_report_stdout_flush_errors() {
+    use std::io::{self, Write};
+
+    struct FailingFlush(Vec<u8>);
+    impl Write for FailingFlush {
+        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+            self.0.write(bytes)
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            Err(io::Error::other("flush failed"))
+        }
+    }
+
+    let temp = Temp::new().unwrap();
+    let store = temp.install().unwrap();
+    install_artwork(&store).unwrap();
+    let mut stdout = FailingFlush(Vec::new());
+    let mut stderr = Vec::new();
+    let code = command::run(
+        ["pokington", "art", "Mew", "--mode", "png"],
+        || Ok(Runtime::new(store.clone(), StdRng::seed_from_u64(23))),
+        &mut stdout,
+        &mut stderr,
+    )
+    .await;
+    assert_eq!(code, 1);
+    assert_ne!(stdout.0, b"");
+    assert_eq!(
+        String::from_utf8(stderr).unwrap(),
+        "error: command output: flush failed\n"
+    );
+}
+
+#[tokio::test]
+async fn art_name_uses_the_selected_form_label() {
     let temp = Temp::new().unwrap();
     let store = temp.install().unwrap();
     install_artwork(&store).unwrap();
@@ -656,11 +835,6 @@ async fn art_name_and_title_flags_use_the_selected_form_label() {
             let (code, image, stderr) = invoke(&store, args(&words)).await.unwrap();
             assert_eq!((code, stderr.as_str()), (0, ""));
             assert!(image.ends_with('\n'));
-            words.push("--title");
-            let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
-            assert_eq!((code, stderr.as_str()), (0, ""));
-            assert_eq!(stdout, format!("{image}\x1b]2;{expected}\x07"));
-            words.pop();
             words.push("--name");
             let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
             assert_eq!((code, stderr.as_str()), (0, ""));
@@ -669,15 +843,6 @@ async fn art_name_and_title_flags_use_the_selected_form_label() {
             let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
             assert_eq!((code, stderr.as_str()), (0, ""));
             assert_eq!(stdout, format!("{image}{expected}"));
-            words.pop();
-            words.push("--title");
-            let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
-            assert_eq!((code, stderr.as_str()), (0, ""));
-            assert_eq!(stdout, format!("{image}{expected}\n\x1b]2;{expected}\x07"));
-            words.push("--no-newline");
-            let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
-            assert_eq!((code, stderr.as_str()), (0, ""));
-            assert_eq!(stdout, format!("{image}{expected}\x1b]2;{expected}\x07"));
         }
     }
 }
@@ -687,20 +852,27 @@ async fn art_runner_reports_lookup_and_selected_png_errors_without_output() {
     let temp = Temp::new().unwrap();
     let store = temp.install().unwrap();
     for (words, expected) in [
-        (vec!["pokington", "art", "missing"], "unknown Pokémon"),
         (
-            vec!["pokington", "art", "Mew", "--form", "missing"],
+            vec!["pokington", "art", "missing", "--name"],
+            "unknown Pokémon",
+        ),
+        (
+            vec!["pokington", "art", "Mew", "--form", "missing", "--name"],
             "available forms: original",
         ),
         (
-            vec!["pokington", "art", "--form", "missing"],
+            vec!["pokington", "art", "--form", "missing", "--name"],
             "no artwork matches",
         ),
-        (vec!["pokington", "art", "Mew"], "pokington bootstrap"),
+        (
+            vec!["pokington", "art", "Mew", "--name"],
+            "pokington bootstrap",
+        ),
+        (
+            vec!["pokington", "art", "Mew", "--mode", "png"],
+            "pokington bootstrap",
+        ),
     ] {
-        let mut words = words;
-        words.push("--name");
-        words.push("--title");
         let (code, stdout, stderr) = invoke(&store, args(&words)).await.unwrap();
         assert_eq!(code, 1);
         assert_eq!(stdout, "");
@@ -719,21 +891,25 @@ async fn art_runner_reports_lookup_and_selected_png_errors_without_output() {
         .local_artwork;
     let path = store.root().join(reference.as_str());
     fs::write(&path, b"invalid PNG").unwrap();
-    let (code, stdout, stderr) = invoke(&store, args(&["pokington", "art", "Mew"]))
-        .await
-        .unwrap();
-    assert_eq!((code, stdout.as_str()), (1, ""));
-    assert!(stderr.contains("pokington bootstrap") && stderr.contains(&path.display().to_string()));
+    for mode in ["auto", "png"] {
+        let words = args(&["pokington", "art", "Mew", "--mode", mode]);
+        let (code, stdout, stderr) = invoke(&store, words).await.unwrap();
+        assert_eq!((code, stdout.as_str()), (1, ""));
+        assert!(
+            stderr.contains("pokington bootstrap") && stderr.contains(&path.display().to_string())
+        );
+    }
     let mut bytes = std::io::Cursor::new(Vec::new());
     image::DynamicImage::ImageRgba8(image::RgbaImage::new(2, 2))
         .write_to(&mut bytes, image::ImageFormat::Png)
         .unwrap();
     fs::write(path, bytes.get_ref()).unwrap();
-    let (code, stdout, stderr) = invoke(&store, args(&["pokington", "art", "Mew"]))
-        .await
-        .unwrap();
-    assert_eq!((code, stdout.as_str()), (1, ""));
-    assert!(stderr.contains("fully transparent") && stderr.contains("pokington bootstrap"));
+    for mode in ["auto", "markdown"] {
+        let words = args(&["pokington", "art", "Mew", "--mode", mode]);
+        let (code, stdout, stderr) = invoke(&store, words).await.unwrap();
+        assert_eq!((code, stdout.as_str()), (1, ""));
+        assert!(stderr.contains("fully transparent") && stderr.contains("pokington bootstrap"));
+    }
 }
 
 #[tokio::test]

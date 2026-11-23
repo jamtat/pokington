@@ -5,7 +5,7 @@ Plan: [implementation plan](../20261106-implementation-plan.md). Index: [impleme
 ## Run 04 — Dustox B04, S04.T01 and S04.T02
 
 - Preparation/start recorded at: 2026-11-07T13:28:19Z (clock observation; exact response time unavailable).
-- Run status: open. Closed at: pending.
+- Run status: complete by user acceptance. Closed at: 2026-11-08T00:23:44Z (recording observation; exact user-message time unavailable). See the dated closure below; earlier pending entries remain historical.
 - Originating invocation (exact): “Continue using jamtat-work but dont delegate any implementation, do it yourself”.
 - Branch: existing main at a397241, tracking origin/main. Preserve pre-existing src/command.rs and tests/command.rs changes making choose default to one; saved at /private/tmp/pokington-s04-preexisting-choose.patch and excluded from task commits.
 - Prerequisites: S01–S03 and worker S05 complete. Source catalogue and native prototype reused. Actual macOS/Linux final rendering evidence remains required and is not supplied by synthetic tests.
@@ -38,8 +38,8 @@ Proposal (exact):
 ## S04.T00 — Stage timing and exit
 
 - Start: 2026-11-07T13:28:19Z.
-- Finish:
-- Exit: both task evidence/checks/reviews/commits plus actual macOS/Linux rendering matrix. Pending.
+- Finish: 2026-11-08T00:23:44Z (user acceptance recorded).
+- Exit: complete by user acceptance of Dustox, closing the remaining native visual gate. Existing automated platform evidence, both task review pairs and task commits remain as recorded; no new manual test result is claimed. See the dated closure below.
 
 ## S04.T01 — Honchkrow: transforms and text rendering
 
@@ -57,7 +57,7 @@ Proposal (exact):
 ## S04.T02 — Sableye: native output and platform acceptance
 
 - Start: 2026-11-07T13:42:54Z.
-- Finish:
+- Finish: 2026-11-08T00:23:44Z (user acceptance recorded).
 - Goal: active, same thread, created after T01 goal completion; no budget. Exact objective:
 
 > Complete Pokington Dustox B04 S04.T02 — Sableye on existing main under docs/logs/20261107-s04-implementation-log.md Run04 Q01 and docs/20261106-implementation-plan.md#s04-t02. Implement directly in primary session: integrate proven ratatui-image inline renderer into art, safe native detection/auto-blocks-ascii fallback and explicit img errors, native fit/numeric/original sizing, terminal cleanup, concise dated usage docs. Preserve/exclude pre-existing choose changes. Pass meaningful automated command/image/PTY tests, final Rust fmt/build/check/locked full suite/strict Clippy, real complete-data offline commands and actual macOS/Linux rendering matrix with visual/manual evidence; missing external evidence remains incomplete. Run approved one fresh Sol xhigh correctness review including integrated S04/platform acceptance, then separate fresh Sol xhigh simplification/Rust review; resolve findings and validate. Record actual evidence and timings; show title/file table and make final coherent S04.T02 commit with normal hooks only after required evidence/reviews pass, then approved origin/main push including triggered CI. No PR/merge/manual CI, extra reviews, implementation delegation, destructive Git, infrastructure, sudo, TOMORROW.md, summon or computer control. Stop at S04 boundary.
@@ -216,3 +216,12 @@ Proposal (exact):
 - File table shown: src/command.rs and src/inline_image.rs (library detection/protocols, inline sizing/fallback/cleanup); tests/command.rs and tests/inline_image.rs (native/SSH/protocol regressions); examples/art_acceptance.rs and removed examples/inline_image_probe.rs (current acceptance driver); dated usage guide and brief/design/plan/index/stage logs plus four summaries (decisions/evidence/permission/publication status).
 - Stage only these16 task files; remove the saved pre-existing choose default/test hunks from the index without changing the worktree. Normal hooks must pass. Q06 supplies one commit and one origin/main push, including the existing T01 commit and triggered CI. No additional confirmation question.
 - Task/stage Finish and Done remain incomplete because native visual evidence is absent. Publication receipt will record actual Git results without recursive bookkeeping commits; current goal is not marked complete merely for publishing this implementation.
+
+### 2026-11-08 — User acceptance and run closure
+
+- Recorded at: 2026-11-08T00:23:44Z. Exact user-message time unavailable.
+- User instruction (exact), following the report that native visual acceptance was the only unfinished original implementation task: “dustox is all good”.
+- Interpretation: user accepts Dustox, closing the remaining native visual acceptance gate and completing S04.T02, S04.T00 and Run04. All original S01–S04 batches are complete.
+- Existing evidence: both task review pairs completed; final recorded S04.T02 automated suites passed 104 tests on macOS and Linux alongside strict checks and offline runtime verification. Git contains T01 commit `563a162` and T02 commit `ba688a1`.
+- This acceptance supersedes the earlier incomplete status. No new terminal run, platform/protocol measurement, independent review or computer-control permission is claimed. The user supplied no additional per-platform test details.
+- Updated the existing plan and log index to reflect completion. No commit, push, notification or additional implementation was performed for this documentation update.

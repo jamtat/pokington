@@ -2,8 +2,9 @@
 
 use std::{fmt, io, str::FromStr};
 
+use base64::{Engine as _, engine::general_purpose::STANDARD};
 use clap::ValueEnum;
-use image::{RgbaImage, imageops::FilterType};
+use image::{RgbaImage, codecs::png::PngEncoder, imageops::FilterType};
 use rand::{Rng, seq::IndexedRandom};
 
 use crate::{
@@ -18,6 +19,8 @@ pub enum Mode {
     Img,
     Blocks,
     Ascii,
+    Png,
+    Markdown,
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, ValueEnum)]
@@ -222,6 +225,46 @@ pub fn prepare(
         u32::try_from(w).map_err(io::Error::other)?,
         u32::try_from(h).map_err(io::Error::other)?,
     )
+}
+
+/// Prepare a PNG at original size or an explicit pixel width, independent of terminal geometry.
+pub(crate) fn encode_png(image: &RgbaImage, width: Width) -> io::Result<Vec<u8>> {
+    let (cropped, _) = crop_visible(image)?;
+    let image = if let Width::Columns(width) = width {
+        let height = rounded_ratio(
+            u64::from(width),
+            u64::from(cropped.height()),
+            u64::from(cropped.width()),
+        );
+        let height = u32::try_from(height).map_err(|_| {
+            io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "width is too large for this image",
+            )
+        })?;
+        resize(&cropped, width, height)?
+    } else {
+        cropped
+    };
+    let mut bytes = Vec::new();
+    image
+        .write_with_encoder(PngEncoder::new(&mut bytes))
+        .map_err(io::Error::other)?;
+    Ok(bytes)
+}
+
+pub(crate) fn markdown_image(alt_text: &str, png: &[u8]) -> String {
+    let mut output = String::from("![");
+    for character in alt_text.chars() {
+        if character.is_ascii_punctuation() {
+            output.push('\\');
+        }
+        output.push(character);
+    }
+    output.push_str("](data:image/png;base64,");
+    STANDARD.encode_string(png, &mut output);
+    output.push_str(")\n");
+    output
 }
 
 fn rounded_ratio(value: u64, numerator: u64, denominator: u64) -> u64 {

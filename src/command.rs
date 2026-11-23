@@ -39,6 +39,19 @@ impl Cli {
                 "--protocol requires --mode img",
             ));
         }
+        if matches!(
+            self.command,
+            Command::Art {
+                mode: Mode::Png | Mode::Markdown,
+                show_name: true,
+                ..
+            }
+        ) {
+            return Err(Self::command().error(
+                clap::error::ErrorKind::ArgumentConflict,
+                "--name cannot be used with --mode png or --mode markdown",
+            ));
+        }
         Ok(self)
     }
 }
@@ -62,7 +75,7 @@ impl From<NativeProtocol> for ProtocolType {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Display an original or alternate-form illustration inline.
+    /// Display or export an original or alternate-form illustration.
     Art {
         name: Option<String>,
         /// Exclude an exact species name, ignoring case. May be repeated.
@@ -71,24 +84,24 @@ enum Command {
         /// Exclude species names occurring in this UTF-8 file, ignoring case. May be repeated.
         #[arg(long, value_name = "FILE")]
         exclude_file: Vec<PathBuf>,
-        /// Print the Pokémon's form display name on a line below the artwork.
+        /// Print the Pokémon's form display name below terminal artwork.
         #[arg(long = "name")]
         show_name: bool,
         /// Omit the newline after the printed name. Requires --name.
         #[arg(long, requires = "show_name")]
         no_newline: bool,
-        /// Set the terminal title to the same display name as --name.
-        #[arg(long)]
-        title: bool,
         #[arg(long)]
         form: Option<String>,
+        /// Select terminal rendering, raw PNG, or embedded Markdown.
         #[arg(long, value_enum, default_value_t)]
         mode: Mode,
         /// Force a native image protocol. Requires --mode img.
         #[arg(long, value_enum)]
         protocol: Option<NativeProtocol>,
+        /// Pixels for PNG and Markdown, columns for terminal output. Exports default to original.
         #[arg(long, value_name = "N|original")]
         width: Option<Width>,
+        /// Select colour for ASCII and Unicode blocks.
         #[arg(long, value_enum, default_value_t)]
         color: Color,
     },
@@ -342,7 +355,6 @@ impl<R: Rng + Send> Runtime<R> {
                 exclude_file,
                 show_name,
                 no_newline,
-                title,
                 form,
                 mode,
                 protocol,
@@ -369,6 +381,20 @@ impl<R: Rng + Send> Runtime<R> {
                         reason: error.to_string(),
                     })?
                     .into_rgba8();
+                if matches!(mode, Mode::Png | Mode::Markdown) {
+                    let png = art::encode_png(&image, width.unwrap_or(Width::Original))
+                        .map_err(|error| image_error(&self.store, selected, error))?;
+                    let output = if mode == Mode::Markdown {
+                        art::markdown_image(&art::display_name(species, selected), &png)
+                            .into_bytes()
+                    } else {
+                        png
+                    };
+                    return stdout
+                        .write_all(&output)
+                        .and_then(|()| stdout.flush())
+                        .map_err(CommandError::Output);
+                }
                 if let Some(frame) = self
                     .native_frame(&image, width.unwrap_or_default(), mode, protocol)
                     .map_err(|error| image_error(&self.store, selected, error))?
@@ -392,16 +418,10 @@ impl<R: Rng + Send> Runtime<R> {
                         .write_all(text.as_bytes())
                         .map_err(CommandError::Output)?;
                 }
-                if show_name || title {
+                if show_name {
                     let display_name = art::display_name(species, selected);
-                    if show_name {
-                        let ending = if no_newline { "" } else { "\n" };
-                        write!(stdout, "{display_name}{ending}").map_err(CommandError::Output)?;
-                    }
-                    if title {
-                        write!(stdout, "\x1b]2;{display_name}\x07")
-                            .map_err(CommandError::Output)?;
-                    }
+                    let ending = if no_newline { "" } else { "\n" };
+                    write!(stdout, "{display_name}{ending}").map_err(CommandError::Output)?;
                 }
             }
             Command::Choose {
